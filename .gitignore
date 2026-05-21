@@ -1,0 +1,17 @@
+# Régi logó-mappa (nem kell a weboldalhoz)
+Logo_regi/
+
+# Logo_uj: csak a ténylegesen használt 2 kép kell, a nyers munkafájlok nem
+Logo_uj/*
+!Logo_uj/Logo_typo_clean.png
+!Logo_uj/3D_logo.png
+
+# Belső munka-/jegyzetfájlok (nem valók a publikus weboldalra)
+*.md
+
+# Fejlesztői / rendszer fájlok
+node_modules/
+package-lock.json
+.DS_Store
+Thumbs.db
+*.log
