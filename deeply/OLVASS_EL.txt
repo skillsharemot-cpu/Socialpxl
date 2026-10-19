@@ -1,0 +1,44 @@
+DEEPLY – főoldal-lapozó, új árkalkulátor, gépelés közbeni mentés (2026-10-19)
+===========================================================================
+
+Ez a mappa átadó csomag: a Deeply fájljai ide kerültek, mert a Deeply GitHub-repóba
+ebből a munkamenetből nem lehetett feltölteni. Három fájlt kell a helyére tenni.
+
+1) _generator/fooldal.js  →  08_Brand_OS/_generator/fooldal.js (felülírja)
+   Mit tud:
+   • Mobilon az „Így dolgozunk” lapozó azonnal mutatja, hogy oldalra húzható:
+     jobb oldalt kilóg a következő lap, a nyilak telefonon is látszanak,
+     a lapok fölött „1 / 4 · Húzd oldalra →” sor, és amikor a rész először
+     bejön a képbe, a lapok egyszer finoman oldalra csúsznak.
+   • A kalkulátor-linkek magukkal viszik, mire kattintott a látogató
+     (melyik szolgáltatás, mely GYIK-kérdés, hány lépést nézett meg, melyik gombbal indult).
+     Sütit nem használ – a kalkulátor csak a hozzájárulás után jegyzi meg.
+   • Asztali nézetben semmi nem változott.
+   Utána a szokásos módon:  node _DeeplyLogo_Brand/08_Brand_OS/_generator/gen.js
+   (és ha kell a megosztható fájl:  node .../_generator/megosztas.js A_kefe)
+   Nem kötelező: a súgó szövege a content.js-ből is állítható – a fooldal: { … } részbe:
+       howHint: 'Húzd oldalra',
+
+2) arkalkulator_foglalas.html  →  Árkalkulátor/arkalkulator_foglalas.html (felülírja),
+   majd a megszokott github_frissites.ps1 + git push a Deeply repóba.
+   Mit tud:
+   • A főoldal arculata: Pantone-színek, Libertinus Sans + Inter, sötétzöld fejléc a logóval,
+     a főoldal pirula-gombjai és szolgáltatás-ikonjai; telefonon alul ragadó irányár-sáv.
+   • 1. lépés: adatkezelés + sütik + beépülő modulok elfogadása, utána udvariasan kéri a
+     nevet, az e-mail-címet és a telefonszámot – mindhárom kötelező, ellenőrzött.
+   • Gépelés közben ment: a látogató böngészőjébe azonnal, a Google-táblázatba
+     (új „Érdeklődők” lap) 1,2 mp gépelési szünet után. Visszatérő látogató ott folytatja,
+     ahol abbahagyta („Üdv újra, …!”).
+   • Ajánl: a főoldalon választott szolgáltatás kerül előre („Ajánlott”), a listához
+     „Gyakran kérik mellé” javaslatok (impregnálás, gyorsszárítás, fotel, UV-s fertőtlenítés…).
+   • Az árazás, az admin-beállítások és a foglalás formátuma változatlan – az admin
+     és az árajánlat-készítő ugyanúgy olvassa a foglalásokat.
+
+3) apps_script/deeply_backend_lead.gs  →  az Apps Script projektbe (deeply_backend.gs)
+   A fájl elején lépésről lépésre le van írva (1 sor a doPost-ba + a blokk a fájl végére
+   + „Új verzió” telepítése). Amíg ez nincs kész, a kalkulátor csak a böngészőbe ment,
+   a foglalások ugyanúgy beérkeznek.
+
+Megjegyzés: az e-mail, ahová a törlési kérés mehet, a kalkulátor admin-beállításának
+„értesítési e-mail” címe (notifyEmail). Ha lesz külön adatkezelési tájékoztató oldal,
+a kalkulátor „Mit jelent ez pontosan?” részébe érdemes linkelni.
