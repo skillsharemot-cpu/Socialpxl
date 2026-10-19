@@ -1,63 +1,59 @@
-DEEPLY – főoldal-lapozó, süti-ablak, új árkalkulátor, gépelés közbeni mentés (2026-10-19)
-========================================================================================
+DEEPLY – átadó csomag (utolsó frissítés: 2026-10-19, 4. kör)
+=============================================================
 
-Ez a mappa átadó csomag: a Deeply fájljai ide kerültek, mert a Deeply GitHub-repóba
-ebből a munkamenetből nem lehetett feltölteni. Három fájlt kell a helyére tenni.
+Ez a mappa átadó csomag: a Deeply fájljai ide kerültek, mert a Deeply GitHub-repóba ebből a
+munkamenetből nem lehetett feltölteni. Mi hova kerül:
 
-1) _generator/fooldal.js  →  08_Brand_OS/_generator/fooldal.js (felülírja)
-   Mit tud:
-   • Mobilon az „Így dolgozunk” lapozó azonnal mutatja, hogy oldalra húzható:
-     jobb oldalt kilóg a következő lap, a nyilak telefonon is látszanak,
-     a lapok fölött „1 / 4 · Húzd oldalra →” sor, és amikor a rész először
-     bejön a képbe, a lapok egyszer finoman oldalra csúsznak.
-   • A kalkulátor-linkek magukkal viszik, mire kattintott a látogató
-     (melyik szolgáltatás, mely GYIK-kérdés, hány lépést nézett meg, melyik gombbal indult).
-     Sütit nem használ – a kalkulátor csak a hozzájárulás után jegyzi meg.
-   • Süti-ablak a főoldalon (kicsi, alul): „Elfogadom” / „Csak a szükségesek”, „Részletek” lenyíló,
-     a láblécben „Süti-beállítások” link. A döntést a kalkulátor-link ?ck=… paraméterrel viszi át
-     (3 óráig érvényes, így egy továbbküldött régi link nem hoz magával hozzájárulást).
-     Elfogadás után a főoldal is megjegyzi, mire kattintott a látogató (következő látogatáskor is).
-   • A fő gomb (CTA) elütő arany: #D8AE47, sötétzöld felirattal (fejléc + mobilon alul ragadó gomb).
-   • A „Hivatkozások” átnéző gomb mobilon már nem takarja a ragadós gomb nyilát.
-   • Az „Így dolgozunk” lapozó asztali nézete nem változott.
-   Utána a szokásos módon:  node _DeeplyLogo_Brand/08_Brand_OS/_generator/gen.js
-   (és ha kell a megosztható fájl:  node .../_generator/megosztas.js A_kefe)
-   Nem kötelező: a súgó és a süti-ablak szövege a content.js-ből is állítható – a fooldal: { … } részbe
-       howHint: 'Húzd oldalra',
-   és egy cookie: { title, text, more, list: [...], yes, no, settings } objektum (a mostani szövegek a fooldal.js
-   elején, a CK konstansban vannak).
+  _generator/fooldal.js            →  08_Brand_OS/_generator/fooldal.js (felülírja), utána: node gen.js
+  arkalkulator_foglalas.html       →  saját tárhelyen: public_html/kalkulator/index.html
+                                      (amíg nincs tárhely: Árkalkulátor/arkalkulator_foglalas.html + GitHub, mint eddig)
+  szerver/api/                     →  public_html/api/        (a saját szerver – lásd szerver/TELEPITES.txt)
+  szerver/admin/ugyek.html         →  public_html/admin/ugyek.html
+  apps_script/deeply_backend_lead.gs → csak a régi (Apps Script-es) működéshez, a költözésig
 
-2) arkalkulator_foglalas.html  →  Árkalkulátor/arkalkulator_foglalas.html (felülírja),
-   majd a megszokott github_frissites.ps1 + git push a Deeply repóba.
-   Mit tud:
-   • A főoldal arculata: Pantone-színek, Libertinus Sans + Inter, sötétzöld fejléc a logóval,
-     a főoldal pirula-gombjai és szolgáltatás-ikonjai; telefonon alul ragadó irányár-sáv.
-   • Ugyanaz a süti-ablak, mint a főoldalon – de csak akkor jelenik meg, ha a látogató nem a
-     főoldalról jön (pl. QR-kódról), vagy még nem döntött.
-   • 1. lépés: udvariasan kéri a nevet, az e-mail-címet és a telefonszámot – mindhárom kötelező, ellenőrzött.
-   • Az irányár alatt „Húzd jobbra az elfogadáshoz” csúszka, finom arany csillogással. Akkor jelenik
-     meg, ha a látogató legörget az irányárig, vagy a ragadós irányár-sáv nyilára koppint. Jobbra
-     húzva elfogadja az irányárat és továbblép: tételek → időpont → cím → a végén elküldi a foglalást.
-     (Billentyűzettel: Enter a csúszka gombján.)
-   • A fő gomb (CTA) arany, mint a főoldalon.
-   • Gépelés közben ment (csak süti-elfogadás után): a látogató böngészőjébe azonnal, a Google-táblázatba
-     (új „Érdeklődők” lap) 1,2 mp gépelési szünet után. Visszatérő látogató ott folytatja,
-     ahol abbahagyta („Üdv újra, …!”).
-   • Ajánl: a főoldalon választott szolgáltatás kerül előre („Ajánlott”), a listához
-     „Gyakran kérik mellé” javaslatok (impregnálás, gyorsszárítás, fotel, UV-s fertőtlenítés…).
-   • Az árazás, az admin-beállítások és a foglalás formátuma változatlan – az admin
-     és az árajánlat-készítő ugyanúgy olvassa a foglalásokat.
+Olvasnivaló:
+  TARHELY_DOMAIN_JOG.txt  – mit vegyetek (domain, tárhely, e-mail, árak) + ellenőrzőlista az ügyvédnek
+  szerver/TELEPITES.txt   – telepítés lépésről lépésre
+  TEENDOK.txt             – a ti teendőitek (WhatsApp is) és a még nyitott javaslatok
 
-3) apps_script/deeply_backend_lead.gs  →  az Apps Script projektbe (deeply_backend.gs)
-   A fájl elején lépésről lépésre le van írva (1 sor a doPost-ba + a blokk a fájl végére
-   + „Új verzió” telepítése). Amíg ez nincs kész, a kalkulátor csak a böngészőbe ment,
-   a foglalások ugyanúgy beérkeznek.
 
-Brandbook: az arany CTA új szín a Pantone-palettán kívül. A CLAUDE.md szabálya szerint ezt az
-Alapok/komponensek.md-ben (Button: „✕ narancs vagy palettán kívüli gomb” sor) és a design-alapok.md
-színtáblájában érdemes rögzíteni, és beírni a brandbook változásnaplójába – különben a következő
-generálás visszaállíthatja.
+ÚJ A 4. KÖRBEN
+--------------
+1) Saját szerver (szerver/api – PHP + SQLite, bármely magyar tárhelyen fut)
+   • Minden adat a weboldalról ide jön: érdeklődők (gépelés közben), foglalások, fotók.
+   • Rangsorolt értesítő e-mail minden foglalásról: 🔴 SÜRGŐS / 🟠 FONTOS / 🟢 NORMÁL, indoklással
+     (közeli időpont, nagy vagy céges munka, nincs fotó, kényes anyag, visszatérő ügyfél…),
+     a levélben Hívás / WhatsApp / E-mail gomb és a fotók.
+   • Automatikus visszaigazolás a vevőnek („Megkaptuk a foglalásod – erre számíts”).
+   • Jelzés az elakadt érdeklődőkről: aki megadta a telefonszámát, de 30 percig nem foglalt
+     (csak 7:00–21:00 között, egyszer; ha közben foglalt, nem jelez).
+   • Biztonsági mentés: naponta automatikus adatbázis-mentés (30 marad), kézi letöltés (JSON + fotók ZIP),
+     visszatöltés (a régi admin mentése is). A sikertelen leveleket háromszor újrapróbálja.
+   • A régi admin (Apps Script-es) műveletei is működnek vele (list, backup, restore).
 
-Megjegyzés: az e-mail, ahová a törlési kérés mehet, a kalkulátor admin-beállításának
-„értesítési e-mail” címe (notifyEmail). Ha lesz külön adatkezelési tájékoztató oldal,
-a kalkulátor „Mit jelent ez pontosan?” részébe érdemes linkelni.
+2) Ügyek oldal (szerver/admin/ugyek.html) – telefonon is kényelmes
+   • Foglalások és elakadt érdeklődők egy listában, rangsorolva; állapot (Új → Hívva → Ajánlat → Időpont → Kész),
+     saját megjegyzés, egy koppintásos hívás / WhatsApp / e-mail / térkép.
+   • „Árajánlat készítése”: átadja a foglalást az árajánlat-készítőnek.
+   • Mentés fül, Beállítások fül: árlista közzététele, próbalevél, levélminták, napló.
+
+3) Kalkulátor
+   • Új sorrend: Tételek → Ingatlan → Időpont → Fotó → Adataid. A név, e-mail, telefon (kötelező) és a cím a végén.
+   • Fotó: feltöltés, VAGY „Inkább WhatsAppon küldöm el”, VAGY „Most nem tudok fotót készíteni”.
+     A kész oldalon WhatsApp-gomb előre megírt üzenettel.
+   • Magától felismeri, hol fut: saját domainen a /api/-t használja, és onnan tölti a közzétett árlistát és a
+     WhatsApp-számot; GitHubon / helyi fájlként a régi Apps Scriptet.
+   • Ha a látogató visszajön, ott folytatja, ahol abbahagyta (a fotókat biztonsági okból újra kell tölteni).
+
+4) Főoldal: WhatsApp
+   • „Inkább fotót küldenél? Írj WhatsAppon” a választó-kártyák alatt; „Fotó küldése WhatsAppon” a
+     „Nem tudod, kijön-e a folt?” kártyán; kerek WhatsApp-gomb a mobilon alul ragadó sávban.
+   • Az előre megírt üzenetben benne van, mit választott a látogató (pl. „Szőnyegtisztításról érdeklődnék.”).
+   • A szám a content.js WHATSAPP mezőjéből jön (ha üres: a PHONE).
+
+Korábbi körök (változatlanul benne): mobil lapozó-jelzés az „Így dolgozunk” részen, süti-ablak a főoldalon
+(a döntést a kalkulátor-link ?ck=… paraméterrel viszi át), arany CTA (#D8AE47), „Húzd jobbra” elfogadó csúszka,
+gépelés közbeni mentés, ajánlások a főoldali kattintások alapján.
+
+Brandbook: az arany CTA a palettán kívüli szín – az Alapok/komponensek.md-ben és a design-alapok.md-ben
+rögzíteni kell, különben a következő generálás visszaállíthatja.

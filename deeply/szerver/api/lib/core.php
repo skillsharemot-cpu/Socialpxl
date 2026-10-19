@@ -39,7 +39,18 @@ function secret_tag(int $len = 12): string {
   return substr(hash('sha256', 'deeply|' . cfg('admin_key')), 0, $len);
 }
 
-function db_path(): string { return data_dir() . '/deeply_' . secret_tag() . '.sqlite'; }
+function db_path(): string {
+  $p = data_dir() . '/deeply_' . secret_tag() . '.sqlite';
+  if (!is_file($p)) {
+    // az admin-kulcs megváltozott → a meglévő adatbázist átnevezzük az új névre (különben üresnek tűnne minden)
+    $old = glob(data_dir() . '/deeply_*.sqlite') ?: [];
+    if (count($old) === 1) {
+      foreach (['-wal', '-shm'] as $x) if (is_file($old[0] . $x)) @rename($old[0] . $x, $p . $x);
+      @rename($old[0], $p);
+    }
+  }
+  return $p;
+}
 
 function db(): PDO {
   static $pdo = null;

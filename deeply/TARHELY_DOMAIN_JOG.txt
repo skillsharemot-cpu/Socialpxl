@@ -1,0 +1,126 @@
+DEEPLY – domain, tárhely, e-mail és a jogi ellenőrzés (2026-10-19)
+=====================================================================
+
+RÖVIDEN
+  • Domain: deeply.hu (ha szabad), a vállalkozás nevére regisztrálva.  Kb. 2–6 ezer Ft/év.
+  • Tárhely: magyar szolgáltató, „Midi”-kategória: 10 GB, legalább 5–10 postafiók, PHP 8.1+, SSL, napi mentés.
+             Kb. 17–28 ezer Ft/év bruttó. Kezdésnek a 10 GB bőven elég.
+  • E-mail: a tárhelyhez járó postafiókok (pl. ajanlat@deeply.hu) – nem kell külön fizetni érte.
+  • Elfogadható összesen: kb. 25–35 ezer Ft/év bruttó a domainre + tárhelyre + e-mailre.
+    Évi 50 ezer Ft fölött kezdésnek már túlfizetés.
+
+
+1. MIT TUDJON A TÁRHELY? (a mi rendszerünkhöz)
+----------------------------------------------
+  Kötelező:
+    • PHP 8.1 vagy újabb, SQLite (pdo_sqlite) – ezen fut az api/ szerver
+    • ingyenes SSL (https), és lehessen PHP-ből levelet küldeni (SMTP a saját postafiókkal)
+    • cPanel vagy hasonló vezérlőpult: fájlkezelő, e-mail fiókok, „Cron Jobs” (időzítő)
+    • napi automatikus mentés a szolgáltatótól
+    • EU-s (lehetőleg magyar) adatközpont – a GDPR miatt egyszerűbb
+  Nem kell: VPS, külön adatbázis-szerver, „WordPress-tárhely”, webáruház-csomag.
+  Nem jó: Wix / Squarespace / ingyenes oldalkészítők – ezeken nem fut a saját szerverünk (api/).
+
+  Mekkora tárhely kell?
+    • a weboldal + kalkulátor + szerver: 20–30 MB
+    • egy foglalás fotókkal: kb. 0,3–0,6 MB (a kalkulátor tömöríti a képeket)
+      → évi 1000 foglalás ≈ 0,5 GB
+    • a legtöbb helyet a postafiókok viszik (képes levelek) – ezért jobb a 10 GB, mint a 2 GB
+    • a napi adatbázis-mentések: néhány MB
+  → 10 GB évekig elég. A 2 GB-os belépő csomag a levelezés miatt szűkös lehet.
+
+  Példa (2026. októberi árak, a szolgáltató oldaláról):
+    Rackhost Webtárhely Midi 10 GB: 18 000 Ft + ÁFA / év (bruttó 22 860 Ft)
+    Rackhost Webtárhely Mini 2 GB: első év 990 Ft + ÁFA, utána 13 000 Ft + ÁFA / év (bruttó 16 510 Ft)
+    (A cPanel-es oldal ugyanerre a Midire 22 000 Ft + ÁFA-t ír – rendelés előtt nézzétek meg a végleges árat.)
+  Más magyar szolgáltatónál is hasonló a szint; a lényeg a fenti „Kötelező” lista.
+  Rendelés előtt kérdezzétek meg az ügyfélszolgálatot: „PHP 8.1+ és pdo_sqlite van? Van Cron Jobs?”
+
+
+2. DOMAIN
+---------
+  • .hu domain: kb. 2–6 ezer Ft/év a regisztrátortól függően (sokszor a tárhellyel együtt olcsóbb).
+  • Az Ön (a vállalkozás) nevére regisztráljátok, ne a fejlesztő vagy egy ismerős nevére –
+    így a domain biztosan a tiétek marad.
+  • .hu domaint EU-s állampolgár vagy EU-s vállalkozás regisztrálhat.
+  • Kapcsoljátok be az automatikus megújítást – egy lejárt domain miatt leáll a weboldal ÉS az e-mail is.
+  • Ha a deeply.hu foglalt: deeply-tisztitas.hu, deeplytisztitas.hu, vagy .eu.
+
+
+3. SAJÁT E-MAIL-CÍM
+-------------------
+  Ajánlott kezdésnek: a tárhelyhez járó postafiók (0 Ft pluszban).
+    • ajanlat@deeply.hu – ezt használja a szerver a visszaigazolásokhoz (feladó), és ide válaszolnak a vevők
+    • hello@deeply.hu vagy tomi@ / norbi@ – ha kell
+    • Telefonon: a beépített Mail / Gmail alkalmazásba IMAP-pal felvehető.
+    • A meglévő Gmailbe is be lehet kötni (Gmail → Beállítások → Fiókok → „Levelek küldése másként” + továbbítás).
+  Ha később naptár, közös meghajtó, Gmail-felület kell: Google Workspace Business Starter,
+  kb. 7–8 € / fő / hó (két főre kb. 65–80 ezer Ft/év). Kezdésnek nem szükséges.
+  Fontos a jó kézbesítéshez: SPF, DKIM és DMARC beállítása (cPanel: „Email Deliverability”).
+
+
+4. MIT KELL ODAADNI AZ ÜGYVÉDNEK? (ellenőrzőlista)
+---------------------------------------------------
+  Meglévő sablonok a Drive-on (Sablonok mappa): ÁSZF v2, Adatkezelési tájékoztató; az impresszum adatai.
+  Ezek mellé adjátok oda ezt a listát – ezek a weboldal és a rendszer TÉNYLEGES működésének tényei:
+
+  a) Impresszum (elektronikus kereskedelemről szóló törvény):
+     • a vállalkozás neve, székhelye, elérhetősége (e-mail, telefon), nyilvántartási / cégjegyzékszáma, adószáma
+     • A TÁRHELYSZOLGÁLTATÓ neve, címe, e-mail-címe – ez kötelező elem, a tárhely megrendelése után töltsétek ki
+
+  b) Milyen adatot gyűjtünk:
+     • név, e-mail, telefonszám, irányítószám, cím, megjegyzés
+     • a kiválasztott szolgáltatások, a napok, az ingatlan adatai (emelet, lift)
+     • FOTÓK a bútorról / szőnyegről – a lakás belsejéről is látszhat rajtuk valami
+     • a hozzájárulás ideje; az IP-cím NEM kerül tárolásra (csak egy visszafejthetetlen kivonat, 2 napig, a visszaélések ellen)
+     • mire kattintott a főoldalon (melyik szolgáltatás, mely GYIK-kérdés) – csak elfogadás után
+
+  c) Mikor menti: a kalkulátor GÉPELÉS KÖZBEN menti az adatokat (a süti-elfogadás után),
+     tehát akkor is, ha a látogató végül nem küldi el a foglalást. Az ilyen érdeklődőt
+     (ha megadta a telefonszámát) visszahívhatjuk. → Kérdés az ügyvédnek: elég-e erre a süti-ablak
+     elfogadása, vagy külön jelölőnégyzet / szöveg kell a kalkulátor adat-lépésénél?
+
+  d) Megőrzési idők:
+     • foglalás nélküli érdeklődők: 60 nap után a rendszer automatikusan törli
+     • foglalások: jelenleg nincs automatikus törlés → az ügyvéd mondja meg, meddig őrizzük
+       (pl. a javító garancia + elévülés ideje); a rendszerben átállítható
+     • adatbázis-mentések: 30 napig gördülően; a kézi mentések a mi gépünkön / Drive-unkon
+     • a böngészőben tárolt adatok: amíg a látogató nem törli („Adataim törlése erről az eszközről” link)
+
+  e) Adatfeldolgozók / harmadik felek:
+     • a tárhelyszolgáltató (weboldal, adatbázis, e-mail) – EU-n belül
+     • Google: Google Fonts (betűtípus – a látogató IP-címe a Google-hoz kerül), és amíg a régi rendszer él:
+       Google Apps Script / Drive / Sheets (foglalások), Gmail (ha azt használjuk)
+     • Meta (WhatsApp) – ha a vevő WhatsAppon ír vagy küld fotót
+     • GitHub (a mostani kalkulátor tárhelye – a költözés után megszűnik)
+     • nincs hirdetési / analitikai süti (még) – ha később lesz (pl. Google Analytics, Meta Pixel), a süti-ablakot bővíteni kell
+
+  f) Böngésző-tárolás (a süti-tájékoztatóhoz):
+     • deeply_ck_v1 – a süti-döntés (szükséges)
+     • deeply_web_v1 – a főoldali kattintások (csak elfogadás után)
+     • deeply_kalk_v1 – a kalkulátorba beírt adatok és választások (csak elfogadás után)
+     • tc_bookings_v1 – az elküldött foglalás másolata a látogató gépén
+     A „Csak a szükségesek” gomb után semmit nem jegyzünk meg, és gépelés közben sem mentünk.
+
+  g) Automatikus levelek: visszaigazolás a vevőnek a foglalás után (tranzakciós levél, nem hírlevél);
+     belső értesítések nekünk. Hírlevél nincs.
+
+  h) Az érintett jogai: törlés kérésére az Ügyek oldalon végleges törlés van (fotókkal együtt);
+     a kérés címe: a public_email / értesítési e-mail.
+
+  i) ÁSZF-kérdések, amiket a weboldal érint:
+     • az ár „irányár”, a pontos ajánlat írásban, 24 órán belül
+     • előleg: a kalkulátor „Foglalási előleget” mutat, máshol „fizetés a munka után” szerepel → egységesíteni
+     • lakásban végzett szolgáltatás → üzlethelyiségen kívül kötött szerződés: elállási jog, tájékoztatás
+       (45/2014. Korm. rendelet) – hogyan kezeljük, ha a munka azonnal kezdődik
+     • kényes anyagok (gyapjú, bársony, viszkóz): írásos hozzájárulás, felelősség-korlátozás
+     • javító garancia: „lehetőleg 48 órán, legkésőbb 1 héten belül” – feltételek
+     • lemondás, időpont-módosítás, sikertelen kiszállás
+
+
+FORRÁSOK (2026. október)
+  Rackhost webtárhely-árak:  https://www.rackhost.hu/webtarhely
+  Rackhost cPanel-tárhely:   https://www.rackhost.hu/cpanel-webtarhely
+  .hu domain árak (összehasonlító): https://domainoffer.net/tld/hu
+  .hu regisztrációs feltételek: https://www.eurodns.com/domain-extensions/hu-domain-registration
+  Google Workspace árak: https://workspace.google.com/intl/hu/pricing

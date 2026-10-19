@@ -14,7 +14,10 @@
   Deeply – vevői árkalkulátor + foglalás (2026-10-19-i változat)
   • Arculat: a főoldallal közös Pantone-paletta, Libertinus Sans / Inter, a főoldal fejléce és gombjai (08_Brand_OS/A_kefe/Alapok).
   • Süti-ablak: a főoldalon (vagy ha valaki közvetlenül, pl. QR-kódról érkezik, itt) – a döntést a főoldal ?ck=… paraméterrel adja át.
-  • Az első lépés a bemutatkozás: udvariasan kéri a nevet, az e-mailt és a telefonszámot (mind kötelező).
+  • Sorrend (2026-10-19, 4. kör): Tételek → Ingatlan → Időpont → Fotó → Adataid. A nevet, e-mailt, telefonszámot
+    (mind kötelező) és a címet a végén, udvariasan kéri. A fotó WhatsAppon is küldhető (ha van WhatsApp-szám).
+  • Saját szerver: ha a kalkulátor a saját domainen fut (nem github.io / helyi fájl), mindent a /api/-nak küld
+    (szerver/api), és onnan tölti a közzétett árlistát és az elérhetőségeket. Különben a régi Apps Scriptet használja.
   • Az irányár alatt „Húzd jobbra” csúszka: elfogadja az irányárat és a következő lépésre visz (a végén elküldi a foglalást).
   • A fő gomb (CTA) elütő arany (#D8AE47) – a felhasználó kérése 2026-10-19; a brandbook komponensek.md-jét ehhez frissíteni kell.
   • Gépelés közben ment: a böngészőbe (localStorage) és – ha az Apps Script már ismeri a 'lead' műveletet – a Google-táblázat
@@ -158,6 +161,13 @@ body.has-mb .ckb{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
 .note .i{color:var(--mv);margin-top:1px}
 .note.ok{border-left-color:var(--mg)}
 .note.err{border-left-color:var(--err)}
+.note.warn{border-left-color:var(--gold-d);background:#FBF3DD}
+.wa-btn{margin-top:8px}
+.wa-box{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center;background:var(--cm);border-radius:14px;padding:14px 16px;margin:16px 0}
+.wa-box .tx b{display:block;font:600 15px/1.3 var(--sans)}
+.wa-box small{display:block;color:var(--muted);font-size:13px;line-height:1.45;margin-top:2px}
+.wa-box .cta{grid-column:1/-1;justify-self:start}
+@media(min-width:620px){.wa-box{grid-template-columns:auto minmax(0,1fr) auto}.wa-box .cta{grid-column:auto}}
 .reco{background:var(--cm);border-radius:16px;padding:14px 16px;margin:0 0 20px}
 .reco h3{display:flex;align-items:center;gap:8px;font:600 12px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 4px}
 .reco-i{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:6px 12px;background:#fff;border-radius:12px;padding:10px 12px;margin-top:8px}
@@ -464,6 +474,7 @@ const ICON={
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.4"/>',
   clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   chat:'<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/>',
+  wa:'<path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z"/><path d="M9.2 7.8c-.4 0-.9.4-.9 1.2 0 2.9 3.4 6.4 6.6 6.6.8 0 1.2-.5 1.2-.9v-.9l-1.9-.9-.9.9c-1-.4-2.4-1.8-2.8-2.8l.9-.9-.9-1.9z"/>',
   arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
   chev:'<path d="M9 6l6 6-6 6"/>',
   check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
@@ -506,8 +517,8 @@ const URLI=(function(){const o={pick:'',int:[],faq:[],how:0,from:''};
   return o;})();
 
 /* ═══════════ ÁLLAPOT ═══════════ */
-const STEPS=[['contact','Adataid'],['property','Ingatlan'],['build','Tételek'],['calendar','Időpont'],['form','Cím és fotó']];
-let view='contact', buildStep=1;
+const STEPS=[['build','Tételek'],['property','Ingatlan'],['calendar','Időpont'],['photo','Fotó'],['contact','Adataid']];
+let view='build', buildStep=1;
 let property={type:null,floor:'',lift:null}; // type: csaladi|tarsashaz|emeletes
 let cart=[];
 let draft=null; // {serviceId, qty, materialId, stains:[], addons:[]}
@@ -516,10 +527,11 @@ let calRef=new Date(); calRef.setDate(1);
 let customer={name:'',phone:'',email:'',zip:'',address:'',note:'',timepref:'Rugalmas'};
 let photos=[];      // array of base64 data URLs
 let noPhoto=false;  // "jelenleg nem tudok képet csinálni"
+let photoVia='';    // 'whatsapp' = a fotót WhatsAppon küldi
 let consent=null;   // {at, v} – az adatkezelés + sütik elfogadása
 let leadId='';      // a félbehagyott foglalás azonosítója (Érdeklődők lap)
 let profile={picks:[],faq:[],svc:{},booked:[],visits:0};
-let flash='';       // egyszeri üzenet a következő nézet tetején (pl. „Hozzáadtuk…”)
+let flash='',flashWarn=false,shownFlash=null; // egyszeri üzenet a következő nézet tetején (pl. „Hozzáadtuk…”); flashWarn = figyelmeztetés
 let welcomeBack=false;
 const touchedF={};  // mely mezőket hagyta már el a látogató (csak utána mutatunk hibát)
 
@@ -583,7 +595,7 @@ function newId(){return 'l-'+Date.now().toString(36)+'-'+Math.random().toString(
 function store(){
   if(!consent)return;
   try{localStorage.setItem(SKEY,JSON.stringify({v:1,savedAt:Date.now(),consent,leadId,customer,property,cart,draft,
-    dates:[...dates],view:view==='done'?'property':view,buildStep,noPhoto,profile}));}catch(e){}
+    dates:[...dates],view:view==='done'?'build':view,buildStep,noPhoto,photoVia,photoN:photos.length,profile}));}catch(e){}
 }
 function todayIso(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function restore(){
@@ -595,15 +607,28 @@ function restore(){
   cart=(Array.isArray(s.cart)?s.cart:[]).filter(it=>it&&svc(it.serviceId));
   draft=s.draft&&svc(s.draft.serviceId)?s.draft:null;
   const t=todayIso();dates=new Set((s.dates||[]).filter(d=>typeof d==='string'&&d>=t));
-  noPhoto=!!s.noPhoto;
+  noPhoto=!!s.noPhoto;photoVia=s.photoVia==='whatsapp'?'whatsapp':'';
   profile=Object.assign(profile,s.profile||{});
-  const ok=STEPS.some(x=>x[0]===s.view);
-  view=ok?s.view:'property';buildStep=(draft&&s.buildStep>1)?s.buildStep:1;
-  if(!contactValid())view='contact';
-  else if(view==='calendar'&&!cart.length)view='build';
-  else if(view==='form'&&(!cart.length||!dates.size))view=cart.length?'calendar':'build';
-  welcomeBack=!!customer.name;
+  view=stepIdx(s.view)>=0?s.view:'build';buildStep=(draft&&s.buildStep>1)?s.buildStep:1;
+  const gap=firstGap();
+  if(gap&&stepIdx(gap)<stepIdx(view)){
+    view=gap;
+    if(gap==='photo'&&s.photoN>0){flash='A fotókat biztonsági okból nem tároljuk a böngészőben – kérlek, töltsd fel őket újra.';flashWarn=true;}
+  }
+  welcomeBack=!!(customer.name.trim()||cart.length);
 }
+function stepIdx(v){return STEPS.findIndex(x=>x[0]===v);}
+function photoOk(){return photos.length>0||noPhoto||photoVia==='whatsapp';}
+/* Az első lépés, ahol még hiányzik valami ('' = minden megvan, jöhetnek az adatok). */
+function firstGap(){
+  if(!cart.length)return 'build';
+  if(!canLeaveProperty())return 'property';
+  if(!dates.size)return 'calendar';
+  if(!photoOk())return 'photo';
+  return '';
+}
+const GAP_MSG={build:'Még nincs tétel a listán – válaszd ki, mit tisztítsunk.',property:'Add meg, milyen ingatlanba megyünk.',
+  calendar:'Jelölj be legalább egy napot, amikor otthon vagy.',photo:'Tölts fel egy fotót, vagy jelöld be, hogy WhatsAppon küldöd / most nem tudsz.'};
 function forget(){
   if(!confirm('Biztosan törlöd az ezen az eszközön tárolt adataidat (név, elérhetőség, választott tételek)?'))return;
   try{localStorage.removeItem(SKEY);localStorage.removeItem(CKKEY);}catch(e){}
@@ -637,18 +662,19 @@ function interestText(){
 
 /* ═══════════ MENTÉS GÉPELÉS KÖZBEN – felhőbe is (4E) ═══════════
    Minden változás azonnal a böngészőbe kerül; ha van név / e-mail / telefon, 1,2 mp gépelési szünet
-   után (és mező elhagyásakor, lapváltáskor) felmegy az Apps Scriptnek 'lead' műveletként.
-   A táblázatban ugyanaz a sor frissül (leadId alapján), nem lesz belőle sok sor. Amíg az Apps Script
-   nem ismeri a 'lead' műveletet, a jelző „Mentve ezen az eszközön” marad – semmi nem törik el. */
+   után (és mező elhagyásakor, lapváltáskor) felmegy a szervernek 'lead' műveletként (saját szerver: api/,
+   különben az Apps Script). Ugyanaz a sor frissül (leadId alapján). Ha a szerver nem ismeri a 'lead'
+   műveletet, a jelző „Mentve ezen az eszközön” marad – semmi nem törik el. Mivel az adatok a végén
+   jönnek, az érdeklődő akkor kerül a szerverre, amikor elkezdi beírni az elérhetőségét. */
 let leadTimer=0,leadDirty=false,leadSig='',cloudOk=null,leadOff=false;
 function hasContact(){return !!(customer.name.trim()||customer.email.trim()||customer.phone.trim());}
-function stageName(){return ({contact:'adatok',property:'ingatlan',build:'tételek',calendar:'időpont',form:'cím, fotó',done:'foglalt'})[view]||view;}
+function stageName(){return ({build:'tételek',property:'ingatlan',calendar:'időpont',photo:'fotó',contact:'adatok',done:'foglalt'})[view]||view;}
 function leadData(){const o=computeOrder();
   return {leadId,created:consent.at,updated:Date.now(),src:SRC,stage:stageName(),consent:{at:consent.at,v:consent.v},
     customer:{name:customer.name.trim(),email:customer.email.trim(),phone:customer.phone.trim(),zip:customer.zip.trim(),
       address:customer.address.trim(),note:customer.note,timepref:customer.timepref},
     property:propLabel(property),items:cart.map(itemLabel),total:cart.length?o.applied:0,dates:[...dates].sort(),
-    photos:photos.length,noPhoto,interest:interestText()};}
+    photos:photos.length,noPhoto,photoVia,interest:interestText()};}
 function touch(){
   const cap=document.getElementById('accCap');   // a csúszka hibaüzenete eltűnik, ha a látogató javít
   if(cap&&cap.classList.contains('err')){const a=accInfo();if(a){cap.textContent=a.cap;cap.classList.remove('err');}}
@@ -713,17 +739,24 @@ function renderSummary(){
 
 /* ═══════════ „HÚZD JOBBRA” – az irányár elfogadása ═══════════
    Akkor jelenik meg, ha a látogató legörget az irányárig, vagy a ragadós sáv nyilára koppint.
-   Jobbra húzva elfogadja az irányárat, és a következő lépésre visz: tételek → időpont → cím → foglalás elküldése.
+   Jobbra húzva elfogadja az irányárat, és a következő lépésre visz: tételek → ingatlan → időpont → fotó → adatok → foglalás elküldése.
    Billentyűzettel: a gombra Enter/Szóköz. Egérrel/ujjal csak a húzás számít (véletlen koppintás nem fogad el). */
 let accShown=false,accBusy=false,sumVisible=false;
+const ACC={
+  build:['Elfogadod az irányárat, és jön pár gyors kérdés.','tovább az ingatlanhoz',
+    ()=>{go('property');}],
+  property:['Elfogadod az irányárat, és jön az időpont.','tovább az időponthoz',
+    ()=>{if(!canLeaveProperty())return property.type==='emeletes'?'Előbb add meg az emeletet és azt, hogy van-e lift.':'Előbb válaszd ki, milyen ingatlanba megyünk.';go('calendar');}],
+  calendar:['Elfogadod az irányárat, és jön a fotó.','tovább a fotóhoz',
+    ()=>{if(!dates.size)return 'Előbb jelölj be legalább egy napot a naptárban.';go('photo');}],
+  photo:['Elfogadod az irányárat – már csak az elérhetőséged kell.','tovább az utolsó lépéshez',
+    ()=>{if(!photoOk())return 'Tölts fel egy fotót, vagy jelöld be, hogy WhatsAppon küldöd / most nem tudsz.';go('contact');}],
+  contact:['Elfogadod az irányárat, és elküldjük a foglalást.','és elküldöm a foglalást',
+    ()=>{submit();if(view!=='done')return 'Valami még hiányzik – nézd át a fenti mezőket.';}]
+};
 function accInfo(){
-  if(!cart.length||['build','calendar','form'].indexOf(view)<0)return null;
-  if(view==='build')return {cap:'Elfogadod az irányárat, és jön az időpont.',aria:'Elfogadom az irányárat, tovább az időponthoz',
-    run:()=>{go('calendar');}};
-  if(view==='calendar')return {cap:'Elfogadod az irányárat, és megadod a címet.',aria:'Elfogadom az irányárat, tovább a címhez',
-    run:()=>{if(!dates.size)return 'Előbb jelölj be legalább egy napot a naptárban.';go('form');}};
-  return {cap:'Elfogadod az irányárat, és elküldjük a foglalást.',aria:'Elfogadom az irányárat, és elküldöm a foglalást',
-    run:()=>{submit();if(view!=='done')return 'Valami még hiányzik – nézd át a fenti mezőket.';}};
+  const a=cart.length&&ACC[view];if(!a)return null;
+  return {cap:a[0],aria:'Elfogadom az irányárat, '+a[1],run:a[2]};
 }
 function renderAcc(msg){
   const el=document.getElementById('acc');const a=accInfo();
@@ -780,7 +813,7 @@ function renderSteps(){
   document.querySelectorAll('#steps [data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 }
 function go(v,opts){
-  welcomeBack=false;view=v;if(v==='build'&&!(opts&&opts.keepStep))buildStep=1;
+  welcomeBack=false;shownFlash=null;view=v;if(v==='build'&&!(opts&&opts.keepStep))buildStep=1;
   touch();render();
   const m=document.getElementById('main');const r=m.getBoundingClientRect();
   if(r.top<0||r.top>innerHeight*.6)m.scrollIntoView({block:'start'});
@@ -791,26 +824,27 @@ function go(v,opts){
 function render(){
   document.body.classList.toggle('is-done',view==='done');
   renderSteps();renderSummary();
-  if(view==='contact')renderContact();
+  if(view==='build')renderBuild();
   else if(view==='property')renderProperty();
-  else if(view==='build')renderBuild();
   else if(view==='calendar')renderCalendar();
-  else if(view==='form')renderForm();
+  else if(view==='photo')renderPhoto();
+  else if(view==='contact')renderContact();
   else if(view==='done')renderDone();
   document.querySelectorAll('[data-save]').forEach(paintSave);
 }
 function topHtml(){ // visszatérő látogató + egyszeri üzenet a nézet tetején
   let h='';
-  if(welcomeBack&&view!=='contact'){
-    h+='<div class="hello">'+ci('user',3,20)+'<div class="tx"><b>Üdv újra, '+esc(customer.name.trim())+'!</b> Ott folytatod, ahol abbahagytad.</div>'
+  if(welcomeBack){
+    const nm=customer.name.trim().split(/\s+/).slice(-1)[0]||'';
+    h+='<div class="hello">'+ci('user',3,20)+'<div class="tx"><b>Üdv újra'+(nm?', '+esc(nm):'')+'!</b> Ott folytatod, ahol abbahagytad.</div>'
       +'<button type="button" class="btn2 sm" id="restartBtn">Újrakezdem</button></div>';
   }
-  if(flash){h+='<div class="note ok" role="status" style="margin:0 0 18px">'+ic('check',18)+'<span>'+flash+'</span></div>';flash='';}
+  if(flash){h+='<div class="note '+(flashWarn?'warn':'ok')+'" role="status" style="margin:0 0 18px">'+ic(flashWarn?'info':'check',18)+'<span>'+flash+'</span></div>';shownFlash=[flash,flashWarn];flash='';flashWarn=false;}
   return h;
 }
 function bindTop(){
   const rb=document.getElementById('restartBtn');
-  if(rb)rb.onclick=()=>{welcomeBack=false;cart=[];draft=null;dates=new Set();property={type:null,floor:'',lift:null};photos=[];noPhoto=false;buildStep=1;go('property');};
+  if(rb)rb.onclick=()=>{welcomeBack=false;cart=[];draft=null;dates=new Set();photos=[];noPhoto=false;photoVia='';buildStep=1;go('build');};
 }
 function navHtml(backId,backTxt,nextId,nextTxt,disabled){
   return '<div class="nav">'+(backId?'<button type="button" class="back" id="'+backId+'">'+backTxt+'</button>':'<span></span>')
@@ -829,7 +863,6 @@ function checkField(k){
   if(k==='address')return v.length>=3?'':'Kérlek, add meg az utcát és a házszámot.';
   return '';
 }
-function contactValid(){return !checkField('name')&&!checkField('email')&&!checkField('phone');}
 function fieldHtml(k,label,attrs,ph,hint){
   const err=touchedF[k]?checkField(k):'';
   return '<div class="field"><label for="f_'+k+'">'+label+' <span class="req" aria-hidden="true">*</span></label>'
@@ -844,28 +877,29 @@ function bindField(k){
 function showErr(k){const el=document.getElementById('f_'+k),m=document.getElementById('m_'+k);if(!el||!m)return;
   const e=checkField(k);m.textContent=e;el.classList.toggle('bad',!!e);el.setAttribute('aria-invalid',e?'true':'false');}
 function renderContact(){
-  const mp=mainPick();
   let h=topHtml();
-  if(mp)h+='<div class="pill">'+ci(PICKS[mp].icon,PICKS[mp].col,16)+'<span>'+esc(PICKS[mp].name)+' – ezzel kezdünk majd</span></div>';
-  h+='<h2 class="q">Szia! Kezdjük egy rövid bemutatkozással.</h2>';
-  h+='<p class="qs">Kérlek, add meg a neved és az elérhetőségeidet – így tudjuk elküldeni az írásos ajánlatot, és ha kérdésünk van, gyorsan elérünk. Köszönjük.</p>';
+  h+='<h2 class="q">Utolsó lépés: kinek és hova menjünk?</h2>';
+  h+='<p class="qs">Kérlek, add meg a neved és az elérhetőségeidet – ide küldjük az írásos ajánlatot, és ha kérdésünk van, gyorsan elérünk. Köszönjük!</p>';
   h+='<div style="margin-top:4px">'
     +fieldHtml('name','Hogyan szólíthatunk?','type="text" autocomplete="name" autocapitalize="words" enterkeyhint="next"','pl. Kovács Anna')
-    +fieldHtml('email','Az e-mail-címed','type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" enterkeyhint="next"','pl. anna@email.hu')
-    +fieldHtml('phone','A telefonszámod','type="tel" autocomplete="tel" inputmode="tel" enterkeyhint="done"','pl. +36 30 123 4567')
-    +'</div><div data-save></div>';
+    +fieldHtml('email','Az e-mail-címed','type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" enterkeyhint="next"','pl. anna@email.hu','<p class="fine" style="margin-top:6px">Ide küldjük a visszaigazolást és az írásos ajánlatot.</p>')
+    +fieldHtml('phone','A telefonszámod','type="tel" autocomplete="tel" inputmode="tel" enterkeyhint="next"','pl. +36 30 123 4567')
+    +'<div class="row2">'
+    +fieldHtml('zip','Irányítószám','type="text" autocomplete="postal-code" inputmode="numeric" maxlength="4" enterkeyhint="next"','pl. 1117')
+    +fieldHtml('address','Cím','type="text" autocomplete="street-address" enterkeyhint="next"','utca, házszám, emelet/ajtó')+'</div>'
+    +'<div class="field"><label for="f_note">Megjegyzés <span class="opt-l">(nem kötelező)</span></label><textarea class="inp" id="f_note" rows="3" placeholder="pl. parkolás, kapukód, kisállat">'+esc(customer.note)+'</textarea></div>'
+    +'</div>';
+  if(picks().indexOf('b2b')>=0)h+='<div class="note" style="margin:-4px 0 16px">'+ic('building',18)+'<span>Céges ügyfélként negyedéves szinten tartó tisztítást is kérhetsz – írd meg a megjegyzésben, és a cégnevet is.</span></div>';
+  h+='<div data-save></div>';
   h+='<p class="lock">'+ic('lock',16)+'Az adataidat bizalmasan kezeljük – csak ehhez a foglaláshoz használjuk.</p>';
-  h+=navHtml('','', 'toProp','Tovább a kalkulátorhoz');
+  h+=navHtml('back','Vissza a fotóhoz','submit','Foglalás elküldése');
   viewEl.innerHTML=h;bindTop();
-  ['name','email','phone'].forEach(bindField);
-  ['name','email'].forEach((k,i)=>{document.getElementById('f_'+k).onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('f_'+['email','phone'][i]).focus();}};});
-  document.getElementById('f_phone').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('toProp').click();}};
-  document.getElementById('toProp').onclick=()=>{
-    ['name','email','phone'].forEach(k=>{touchedF[k]=true;const el=document.getElementById('f_'+k);customer[k]=el.value.trim();showErr(k);});
-    const bad=['name','email','phone'].find(k=>checkField(k));
-    if(bad){document.getElementById('f_'+bad).focus();return;}
-    flushLead();go('property');
-  };
+  const F=['name','email','phone','zip','address'];
+  F.forEach(bindField);
+  F.forEach((k,i)=>{document.getElementById('f_'+k).onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById(i<F.length-1?'f_'+F[i+1]:'f_note').focus();}};});
+  const n=document.getElementById('f_note');n.oninput=()=>{customer.note=n.value;touch();};n.onblur=()=>flushLead();
+  document.getElementById('back').onclick=()=>go('photo');
+  document.getElementById('submit').onclick=submit;
 }
 /* ═══════════ SÜTI-ABLAK / HOZZÁJÁRULÁS (3C) ═══════════
    A döntés a főoldalon születik (ugyanez az ablak), és a kalkulátor-link ?ck=<elfogadás ideje>-<kattintás ideje>
@@ -900,11 +934,11 @@ function declineConsent(){
 }
 function showCookie(){const b=document.getElementById('ckb');b.hidden=false;}
 function hideCookie(){document.getElementById('ckb').hidden=true;}
-document.getElementById('ckList').innerHTML=
+function fillCkList(){document.getElementById('ckList').innerHTML=
    '<li><b>Szükséges:</b> a süti-döntésed megjegyzése – ez mindig működik.</li>'
   +'<li><b>Kényelmi:</b> a választásaid és a kalkulátorba beírt adatok mentése (már gépelés közben), hogy ott folytathasd, ahol abbahagytad, és vissza tudjunk hívni.</li>'
-  +'<li><b>Beépülő modulok:</b> Google Fonts (betűtípusok), Google Apps Script (az ajánlatkérések fogadása).</li>'
-  +'<li>Az adataidat csak az ajánlatodhoz és a foglalásodhoz használjuk, nem adjuk tovább. Törlést kérhetsz: '+esc(cfg.settings.notifyEmail||'')+'. A döntésed az oldal alján, a „Süti-beállítások” linkkel bármikor módosíthatod.</li>';
+  +'<li><b>Beépülő modulok:</b> Google Fonts (betűtípusok)'+(CLOUD.OWN?'':', Google Apps Script (az ajánlatkérések fogadása)')+'. A WhatsApp csak akkor nyílik meg, ha a WhatsApp-gombra koppintasz.</li>'
+  +'<li>Az adataidat csak az ajánlatodhoz és a foglalásodhoz használjuk, nem adjuk tovább. Törlést kérhetsz: '+esc(cfg.settings.notifyEmail||'')+'. A döntésed az oldal alján, a „Süti-beállítások” linkkel bármikor módosíthatod.</li>';}
 document.getElementById('ckYes').onclick=()=>acceptConsent();
 document.getElementById('ckNo').onclick=declineConsent;
 document.getElementById('ckSet').onclick=showCookie;
@@ -939,7 +973,7 @@ function renderProperty(){
   let h=topHtml()+'<h2 class="q">Milyen ingatlanba megyünk?</h2><p class="qs">Ebből tudjuk, mire készüljünk a kiszállásnál: lépcső, lift, a gépek felhordása.</p>';
   h+='<div class="opts">'+PROP_TYPES.map((t,i)=>optHtml('data-pt="'+t.id+'"',property.type===t.id,ci(t.icon,i===2?2:i,22),esc(t.name),esc(t.sub))).join('')+'</div>';
   h+='<div id="emBox"></div>';
-  h+=navHtml('toContact','Vissza','toBuild','Tovább a tételekhez',!canLeaveProperty());
+  h+=navHtml('toBuild0','Vissza a tételekhez','toBuild','Tovább az időponthoz',!canLeaveProperty());
   viewEl.innerHTML=h;bindTop();
   viewEl.querySelectorAll('[data-pt]').forEach(b=>b.onclick=()=>{property.type=b.dataset.pt;if(property.type!=='emeletes'){property.floor='';property.lift=null;}touch();render();
     if(property.type==='emeletes'){const f=document.getElementById('p_floor');if(f&&!property.floor)f.focus();}});
@@ -956,8 +990,8 @@ function renderProperty(){
     em.querySelectorAll('input[name=lift]').forEach(r=>r.onchange=()=>{property.lift=r.value==='1';updateLiftNote();const tb=document.getElementById('toBuild');if(tb)tb.disabled=!canLeaveProperty();touch();});
     updateLiftNote();
   }
-  document.getElementById('toContact').onclick=()=>go('contact');
-  document.getElementById('toBuild').onclick=()=>{if(!canLeaveProperty())return;go('build');};
+  document.getElementById('toBuild0').onclick=()=>go('build',{keepStep:true});
+  document.getElementById('toBuild').onclick=()=>{if(!canLeaveProperty())return;go('calendar');};
 }
 function updateLiftNote(){
   const el=document.getElementById('liftNote');if(!el)return;
@@ -1014,7 +1048,7 @@ function renderBuild(){
   if(buildStep===1){
     let h=topHtml();
     h+='<h2 class="q">'+(cart.length?'Kérsz még valamit?':'Mit szeretnél tisztíttatni?')+'</h2>';
-    h+='<p class="qs">'+(cart.length?'Adj hozzá újabb tételt, vagy menjünk tovább az időponthoz.':'Válassz egyet – utána megadod a mennyiséget és az anyagot. Több tételt is hozzáadhatsz.')+'</p>';
+    h+='<p class="qs">'+(cart.length?'Adj hozzá újabb tételt, vagy menjünk tovább.':'Válassz egyet – utána megadod a mennyiséget és az anyagot. Több tételt is hozzáadhatsz. Az irányárat azonnal látod.')+'</p>';
     const cs=cart.length?crossSell():[];
     if(cs.length){
       h+='<div class="reco"><h3>'+ic('spark',16)+'Gyakran kérik mellé</h3>'+cs.map(r=>'<div class="reco-i">'+ci(r.icon[0],r.icon[1],18)+'<div class="tx"><b>'+esc(r.t)+'</b><small>'+esc(r.s)+'</small></div><button type="button" class="btn2 sm" data-reco="'+r.k+'">'+ic('plus',14)+esc(r.btn)+'</button></div>').join('')+'</div>';
@@ -1028,12 +1062,11 @@ function renderBuild(){
       const inCart=cart.filter(it=>it.serviceId===sv.id).length;
       return optHtml('data-svc="'+esc(sv.id)+'"',false,svcIcon(sv.id),esc(sv.name)+tag,fmt(sv.price)+' / '+esc(sv.unit)+(inCart?' · már a listán':''),'<span class="go">'+ic('chev',18)+'</span>');
     }).join('')+'</div>';
-    h+=navHtml('toProp2','Vissza az ingatlanhoz',cart.length?'toCal':'',cart.length?'Tovább az időponthoz':'');
+    h+=navHtml('','',cart.length?'toCal':'',cart.length?'Tovább':'');
     viewEl.innerHTML=h;bindTop();
     viewEl.querySelectorAll('[data-svc]').forEach(b=>b.onclick=()=>startDraft(b.dataset.svc));
     viewEl.querySelectorAll('[data-reco]').forEach(b=>b.onclick=()=>applyReco(b.dataset.reco));
-    document.getElementById('toProp2').onclick=()=>go('property');
-    const tc=document.getElementById('toCal');if(tc)tc.onclick=()=>go('calendar');
+    const tc=document.getElementById('toCal');if(tc)tc.onclick=()=>go('property');
     return;
   }
   if(buildStep===2){
@@ -1100,14 +1133,14 @@ function renderCalendar(){
   h+='<p class="sub-h">Melyik napszak jó?</p><div class="seg" id="tp">'+['Délelőtt','Délután','Rugalmas'].map(t=>'<label><input type="radio" name="tp" value="'+t+'"'+(customer.timepref===t?' checked':'')+'>'+t+'</label>').join('')+'</div>';
   if(cart.some(it=>['kanape','fotel','puff','auto','matrac'].indexOf(it.serviceId)>=0))
     h+='<div class="note">'+ic('clock',18)+'<span>A kárpitnak a munka után 4–6 óra kell a teljes száradáshoz – ha vendégeket vársz, ezt az időpontnál számoljuk.</span></div>';
-  h+=navHtml('back','Vissza a tételekhez','toForm','Tovább a címhez',!dates.size);
+  h+=navHtml('back','Vissza az ingatlanhoz','toForm','Tovább a fotóhoz',!dates.size);
   viewEl.innerHTML=h;bindTop();
   drawCal();
   document.getElementById('prev').onclick=()=>{calRef.setMonth(calRef.getMonth()-1);drawCal();};
   document.getElementById('nxt').onclick=()=>{calRef.setMonth(calRef.getMonth()+1);drawCal();};
   viewEl.querySelectorAll('input[name=tp]').forEach(r=>r.onchange=e=>{customer.timepref=e.target.value;touch();});
-  document.getElementById('back').onclick=()=>go('build');
-  document.getElementById('toForm').onclick=()=>{if(dates.size)go('form');};
+  document.getElementById('back').onclick=()=>go('property');
+  document.getElementById('toForm').onclick=()=>{if(dates.size)go('photo');};
 }
 function drawCal(){
   const months=['Január','Február','Március','Április','Május','Június','Július','Augusztus','Szeptember','Október','November','December'];
@@ -1139,42 +1172,45 @@ function updateSelDates(){
   const tf=document.getElementById('toForm');if(tf)tf.disabled=!dates.size;
 }
 
-/* ═══════════ 5 · CÍM ÉS FOTÓ ═══════════ */
-function renderForm(){
-  let h=topHtml()+'<h2 class="q">Hova menjünk?</h2><p class="qs">A cím a kiszálláshoz kell, a fotó pedig ahhoz, hogy előre megmondjuk, mi fog kijönni.</p>';
-  h+='<div class="who">'+ci('user',3,20)+'<div class="tx"><b>'+esc(customer.name)+'</b>'+esc(customer.email)+' · '+esc(customer.phone)+'</div><button type="button" class="btn2 sm" id="editC">Módosítom</button></div>';
-  h+='<div class="row2">'
-    +fieldHtml('zip','Irányítószám','type="text" autocomplete="postal-code" inputmode="numeric" maxlength="4" enterkeyhint="next"','pl. 1117')
-    +fieldHtml('address','Cím','type="text" autocomplete="street-address" enterkeyhint="next"','utca, házszám, emelet/ajtó')+'</div>';
-  h+='<div class="field"><label for="f_note">Megjegyzés <span class="opt-l">(nem kötelező)</span></label><textarea class="inp" id="f_note" rows="3" placeholder="pl. parkolás, kapukód, kisállat">'+esc(customer.note)+'</textarea></div>';
-  if(picks().indexOf('b2b')>=0)h+='<div class="note" style="margin:-4px 0 16px">'+ic('building',18)+'<span>Céges ügyfélként negyedéves szinten tartó tisztítást is kérhetsz – írd meg a megjegyzésben, és a cégnevet is.</span></div>';
-  h+='<div class="field"><span class="lbl">Fotó a foltról / a tisztítandó felületről</span>'
-    +(faqSeen(0)?'<p class="fine" style="margin:0 0 10px">A főoldalon a foltokról olvastál: egy közeli fotó sokat segít, hogy előre megmondjuk, kijön-e.</p>':'')
-    +'<div class="photos" id="photoList"></div>'
+/* ═══════════ 4 · FOTÓ (feltöltés, vagy WhatsAppon küldi, vagy most nem tud) ═══════════ */
+function renderPhoto(){
+  const wa=waNumber();
+  let h=topHtml()+'<h2 class="q">Küldenél egy fotót?</h2><p class="qs">Egy közeli fotó a foltról vagy a felületről sokat segít: előre megmondjuk, mi fog kijönni, és pontosabb lesz az ajánlat.</p>';
+  if(faqSeen(0))h+='<p class="fine" style="margin:-8px 0 14px">A főoldalon a foltokról olvastál: egy közeli fotóból látjuk, kijön-e.</p>';
+  h+='<div class="field"><div class="photos" id="photoList"></div>'
     +'<label class="upload" for="f_photo">'+ic('cam',22)+'Fotó hozzáadása</label>'
     +'<input type="file" id="f_photo" accept="image/*" multiple class="sr">'
+    +(wa?'<label class="tickrow"><input type="checkbox" class="box" id="f_wa" '+(photoVia==='whatsapp'?'checked':'')+'><span>Inkább WhatsAppon küldöm el</span></label>':'')
     +'<label class="tickrow"><input type="checkbox" class="box" id="f_nophoto" '+(noPhoto?'checked':'')+'><span>Most nem tudok fotót készíteni</span></label>'
     +'<div id="nophotoNote"></div></div>';
-  h+='<div data-save></div>';
-  h+=navHtml('back','Vissza az időponthoz','submit','Foglalás elküldése');
+  h+=navHtml('back','Vissza az időponthoz','toContact','Tovább az utolsó lépéshez');
   viewEl.innerHTML=h;bindTop();
-  ['zip','address'].forEach(bindField);
-  const n=document.getElementById('f_note');n.oninput=()=>{customer.note=n.value;touch();};n.onblur=()=>flushLead();
-  document.getElementById('editC').onclick=()=>go('contact');
   document.getElementById('f_photo').onchange=e=>{addPhotoFiles(e.target.files);e.target.value='';};
-  document.getElementById('f_nophoto').onchange=e=>{noPhoto=e.target.checked;if(noPhoto)photos=[];renderPhotoList();updateNoPhotoNote();touch();};
+  const fw=document.getElementById('f_wa');
+  if(fw)fw.onchange=e=>{photoVia=e.target.checked?'whatsapp':'';if(photoVia){noPhoto=false;document.getElementById('f_nophoto').checked=false;}updateNoPhotoNote();touch();};
+  document.getElementById('f_nophoto').onchange=e=>{noPhoto=e.target.checked;if(noPhoto){photos=[];photoVia='';if(fw)fw.checked=false;}renderPhotoList();updateNoPhotoNote();touch();};
   document.getElementById('back').onclick=()=>go('calendar');
-  document.getElementById('submit').onclick=submit;
+  document.getElementById('toContact').onclick=()=>{
+    if(!photoOk()){updateNoPhotoNote(true);document.querySelector('.upload').scrollIntoView({block:'center',behavior:'smooth'});return;}
+    go('contact');
+  };
   renderPhotoList();updateNoPhotoNote();
 }
-function updateNoPhotoNote(){
+function updateNoPhotoNote(warn){
   const el=document.getElementById('nophotoNote');if(!el)return;
+  const wa=waNumber();
+  if(warn&&!photoOk()){el.innerHTML='<div class="note err">'+ic('cam',18)+'<span>Tölts fel legalább egy fotót a foltról'+(wa?', jelöld be, hogy WhatsAppon küldöd,':'')+' vagy pipáld be, hogy most nem tudsz fotót készíteni.</span></div>';return;}
+  if(photoVia==='whatsapp'&&wa){
+    el.innerHTML='<div class="note">'+ic('wa',18)+'<span>Rendben! A foglalás után egy gombnyomással megnyílik a WhatsApp, és elküldheted a fotót. Ha most kéznél van, már el is küldheted:'
+      +'<br><a class="btn2 sm wa-btn" href="'+esc(waLink('Szia! A Deeply kalkulátorból küldöm a fotót a foglalásomhoz ('+cart.map(it=>(svc(it.serviceId)||{}).name).filter(Boolean).join(', ')+').'))+'" target="_blank" rel="noopener">'+ic('wa',16)+'WhatsApp megnyitása</a></span></div>';
+    return;
+  }
   el.innerHTML=noPhoto?'<div class="note">'+ic('phone',18)+'<span>Rendben – mivel nincs fotó, telefonon keresünk, hogy pontosítsuk a folt jellegét.</span></div>':'';
 }
 function renderPhotoList(){
   const el=document.getElementById('photoList');if(!el)return;
   el.innerHTML=photos.map((src,i)=>'<div class="thumb"><img src="'+src+'" alt="Feltöltött fotó '+(i+1)+'"><button type="button" data-ph="'+i+'" aria-label="Fotó törlése">'+ic('x',14)+'</button></div>').join('');
-  el.querySelectorAll('[data-ph]').forEach(b=>b.onclick=()=>{photos.splice(+b.dataset.ph,1);renderPhotoList();touch();});
+  el.querySelectorAll('[data-ph]').forEach(b=>b.onclick=()=>{photos.splice(+b.dataset.ph,1);renderPhotoList();updateNoPhotoNote();touch();});
 }
 function addPhotoFiles(files){
   if(noPhoto){noPhoto=false;const cb=document.getElementById('f_nophoto');if(cb)cb.checked=false;updateNoPhotoNote();}
@@ -1213,9 +1249,17 @@ function addPhotoFiles(files){
    FIGYELEM: ez a blokk két fájlban él (arkalkulator_foglalas.html és
    arkalkulator_admin.html) – módosításkor mindkettőben át kell vezetni.
    ════════════════════════════════════════════════════════════════════════ */
+const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbxBYLvankJ9lJ5w2LQ4zE9GG1MnV4l4KANaTeYcz5fIdyc_mTbvrP3ptJpRs0n4lSeW/exec';
+/* Saját szerver: ha a kalkulátor a saját domainen fut (pl. https://deeply.hu/kalkulator/), az API ugyanott van: /api/.
+   GitHub Pages-en vagy helyi fájlként megnyitva marad a régi Apps Script. */
+const OWN_API=(function(){try{
+  if(!/^https?:$/.test(location.protocol))return '';
+  if(/(^|\.)github\.io$|(^|\.)google(usercontent)?\.com$/.test(location.hostname))return '';
+  return location.origin+'/api/';}catch(e){return '';}})();
 const CLOUD={
-  URL:'https://script.google.com/macros/s/AKfycbxBYLvankJ9lJ5w2LQ4zE9GG1MnV4l4KANaTeYcz5fIdyc_mTbvrP3ptJpRs0n4lSeW/exec',                          /* ← ide jön a webalkalmazás URL-je (…/exec) */
-  WRITE_KEY:'F9YcCX1EyZ0Mqzpz'
+  URL:OWN_API||APPS_SCRIPT_URL,
+  WRITE_KEY:'F9YcCX1EyZ0Mqzpz',
+  OWN:!!OWN_API
 };
 const CLOUD_KKEY='tc_cloud_admin_key_v1';
 function cloudOn(){return !!CLOUD.URL;}
@@ -1234,7 +1278,33 @@ function cloudCall(action,payload,key){
     });
 }
 
-/* ── A foglalás felküldése a Drive-ra (ha be van állítva a felhő) ── */
+/* ── Elérhetőség (WhatsApp, telefon) – a saját szerver config.php-jából jön; Apps Script esetén az itteni érték ── */
+const CONTACT={business:'Deeply',phone:'',whatsapp:'',email:''};
+function waNumber(){let d=String(CONTACT.whatsapp||'').replace(/\D/g,'');if(/^06/.test(d))d='36'+d.slice(2);return d.length>=10?d:'';}
+function waLink(text){return 'https://wa.me/'+waNumber()+(text?'?text='+encodeURIComponent(text):'');}
+/* A közzétett árlista: az Ügyek oldalon „Árlista közzététele” után minden látogató ezt látja. */
+function loadServerPricing(){
+  if(!CLOUD.OWN)return;
+  fetch(CLOUD.URL+'?action=pricing',{credentials:'omit'}).then(r=>r.json()).then(j=>{
+    if(!j||!j.ok)return;
+    const before=JSON.stringify([cfg,CONTACT]);
+    if(j.contact)['business','phone','whatsapp','email'].forEach(k=>{if(typeof j.contact[k]==='string')CONTACT[k]=j.contact[k];});
+    const p=j.pricing;
+    if(p&&Array.isArray(p.services)&&p.services.length){
+      cfg.services=p.services;
+      ['materials','stains','addons'].forEach(k=>{if(Array.isArray(p[k]))cfg[k]=p[k];});
+      if(p.settings)cfg.settings=Object.assign(cfg.settings,p.settings);
+      cart=cart.filter(it=>svc(it.serviceId));
+      if(draft&&draft.serviceId&&!svc(draft.serviceId)){draft=null;buildStep=1;}
+    }
+    if(JSON.stringify([cfg,CONTACT])===before)return;
+    if(shownFlash&&!flash){flash=shownFlash[0];flashWarn=shownFlash[1];}   // az épp kiírt üzenet maradjon látható
+    const a=document.activeElement;   // gépelés közben nem rajzoljuk újra a mezőket
+    if(a&&viewEl.contains(a)&&/^(INPUT|TEXTAREA)$/.test(a.tagName))renderSummary();else render();
+  }).catch(()=>{});
+}
+
+/* ── A foglalás felküldése a szerverre (saját szerver vagy Apps Script) ── */
 function cloudSendBooking(b){
   const el=()=>document.getElementById('cloudState');
   if(!cloudOn()){const e0=el();if(e0)e0.remove();return;}
@@ -1242,7 +1312,7 @@ function cloudSendBooking(b){
   cloudCall('booking',{data:b}).then(r=>{
     const e2=el();
     if(e2)e2.innerHTML='<span class="ok">✓ A foglalásod megérkezett hozzánk'
-      +(r.photos?' ('+r.photos+' fotóval)':'')+' – nem kell mást tenned.</span>';
+      +(r.photos?' ('+r.photos+' fotóval)':'')+(CLOUD.OWN&&b.customer.email?' – a visszaigazolást elküldtük e-mailben.':' – nem kell mást tenned.')+'</span>';
   }).catch(err=>{
     const e2=el();
     if(e2)e2.innerHTML='<span class="err">A foglalást most nem sikerült elküldeni. '
@@ -1251,20 +1321,16 @@ function cloudSendBooking(b){
 }
 
 function submit(){
-  ['zip','address'].forEach(k=>{touchedF[k]=true;const el=document.getElementById('f_'+k);if(el){customer[k]=el.value.trim();showErr(k);}});
-  if(!contactValid()){go('contact');return;}
-  const bad=['zip','address'].find(k=>checkField(k));
-  if(bad){document.getElementById('f_'+bad).focus();return;}
-  if(!cart.length){flash='Még nincs tétel a listán – válaszd ki, mit tisztítsunk.';go('build');return;}
-  if(!dates.size){flash='Jelölj be legalább egy napot, amikor otthon vagy.';go('calendar');return;}
-  if(!photos.length&&!noPhoto){
-    const nn=document.getElementById('nophotoNote');
-    if(nn)nn.innerHTML='<div class="note err">'+ic('cam',18)+'<span>Tölts fel legalább egy fotót a foltról, vagy pipáld be, hogy most nem tudsz fotót készíteni.</span></div>';
-    document.querySelector('.upload').scrollIntoView({block:'center'});return;
-  }
+  const gap=firstGap();
+  if(gap){flash=GAP_MSG[gap];flashWarn=true;go(gap);return;}
+  const F=['name','email','phone','zip','address'];
+  if(view!=='contact'){go('contact');return;}
+  F.forEach(k=>{touchedF[k]=true;const el=document.getElementById('f_'+k);if(el){customer[k]=el.value.trim();showErr(k);}});
+  const bad=F.find(k=>checkField(k));
+  if(bad){const el=document.getElementById('f_'+bad);el.focus();el.scrollIntoView({block:'center'});return;}
   const o=computeOrder();
   const booking={created:Date.now(),src:SRC,leadId:leadId,consent:consent,interest:interestText(),customer:clone(customer),dates:[...dates].sort(),
-    property:clone(property),photos:photos.slice(),noPhoto:noPhoto,
+    property:clone(property),photos:photos.slice(),noPhoto:noPhoto,photoVia:photoVia,
     items:cart.map(it=>Object.assign({label:itemLabel(it),total:itemTotal(it)},itemBreakdown(it)||{})),
     sub:o.sub,travelFee:o.travelFee,total:o.applied,deposit:o.deposit,onsite:o.onsite};
   let arr=[];try{arr=JSON.parse(localStorage.getItem(BKEY)||'[]');}catch(e){}
@@ -1280,7 +1346,7 @@ function submit(){
   // az érdeklődő-sor „foglalt” lesz; a választások a profilba kerülnek a következő ajánlásokhoz
   profile.booked=(profile.booked||[]).concat(cart.map(it=>it.serviceId)).filter((x,i,a)=>a.indexOf(x)===i).slice(-8);
   view='done';leadDirty=true;flushLead();
-  cart=[];draft=null;dates=new Set();photos=[];noPhoto=false;property={type:null,floor:'',lift:null};buildStep=1;
+  cart=[];draft=null;dates=new Set();photos=[];noPhoto=false;photoVia='';buildStep=1;
   welcomeBack=false;store();
   render();
   document.getElementById('main').scrollIntoView({block:'start'});
@@ -1289,7 +1355,7 @@ function submit(){
 
 function renderDone(){
   const b=window._lastBooking;
-  if(!b){view='contact';return render();}
+  if(!b){view='build';return render();}
   const lines=b.items.map(it=>'• '+it.label+' — '+fmt(it.total)).join('\n');
   const body=
 'Új foglalási igény\n'+
@@ -1323,7 +1389,12 @@ function renderDone(){
     +'<div>'+ci('check',1,16)+'<span>Javító garancia: ha visszajön a folt, ingyen visszamegyünk – lehetőleg 48 órán, legkésőbb 1 héten belül.</span></div>'
     +'</div>';
   if(b.photos&&b.photos.length)h+='<div class="photos">'+b.photos.map((s,i)=>'<div class="thumb"><img src="'+s+'" alt="Fotó '+(i+1)+'"></div>').join('')+'</div>';
-  if(b.noPhoto)h+='<div class="note">'+ic('phone',18)+'<span>Nincs fotó – telefonon keresünk a folt pontosításához.</span></div>';
+  const wa=waNumber();
+  if(wa&&(b.photoVia==='whatsapp'||b.noPhoto)){
+    h+='<div class="wa-box">'+ci('wa',1,20)+'<div class="tx"><b>'+(b.photoVia==='whatsapp'?'Küldd el a fotót WhatsAppon':'Ha mégis tudsz fotót csinálni')+'</b>'
+      +'<small>Egy gombnyomás, és a fotó a foglalásod mellé kerül – így pontosabb ajánlatot tudunk adni.</small></div>'
+      +'<a class="cta sm" href="'+esc(waLink('Szia! '+b.customer.name+' vagyok, most foglaltam a kalkulátorban ('+b.items.map(it=>it.name||it.label).join(', ')+'). Küldöm a fotót:'))+'" target="_blank" rel="noopener"><span>Fotó küldése</span><span class="cc">'+ic('wa',18)+'</span></a></div>';
+  }else if(b.noPhoto)h+='<div class="note">'+ic('phone',18)+'<span>Nincs fotó – telefonon keresünk a folt pontosításához.</span></div>';
   h+='<details class="raw"><summary>A foglalás részletei</summary><pre class="sumtxt">'+esc(body)+'</pre></details>';
   h+='<div class="nav"><button type="button" class="back" id="newBtn">Új foglalás indítása</button>'
     +'<a class="cta lt" href="'+mail+'"><span>E-mailben is elküldöm</span><span class="cc">'+ic('mail',18)+'</span></a></div>'
@@ -1331,7 +1402,7 @@ function renderDone(){
   viewEl.innerHTML=h;
   document.getElementById('copyBtn').onclick=()=>{navigator.clipboard.writeText(body).then(()=>alert('Vágólapra másolva!'),()=>alert('Nem sikerült a másolás.'));};
   document.getElementById('newBtn').onclick=()=>{ // az elérhetőség megmarad, a választások törlődnek
-    leadId=newId();leadSig='';buildStep=1;customer.note='';go('property');};
+    leadId=newId();leadSig='';buildStep=1;customer.note='';go('build');};
 }
 
 /* ═══════════ INDULÁS ═══════════ */
@@ -1345,7 +1416,10 @@ restore();
   else showCookie();
   if(consent){mergeInterest();store();}
 })();
+fillCkList();
 render();
+loadServerPricing();
+if(CLOUD.OWN){const al=document.querySelector('footer a[href="arkalkulator_admin.html"]');if(al)al.remove();}
 </script>
 </body>
 </html>

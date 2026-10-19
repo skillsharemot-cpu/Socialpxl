@@ -13,6 +13,11 @@ const F = C.fooldal, esc = P.esc;
 const r = p => ` data-ref="${P.idOf(p)}"`;
 const KALK = C.KALK + '?src=web';
 const TEL = 'tel:' + C.PHONE.replace(/\s/g, '');
+// WhatsApp: a content.js WHATSAPP mezője (nemzetközi formában, pl. '+36 30 123 4567'); ha nincs megadva, a PHONE
+const WA_NUM = String(C.WHATSAPP || C.PHONE).replace(/\D/g, '').replace(/^06/, '36');
+const WA_TXT = F.waText || 'Szia! Küldök egy fotót a foltról – mennyibe kerülne a tisztítás?';
+const WA = 'https://wa.me/' + WA_NUM + '?text=' + encodeURIComponent(WA_TXT);
+const WA_A = `href="${WA}" data-wa target="_blank" rel="noopener"`;
 
 const ICON = {
   sofa: '<path d="M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3"/><path d="M2 13a2 2 0 0 1 4 0v2h12v-2a2 2 0 0 1 4 0v5H2z"/><path d="M5 18v2M19 18v2"/>',
@@ -31,6 +36,7 @@ const ICON = {
   chev: '<path d="M6 9l6 6 6-6"/>',
   check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
   tag: '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/>',
+  wa: '<path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z"/><path d="M9.2 7.8c-.4 0-.9.4-.9 1.2 0 2.9 3.4 6.4 6.6 6.6.8 0 1.2-.5 1.2-.9v-.9l-1.9-.9-.9.9c-1-.4-2.4-1.8-2.8-2.8l.9-.9-.9-1.9z"/>',
   ext: '<path d="M8 16L16 8M9 8h7v7"/>',
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
   pdf: '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/>',
@@ -50,7 +56,7 @@ const CK = F.cookie || {
   more: 'Részletek',
   list: ['Szükséges: a süti-döntésed megjegyzése – ez mindig működik.',
     'Kényelmi: a választásaid és a kalkulátorba beírt adatok mentése (már gépelés közben), hogy ott folytathasd, ahol abbahagytad, és vissza tudjunk hívni.',
-    'Beépülő modulok: Google Fonts (betűtípusok), Google Apps Script (az ajánlatkérések fogadása).',
+    'Beépülő modulok: Google Fonts (betűtípusok)' + (/github\.io/.test(C.KALK) ? ', Google Apps Script (az ajánlatkérések fogadása)' : '') + '. A WhatsApp csak akkor nyílik meg, ha a WhatsApp-gombra koppintasz.',
     'Az adataidat csak az ajánlatodhoz és a foglalásodhoz használjuk, nem adjuk tovább. A döntésed az oldal alján, a „Süti-beállítások” linkkel bármikor módosíthatod.'],
   yes: 'Elfogadom', no: 'Csak a szükségesek', settings: 'Süti-beállítások',
 };
@@ -116,6 +122,8 @@ header.fx .logo,header.fx .lockup{color:var(--cm)}
 @media(max-width:960px){.ckb{bottom:calc(92px + env(safe-area-inset-bottom,0px))}}
 @media(prefers-reduced-motion:reduce){.ckb{animation:none}}
 .ckset{background:none;border:0;padding:0;color:inherit;font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+/* WhatsApp (2026-10-19): halk link a hero-ban; a segítség-kártyán és a mobil sávban gomb */
+.hwa{margin:20px 0 0;text-align:center}.hwa a{display:inline-flex;align-items:center;gap:10px;color:var(--cm);font:600 15px/1.35 var(--sans);text-decoration:none;padding:10px 18px;border-radius:999px;border:1.5px solid rgba(240,237,229,.5);transition:background .2s}.hwa a:hover{background:rgba(240,237,229,.12)}
 #mt{display:none}.bg{display:none;cursor:pointer;color:var(--cm)}
 .callc{display:none}
 @media(max-width:960px){.mn,.tl,.nr .cta{display:none}.bg{display:grid}
@@ -320,6 +328,8 @@ footer.fo{background:linear-gradient(#34452F,#1C2619);color:var(--cm);padding:44
 .mb{display:none}
 @media(max-width:960px){.mb{display:block;position:fixed;left:0;right:0;bottom:0;z-index:45;background:#fff;padding:12px 16px;box-shadow:0 -2px 14px rgba(45,60,41,.12)}
  .mb .cta{display:flex;justify-content:space-between;width:100%;padding:6px 6px 6px 22px;font-size:16px}.mb .cta .cc{width:44px;height:44px}
+ .mb{display:flex;gap:10px;align-items:center}.mb .cta{flex:1;min-width:0}
+ .mb .wa{flex:none;width:56px;height:56px;border-radius:50%;background:var(--mv);color:var(--cm);display:grid;place-items:center;box-shadow:var(--sh1)}
  body{padding-bottom:80px}body .reftog{bottom:88px}}
 `;
 
@@ -356,6 +366,7 @@ const body = T => `
     <h1${r('hero.h1')}>${esc(C.hero.h1)}</h1>
     <p class="hq"${r('fooldal.heroQ')}>${esc(F.heroQ)}</p>
     <div class="pk">${F.pick.map(([k, n, s], i) => `<a href="${KALK}" data-pick="${k}"${r('fooldal.pick.' + i)}>${ci(k, i)}<span><b>${esc(n)}</b><small>${esc(s)}</small></span><span class="go">${ic('arrowc', 28)}</span></a>`).join('')}</div>
+    <p class="hwa"><a ${WA_A}>${ic('wa', 18)}<span${r('fooldal.waHero')}>${esc(F.waHero || 'Inkább fotót küldenél? Írj WhatsAppon')}</span></a></p>
     <div class="tr">${F.trust.map(([k, b, s], i) => `<div${r('fooldal.trust.' + i)}>${ic(k, 26)}<span><b>${esc(b)}</b><small>${esc(s)}</small></span></div>`).join('')}</div>
   </div></div>
 </section>
@@ -393,7 +404,7 @@ const body = T => `
   <svg class="road" viewBox="0 0 1100 260" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="rgba(240,237,229,.13)" stroke-width="16"><path d="M-10 30H760q60 0 90 50l90 190"/><path d="M-10 70H735q40 0 62 36l84 164"/></g></svg>
   <h2 class="h-m"${r('fooldal.helpTitle')}>${esc(F.helpTitle)}</h2>
   <div class="hc-r"><p${r('fooldal.helpText')}>${esc(F.helpText)}</p>
-    <div class="hc-b"><a class="big" href="${TEL}">${C.PHONE} <small>minta</small><span>${ic('phone', 24)}</span></a><a class="sm" href="mailto:${C.MAIL}"><b${r('fooldal.helpMail')}>${esc(F.helpMail)}</b><span>${ic('mail', 18)}</span></a></div>
+    <div class="hc-b"><a class="big" href="${TEL}">${C.PHONE} <small>minta</small><span>${ic('phone', 24)}</span></a><a class="sm" ${WA_A}><b${r('fooldal.helpWa')}>${esc(F.helpWa || 'Fotó küldése WhatsAppon')}</b><span>${ic('wa', 18)}</span></a><a class="sm" href="mailto:${C.MAIL}"><b${r('fooldal.helpMail')}>${esc(F.helpMail)}</b><span>${ic('mail', 18)}</span></a></div>
   </div>
 </div></div></section>
 
@@ -418,7 +429,7 @@ const body = T => `
   </div>
   <div class="bt"><span>© 2026 Deeply – Kárpit és szőnyegtisztítás · Budapest és környéke</span><span>Javító garancia: ${C.GARANCIA}</span><span>${C.PHONE} · ${C.MAIL} (minta)</span><button type="button" class="ckset" id="ckS">${esc(CK.settings)}</button></div>
 </div></footer>
-<div class="mb"><a class="cta dk" href="${KALK}"><span${r('fooldal.mobileCta')}>${esc(F.mobileCta)}</span><span class="cc">${ic('arrow', 20)}</span></a></div>
+<div class="mb"><a class="cta dk" href="${KALK}"><span${r('fooldal.mobileCta')}>${esc(F.mobileCta)}</span><span class="cc">${ic('arrow', 20)}</span></a><a class="wa" ${WA_A} aria-label="Írj nekünk WhatsAppon">${ic('wa', 26)}</a></div>
 <div class="ckb" id="ckb" role="dialog" aria-labelledby="ckbT" hidden>
   <p class="ckb-t" id="ckbT"${r('fooldal.cookie.title')}>${esc(CK.title)}</p>
   <p${r('fooldal.cookie.text')}>${esc(CK.text)}</p>
@@ -463,8 +474,10 @@ document.getElementById('ckY').onclick=function(){ckSave(true)};document.getElem
 document.getElementById('ckS').onclick=function(){cb.hidden=false};
 document.querySelectorAll('.ac details').forEach(function(x,j){x.addEventListener('toggle',function(){if(x.open){add(V.faq,j);saveV()}})});
 var K='${C.KALK}';
+var WAN=${JSON.stringify(Object.fromEntries(F.pick.map(([k, n]) => [k, n])))};
 document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a');if(!a)return;
  var p=a.getAttribute('data-pick');if(p){V.pick=p;add(V.int,p);saveV()}
+ if(a.hasAttribute('data-wa')){var n=WAN[V.pick];a.href='https://wa.me/${WA_NUM}?text='+encodeURIComponent('Szia! '+(n?n+'tisztításról érdeklődnék. ':'')+'Küldök egy fotót a foltról – mennyibe kerülne?');return}
  if(a.href.indexOf(K)!==0)return;
  try{var u=new URL(a.href),q=u.searchParams;
   if(V.pick)q.set('pick',V.pick);if(V.int.length)q.set('int',V.int.join('.'));if(V.faq.length)q.set('faq',V.faq.join('.'));if(V.how)q.set('how',V.how);
