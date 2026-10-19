@@ -3,6 +3,8 @@
 // Szövegek: content.js → fooldal.* (hivatkozás: FOOLDAL-…); arculat: themes.js (Pantone). Ár nincs az oldalon – minden választás a kalkulátorra visz.
 // 2026-10-19: mobilon az „Így dolgozunk” lapozó jobban mutatja, hogy oldalra húzható (kilógó következő lap, nyilak, „1 / 4 · Húzd oldalra” sor,
 // egyszeri rámutató mozdulat); a kalkulátor-linkek magukkal viszik, mire kattintott a látogató (?pick=…&int=…&faq=…&how=…&from=…).
+// 2026-10-19 (2): süti-ablak a főoldalon (a döntést a kalkulátor-link ?ck=… viszi át); a fő gomb (CTA) elütő arany #D8AE47 –
+// a felhasználó kérése, a brandbook Alapok/komponensek.md szabályát („✕ palettán kívüli gomb”) ehhez frissíteni kell.
 // Fixter → Deeply színek: lila hero/fejléc → Mountain View · sárga CTA → Coconut Milk (sötéten) / Mountain View (világoson) ·
 // piros akciósáv → Fog · levendula szakasz-háttér → Coconut Milk · a 4 szolgáltatás-szín → MV / Matte Green / Weathered Teak / Fog.
 const C = require('./content');
@@ -41,6 +43,17 @@ const SC = [['var(--mv)', 'var(--cm)'], ['var(--mg)', '#fff'], ['var(--wt)', 'va
 const HOW_COL = ['var(--mg)', 'var(--wt)', 'var(--mv)', 'var(--fog)'];
 // Mobilon a lapozó fölötti súgó („1 / 4 · Húzd oldalra →”). Ha a content.js-be bekerül a fooldal.howHint, az az irányadó.
 const HOW_HINT = F.howHint || 'Húzd oldalra';
+// Süti-ablak szövegei – ugyanaz, mint a kalkulátorban. A content.js-be tett fooldal.cookie felülírja.
+const CK = F.cookie || {
+  title: 'Sütiket használunk',
+  text: 'A weboldal sütiket és hasonló technológiákat használ, hogy megjegyezze a választásaidat, és az árkalkulátorban ne vesszen el, amit beírsz. Az „Elfogadom” gombbal hozzájárulsz ezekhez és az adataid kezeléséhez.',
+  more: 'Részletek',
+  list: ['Szükséges: a süti-döntésed megjegyzése – ez mindig működik.',
+    'Kényelmi: a választásaid és a kalkulátorba beírt adatok mentése (már gépelés közben), hogy ott folytathasd, ahol abbahagytad, és vissza tudjunk hívni.',
+    'Beépülő modulok: Google Fonts (betűtípusok), Google Apps Script (az ajánlatkérések fogadása).',
+    'Az adataidat csak az ajánlatodhoz és a foglalásodhoz használjuk, nem adjuk tovább. A döntésed az oldal alján, a „Süti-beállítások” linkkel bármikor módosíthatod.'],
+  yes: 'Elfogadom', no: 'Csak a szükségesek', settings: 'Süti-beállítások',
+};
 
 /* CSERE: rajzolt helyőrző – élesítéskor valódi fotó (kivágott, háttér nélküli PNG/WebP) jön a helyére */
 const CHAIR = `<svg class="ill" viewBox="0 0 260 240" aria-hidden="true"><ellipse cx="130" cy="228" rx="110" ry="9" fill="#2D3C29" opacity=".18"/>
@@ -62,7 +75,7 @@ const screen = i => {
 const css = T => `
 html{scroll-behavior:smooth}
 body{background:var(--paper)}
-:root{--grad:linear-gradient(90deg,#34462F,#25321F);--sh1:0 1px 4px rgba(45,60,41,.08),0 0 1px rgba(45,60,41,.25);--sh2:0 4px 11px rgba(45,60,41,.16),0 5px 24px rgba(45,60,41,.12);--r-xl:calc(var(--r-lg) + 10px)}
+:root{--gold:#D8AE47;--gold-d:#C99D36;--grad:linear-gradient(90deg,#34462F,#25321F);--sh1:0 1px 4px rgba(45,60,41,.08),0 0 1px rgba(45,60,41,.25);--sh2:0 4px 11px rgba(45,60,41,.16),0 5px 24px rgba(45,60,41,.12);--r-xl:calc(var(--r-lg) + 10px)}
 .h-m{font:var(--w-head-headline,400) 40px/1.1 var(--f-head);letter-spacing:-.02em;margin:0}
 @media(max-width:48rem){.h-m{font-size:32px}}
 .ctr{text-align:center}
@@ -86,6 +99,23 @@ header.fx .logo,header.fx .lockup{color:var(--cm)}
 .cta{display:inline-flex;align-items:center;gap:12px;background:var(--cm);color:var(--mv);border-radius:999px;padding:5px 5px 5px 20px;text-decoration:none;font:600 14px/1 var(--sans);box-shadow:var(--sh2)}
 .cta .cc{width:34px;height:34px;border-radius:50%;background:var(--mv);color:var(--cm);display:grid;place-items:center}
 .cta.dk{background:var(--mv);color:var(--cm)}.cta.dk .cc{background:var(--cm);color:var(--mv)}
+/* Fő gomb (CTA): elütő arany, hogy ne olvadjon bele a zöld–krém környezetbe (2026-10-19) */
+.cta,.cta.dk{background:var(--gold);color:var(--mv)}.cta .cc,.cta.dk .cc{background:var(--mv);color:var(--gold)}.cta:hover{background:var(--gold-d)}
+/* Süti-ablak (ugyanaz, mint a kalkulátorban): kicsi, nem takarja el az oldalt */
+.ckb{position:fixed;z-index:60;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));max-width:420px;background:#fff;color:var(--mv);border-radius:18px;box-shadow:0 10px 40px rgba(29,38,26,.28),0 0 0 1px rgba(45,60,41,.08);padding:18px 18px 16px;font:400 14px/1.55 var(--sans);animation:ckIn .35s ease}
+.ckb[hidden]{display:none}
+.ckb-t{font:400 22px/1.2 var(--f-head);letter-spacing:-.015em;margin:0 0 6px}
+.ckb p{margin:0}.ckb details{margin-top:8px;color:var(--muted);font-size:13px}
+.ckb summary{cursor:pointer;font-weight:600;color:var(--mv);text-decoration:underline;text-underline-offset:3px;list-style:none;display:inline}.ckb summary::-webkit-details-marker{display:none}
+.ckb ul{margin:8px 0 0;padding-left:1.1em}.ckb li+li{margin-top:4px}
+.ckb-a{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.ckb-a button{flex:1 1 140px;min-height:44px;border-radius:999px;font:600 14px/1.2 var(--sans);cursor:pointer;padding:10px 16px}
+.ckb .y{background:var(--gold);color:var(--mv);border:0;box-shadow:0 6px 18px rgba(216,174,71,.45)}.ckb .n{background:transparent;color:var(--mv);border:1.5px solid var(--mv)}
+@keyframes ckIn{from{transform:translateY(16px);opacity:0}}
+@media(min-width:961px){.ckb{left:24px;right:auto;bottom:24px}}
+@media(max-width:960px){.ckb{bottom:calc(92px + env(safe-area-inset-bottom,0px))}}
+@media(prefers-reduced-motion:reduce){.ckb{animation:none}}
+.ckset{background:none;border:0;padding:0;color:inherit;font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 #mt{display:none}.bg{display:none;cursor:pointer;color:var(--cm)}
 .callc{display:none}
 @media(max-width:960px){.mn,.tl,.nr .cta{display:none}.bg{display:grid}
@@ -290,7 +320,7 @@ footer.fo{background:linear-gradient(#34452F,#1C2619);color:var(--cm);padding:44
 .mb{display:none}
 @media(max-width:960px){.mb{display:block;position:fixed;left:0;right:0;bottom:0;z-index:45;background:#fff;padding:12px 16px;box-shadow:0 -2px 14px rgba(45,60,41,.12)}
  .mb .cta{display:flex;justify-content:space-between;width:100%;padding:6px 6px 6px 22px;font-size:16px}.mb .cta .cc{width:44px;height:44px}
- body{padding-bottom:80px}.reftog{bottom:88px}}
+ body{padding-bottom:80px}body .reftog{bottom:88px}}
 `;
 
 const parts = a => `${esc(a[0])}<span class="ul">${esc(a[1])}</span>${esc(a[2])}`;
@@ -386,9 +416,15 @@ const body = T => `
     ${F.footCols.map(([h, l], i) => `<div${r('fooldal.footCols.' + i)}><h3>${esc(h)}</h3><ul>${l.map(x => `<li><a href="${x === 'Árkalkulátor' ? KALK : '#'}">${esc(x)}</a></li>`).join('')}</ul></div>`).join('')}
     <div>${T.logo(T.id === 'A_kefe' ? 170 : 190)}<h3${r('fooldal.footPay')}>${esc(F.footPay[0])}</h3><div class="pay">${F.footPay[1].map(x => `<span>${esc(x)}</span>`).join('')}</div></div>
   </div>
-  <div class="bt"><span>© 2026 Deeply – Kárpit és szőnyegtisztítás · Budapest és környéke</span><span>Javító garancia: ${C.GARANCIA}</span><span>${C.PHONE} · ${C.MAIL} (minta)</span></div>
+  <div class="bt"><span>© 2026 Deeply – Kárpit és szőnyegtisztítás · Budapest és környéke</span><span>Javító garancia: ${C.GARANCIA}</span><span>${C.PHONE} · ${C.MAIL} (minta)</span><button type="button" class="ckset" id="ckS">${esc(CK.settings)}</button></div>
 </div></footer>
 <div class="mb"><a class="cta dk" href="${KALK}"><span${r('fooldal.mobileCta')}>${esc(F.mobileCta)}</span><span class="cc">${ic('arrow', 20)}</span></a></div>
+<div class="ckb" id="ckb" role="dialog" aria-labelledby="ckbT" hidden>
+  <p class="ckb-t" id="ckbT"${r('fooldal.cookie.title')}>${esc(CK.title)}</p>
+  <p${r('fooldal.cookie.text')}>${esc(CK.text)}</p>
+  <details><summary>${esc(CK.more)}</summary><ul>${CK.list.map(x => `<li>${esc(x)}</li>`).join('')}</ul></details>
+  <div class="ckb-a"><button type="button" class="y" id="ckY">${esc(CK.yes)}</button><button type="button" class="n" id="ckN">${esc(CK.no)}</button></div>
+</div>
 <script>
 (function(){
 var t=document.getElementById('hw'),st=t.querySelectorAll('.st'),d=document.querySelectorAll('#hwd i'),pv=document.querySelector('.hw-a.pv'),nx=document.querySelector('.hw-a.nx'),cur=0;
@@ -414,13 +450,25 @@ var rv=document.getElementById('rv'),rc=rv.querySelector('.rv');
 rv.scrollLeft=rc.offsetWidth*.55;
 document.querySelectorAll('.rv-c button').forEach(function(b){b.onclick=function(){rv.scrollBy({left:(+b.dataset.d)*(rc.offsetWidth+24),behavior:'smooth'})}});
 document.querySelectorAll('.mn a').forEach(function(a){a.addEventListener('click',function(){document.getElementById('mt').checked=false})});
-document.querySelectorAll('.ac details').forEach(function(x,j){x.addEventListener('toggle',function(){if(x.open)add(V.faq,j)})});
+/* Süti-ablak – ugyanaz, mint a kalkulátorban (deeply_ck_v1, verzió 2026-10-19). Elfogadás után a kattintás-emlékezet a böngészőben
+   marad (deeply_web_v1); a kalkulátor-link ?ck=<elfogadás ideje>-<kattintás ideje> paraméterrel viszi át a döntést, mert a kalkulátor
+   másik domainen fut. „Csak a szükségesek” → ck=0, és semmit nem jegyzünk meg. */
+var CKV='2026-10-19',CKK='deeply_ck_v1',WK='deeply_web_v1',ck=null,cb=document.getElementById('ckb');
+try{ck=JSON.parse(localStorage.getItem(CKK)||'null');if(ck&&ck.v!==CKV)ck=null}catch(e){}
+function saveV(){if(ck&&ck.ok)try{localStorage.setItem(WK,JSON.stringify(V))}catch(e){}}
+function ckSave(ok){ck={ok:ok,at:Date.now(),v:CKV};try{localStorage.setItem(CKK,JSON.stringify(ck));if(ok)saveV();else localStorage.removeItem(WK)}catch(e){}cb.hidden=true}
+if(ck&&ck.ok){try{var o=JSON.parse(localStorage.getItem(WK)||'null');if(o){V.pick=o.pick||'';V.int=o.int||[];V.faq=o.faq||[];V.how=Math.max(V.how,o.how||0)}}catch(e){}}
+if(!ck)setTimeout(function(){cb.hidden=false},700);
+document.getElementById('ckY').onclick=function(){ckSave(true)};document.getElementById('ckN').onclick=function(){ckSave(false)};
+document.getElementById('ckS').onclick=function(){cb.hidden=false};
+document.querySelectorAll('.ac details').forEach(function(x,j){x.addEventListener('toggle',function(){if(x.open){add(V.faq,j);saveV()}})});
 var K='${C.KALK}';
 document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a');if(!a)return;
- var p=a.getAttribute('data-pick');if(p){V.pick=p;add(V.int,p)}
+ var p=a.getAttribute('data-pick');if(p){V.pick=p;add(V.int,p);saveV()}
  if(a.href.indexOf(K)!==0)return;
  try{var u=new URL(a.href),q=u.searchParams;
   if(V.pick)q.set('pick',V.pick);if(V.int.length)q.set('int',V.int.join('.'));if(V.faq.length)q.set('faq',V.faq.join('.'));if(V.how)q.set('how',V.how);
+  if(ck)q.set('ck',ck.ok?ck.at.toString(36)+'-'+Date.now().toString(36):'0');
   q.set('from',a.closest('.pk')?'hero':a.closest('.sg')?'svc':a.closest('.mb')?'mobil':a.closest('header')?'menu':a.closest('footer')?'lablec':'egyeb');
   a.href=u.toString()}catch(err){}},true);
 })();

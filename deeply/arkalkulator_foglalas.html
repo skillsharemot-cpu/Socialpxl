@@ -13,7 +13,10 @@
 <!--
   Deeply – vevői árkalkulátor + foglalás (2026-10-19-i változat)
   • Arculat: a főoldallal közös Pantone-paletta, Libertinus Sans / Inter, a főoldal fejléce és gombjai (08_Brand_OS/A_kefe/Alapok).
-  • Az első lépés a bemutatkozás: adatkezelés + sütik elfogadása, utána név, e-mail, telefon (mind kötelező).
+  • Süti-ablak: a főoldalon (vagy ha valaki közvetlenül, pl. QR-kódról érkezik, itt) – a döntést a főoldal ?ck=… paraméterrel adja át.
+  • Az első lépés a bemutatkozás: udvariasan kéri a nevet, az e-mailt és a telefonszámot (mind kötelező).
+  • Az irányár alatt „Húzd jobbra” csúszka: elfogadja az irányárat és a következő lépésre visz (a végén elküldi a foglalást).
+  • A fő gomb (CTA) elütő arany (#D8AE47) – a felhasználó kérése 2026-10-19; a brandbook komponensek.md-jét ehhez frissíteni kell.
   • Gépelés közben ment: a böngészőbe (localStorage) és – ha az Apps Script már ismeri a 'lead' műveletet – a Google-táblázat
     „Érdeklődők” lapjára. Mentés csak az elfogadás után indul.
   • Emlékszik, mire kattintott a látogató: a főoldal linkje hozza (?pick=…&int=…&faq=…&how=…&from=…), a kalkulátor pedig
@@ -21,7 +24,7 @@
   • Az árazás, a foglalás formátuma (tc_bookings_v1) és az admin-beállítások (tc_pricing_v1) változatlanok.
 -->
 <style>
-:root{--mv:#2D3C29;--cm:#F0EDE5;--mg:#7E8772;--fog:#D6CBB9;--wt:#A0907F;--paper:#FAF8F3;--muted:#4E5948;--line:#DDD5C6;--err:#A33A1C;
+:root{--mv:#2D3C29;--cm:#F0EDE5;--gold:#D8AE47;--gold-d:#C99D36;--mg:#7E8772;--fog:#D6CBB9;--wt:#A0907F;--paper:#FAF8F3;--muted:#4E5948;--line:#DDD5C6;--err:#A33A1C;
   --r-lg:14px;--r-sm:8px;--r-xl:24px;
   --f-head:"Libertinus Sans",Georgia,serif;--sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--f-accent:"Architects Daughter","Segoe Print",cursive;
   --grad:linear-gradient(90deg,#34462F,#25321F);
@@ -116,29 +119,33 @@ textarea.inp{min-height:96px;resize:vertical}
 .row2{display:grid;grid-template-columns:140px 1fr;gap:12px}
 @media(max-width:480px){.row2{grid-template-columns:1fr}}
 
-/* ── Hozzájárulás (adatkezelés + sütik + beépülő modulok) */
-.gdpr{background:var(--cm);border-radius:18px;padding:20px}
-.gdpr h3{font:400 24px/1.2 var(--f-head);letter-spacing:-.015em;display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.gdpr p{font-size:15px;line-height:1.6}
-.gdpr ul{margin:10px 0 0;padding-left:1.1em;font-size:14px;line-height:1.55;color:var(--muted)}
-.gdpr ul li+li{margin-top:5px}
-.gdpr details{margin-top:12px}
-.gdpr summary{cursor:pointer;font:600 14px/1.4 var(--sans);text-decoration:underline;text-underline-offset:4px;list-style:none}
-.gdpr summary::-webkit-details-marker{display:none}
-.gdpr .acts{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:18px}
-.gdpr.ok{display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:14px}
-.gdpr.ok .ck{width:26px;height:26px;border-radius:50%;background:var(--mv);color:var(--cm);display:grid;place-items:center;flex:none}
-.nope{margin-top:14px}
+/* ── Süti-ablak (ugyanaz, mint a főoldalon): kicsi, nem takarja el az oldalt */
+.ckb{position:fixed;z-index:60;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));max-width:420px;background:#fff;color:var(--mv);border-radius:18px;box-shadow:0 10px 40px rgba(29,38,26,.28),0 0 0 1px rgba(45,60,41,.08);padding:18px 18px 16px;font:400 14px/1.55 var(--sans);animation:ckIn .35s ease}
+.ckb[hidden]{display:none}
+body.has-mb .ckb{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+.ckb-t{display:flex;align-items:center;gap:8px;font:400 22px/1.2 var(--f-head);letter-spacing:-.015em;margin:0 0 6px}
+.ckb p{margin:0}
+.ckb details{margin-top:8px;color:var(--muted);font-size:13px}
+.ckb summary{cursor:pointer;font-weight:600;color:var(--mv);text-decoration:underline;text-underline-offset:3px;list-style:none;display:inline}
+.ckb summary::-webkit-details-marker{display:none}
+.ckb ul{margin:8px 0 0;padding-left:1.1em}.ckb li+li{margin-top:4px}
+.ckb-a{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.ckb-a button{flex:1 1 140px;justify-content:center}
+.ckb-a .btn2{justify-content:center;min-height:44px}
+@keyframes ckIn{from{transform:translateY(16px);opacity:0}}
+@media(min-width:641px){.ckb{left:24px;right:auto;bottom:24px}}
 
 /* ── Gombok – a főoldal pirula-CTA-ja */
 .nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:28px;flex-wrap:wrap}
 .nav>span:empty{display:none}
 .nav>span:empty+.cta{margin-left:auto}
-.cta{display:inline-flex;align-items:center;justify-content:space-between;gap:16px;background:var(--mv);color:var(--cm);border:0;border-radius:999px;padding:6px 6px 6px 22px;min-height:52px;font:600 15px/1.2 var(--sans);letter-spacing:.015em;text-decoration:none;cursor:pointer;box-shadow:var(--sh2);transition:background .15s,opacity .15s}
-.cta .cc{width:40px;height:40px;border-radius:50%;background:var(--cm);color:var(--mv);display:grid;place-items:center;flex:none}
-.cta:hover{background:#3a4c35}
+.cta{display:inline-flex;align-items:center;justify-content:space-between;gap:16px;background:var(--gold);color:var(--mv);border:0;border-radius:999px;padding:6px 6px 6px 22px;min-height:52px;font:600 15px/1.2 var(--sans);letter-spacing:.015em;text-decoration:none;cursor:pointer;box-shadow:var(--sh2);transition:background .15s,opacity .15s}
+.cta .cc{width:40px;height:40px;border-radius:50%;background:var(--mv);color:var(--gold);display:grid;place-items:center;flex:none}
+.cta:not(.lt){box-shadow:0 6px 18px rgba(216,174,71,.45),0 2px 4px rgba(45,60,41,.15)}
+.cta:hover{background:var(--gold-d)}
 .cta[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none}
 .cta.lt{background:var(--cm);color:var(--mv);box-shadow:none}.cta.lt .cc{background:var(--mv);color:var(--cm)}
+.cta.sm{min-height:44px;padding:5px 5px 5px 18px;font-size:14px}.cta.sm .cc{width:34px;height:34px}
 .cta.lt:hover{background:#e6e1d6}
 .back{background:none;border:0;padding:10px 0;font:600 15px/1.2 var(--sans);color:var(--mv);text-decoration:underline;text-underline-offset:4px;cursor:pointer}
 .btn2{display:inline-flex;align-items:center;gap:8px;background:transparent;border:1.5px solid var(--mv);color:var(--mv);border-radius:999px;padding:9px 16px;font:600 14px/1.2 var(--sans);cursor:pointer;text-decoration:none;white-space:nowrap}
@@ -243,7 +250,29 @@ body.is-done .sum{display:none}body.is-done .layout{grid-template-columns:minmax
  body.has-mb{padding-bottom:84px}}
 .mb a{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--mv);color:var(--cm);border-radius:999px;padding:6px 6px 6px 22px;text-decoration:none;font:600 15px/1.2 var(--sans)}
 .mb a b{font:400 24px/1 var(--f-head);margin-left:6px}
-.mb .cc{width:44px;height:44px;border-radius:50%;background:var(--cm);color:var(--mv);display:grid;place-items:center;transform:rotate(90deg)}
+.mb .cc{width:44px;height:44px;border-radius:50%;background:var(--gold);color:var(--mv);display:grid;place-items:center;transform:rotate(90deg);box-shadow:0 0 0 0 rgba(216,174,71,.6);animation:glow 2.4s ease-in-out infinite}
+.mb{transition:transform .3s ease}.mb.away{transform:translateY(120%)}
+/* ── „Húzd jobbra” csúszka az irányár alatt: görgetéskor / a nyílra koppintva jelenik meg, finom csillogással */
+.acc{max-height:0;opacity:0;overflow:hidden;transition:max-height .5s ease,opacity .4s ease,margin-top .4s ease}
+.acc.show{max-height:220px;opacity:1;margin-top:18px}
+.sw{position:relative;height:60px;border-radius:999px;background:var(--mv);box-shadow:inset 0 2px 8px rgba(0,0,0,.28);overflow:hidden;touch-action:pan-y;-webkit-user-select:none;user-select:none}
+.sw-fill{position:absolute;left:0;top:0;bottom:0;width:60px;border-radius:999px;background:linear-gradient(90deg,rgba(216,174,71,.12),rgba(216,174,71,.55))}
+.sw-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:0 14px 0 64px;font:600 14px/1.2 var(--sans);letter-spacing:.02em;white-space:nowrap;
+  background:linear-gradient(100deg,rgba(240,237,229,.5) 0 38%,#FFF3C9 48%,#fff 50%,#FFF3C9 52%,rgba(240,237,229,.5) 62% 100%);background-size:260% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:shine 2.8s linear infinite}
+.sw-knob{position:absolute;left:4px;top:4px;width:52px;height:52px;border-radius:50%;border:0;padding:0;background:var(--gold);color:var(--mv);display:grid;place-items:center;cursor:grab;touch-action:none;animation:glow 2.2s ease-in-out infinite;z-index:2}
+.sw.drag .sw-knob{cursor:grabbing;animation:none}
+.sw.back .sw-knob{transition:transform .4s cubic-bezier(.3,1.5,.5,1)}.sw.back .sw-fill{transition:width .4s cubic-bezier(.3,1.5,.5,1)}
+.sw.hint .sw-knob{animation:nudge .7s ease}
+.sw.ok{background:var(--gold)}.sw.ok .sw-fill{opacity:0}
+.sw.ok .sw-label{background:none;-webkit-text-fill-color:var(--mv);color:var(--mv);animation:none;padding:0 64px 0 14px}
+.acc .cap{font-size:13px;color:var(--muted);text-align:center;margin:8px 0 0}
+.acc .cap.err{color:var(--err);font-weight:500}
+.acc.pulse .sw{animation:swPulse 1.1s ease 2}
+@keyframes shine{from{background-position:100% 0}to{background-position:0 0}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(216,174,71,.55),0 3px 8px rgba(0,0,0,.25)}50%{box-shadow:0 0 0 9px rgba(216,174,71,0),0 0 22px 4px rgba(255,214,110,.55)}}
+@keyframes nudge{30%{transform:translateX(26px)}60%{transform:translateX(-4px)}}
+@keyframes swPulse{50%{box-shadow:inset 0 2px 8px rgba(0,0,0,.28),0 0 0 6px rgba(216,174,71,.35)}}
 
 /* ── Kész */
 .done-h{text-align:center;padding:6px 0 4px}
@@ -263,7 +292,7 @@ footer.fo .wrap{display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-
 footer.fo .lk{display:flex;flex-wrap:wrap;gap:8px 20px}
 footer.fo a,footer.fo button{color:#D9D4C7;background:none;border:0;padding:0;font:400 13px/1.5 var(--sans);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 footer.fo .logo{width:110px;color:var(--cm)}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.save.typing i{animation:none}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.save.typing i,.sw-label,.sw-knob,.mb .cc,.ckb{animation:none}}
 </style>
 </head>
 <body>
@@ -327,6 +356,7 @@ footer.fo .logo{width:110px;color:var(--cm)}
     <div id="cartBox"></div>
     <div id="totals"></div>
     <p class="fine">Az árak tájékoztató jellegűek; a pontos ajánlatot a fotók alapján írásban küldjük. Fizetés a munka után, a helyszínen – készpénzzel vagy utalással.</p>
+    <div class="acc" id="acc"></div>
   </aside>
 </div>
 
@@ -335,8 +365,15 @@ footer.fo .logo{width:110px;color:var(--cm)}
 <footer class="fo"><div class="wrap">
   <svg class="logo" viewBox="0 0 4050 1050" role="img" aria-label="Deeply"><use href="#wm"/></svg>
   <span id="bizFoot"></span>
-  <span class="lk"><button type="button" id="forgetBtn">Adataim törlése erről az eszközről</button><a href="arkalkulator_admin.html">Admin</a></span>
+  <span class="lk"><button type="button" id="ckSet">Süti-beállítások</button><button type="button" id="forgetBtn">Adataim törlése erről az eszközről</button><a href="arkalkulator_admin.html">Admin</a></span>
 </div></footer>
+
+<div class="ckb" id="ckb" role="dialog" aria-labelledby="ckbT" hidden>
+  <p class="ckb-t" id="ckbT">Sütiket használunk</p>
+  <p>A weboldal sütiket és hasonló technológiákat használ, hogy megjegyezze a választásaidat, és az árkalkulátorban ne vesszen el, amit beírsz. Az „Elfogadom” gombbal hozzájárulsz ezekhez és az adataid kezeléséhez.</p>
+  <details><summary>Részletek</summary><ul id="ckList"></ul></details>
+  <div class="ckb-a"><button type="button" class="cta sm" id="ckYes"><span>Elfogadom</span></button><button type="button" class="btn2" id="ckNo">Csak a szükségesek</button></div>
+</div>
 
 <script>
 const KEY='tc_pricing_v1', BKEY='tc_bookings_v1';
@@ -483,7 +520,7 @@ let consent=null;   // {at, v} – az adatkezelés + sütik elfogadása
 let leadId='';      // a félbehagyott foglalás azonosítója (Érdeklődők lap)
 let profile={picks:[],faq:[],svc:{},booked:[],visits:0};
 let flash='';       // egyszeri üzenet a következő nézet tetején (pl. „Hozzáadtuk…”)
-let welcomeBack=false, showNope=false;
+let welcomeBack=false;
 const touchedF={};  // mely mezőket hagyta már el a látogató (csak utána mutatunk hibát)
 
 const viewEl=document.getElementById('view');
@@ -569,7 +606,7 @@ function restore(){
 }
 function forget(){
   if(!confirm('Biztosan törlöd az ezen az eszközön tárolt adataidat (név, elérhetőség, választott tételek)?'))return;
-  try{localStorage.removeItem(SKEY);}catch(e){}
+  try{localStorage.removeItem(SKEY);localStorage.removeItem(CKKEY);}catch(e){}
   alert('Kész – erről az eszközről töröltük az adataidat.\nHa a nálunk rögzített adatok törlését is kéred, írj nekünk: '+(cfg.settings.notifyEmail||''));
   location.href=location.pathname+(SRC!=='kozvetlen'?'?src='+SRC:'');
 }
@@ -613,9 +650,12 @@ function leadData(){const o=computeOrder();
     property:propLabel(property),items:cart.map(itemLabel),total:cart.length?o.applied:0,dates:[...dates].sort(),
     photos:photos.length,noPhoto,interest:interestText()};}
 function touch(){
+  const cap=document.getElementById('accCap');   // a csúszka hibaüzenete eltűnik, ha a látogató javít
+  if(cap&&cap.classList.contains('err')){const a=accInfo();if(a){cap.textContent=a.cap;cap.classList.remove('err');}}
   if(!consent)return;
   store();
-  if(!cloudOn()||leadOff||!hasContact()){setSave('local');return;}
+  if(!hasContact()){setSave('');return;}
+  if(!cloudOn()||leadOff){setSave('local');return;}
   leadDirty=true;setSave('typing');
   clearTimeout(leadTimer);leadTimer=setTimeout(flushLead,1200);
 }
@@ -638,8 +678,10 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 let saveState='';
 function setSave(s){saveState=s;document.querySelectorAll('[data-save]').forEach(paintSave);}
 function paintSave(el){
-  const t={local:'Mentve ezen az eszközön',typing:'Mentés…',cloud:'Mentve – akkor sem vész el, ha most abbahagyod'}[saveState]||'Amit beírsz, automatikusan mentjük';
-  el.className='save '+saveState;el.innerHTML='<i></i><span>'+t+'</span>';
+  let t,st=saveState;
+  if(!consent){st='';t=ckDecided?'Az adataidat a foglalás elküldésekor kapjuk meg.':'Ha elfogadod a sütiket, gépelés közben mentjük, amit beírsz.';}
+  else t={local:'Mentve ezen az eszközön',typing:'Mentés…',cloud:'Mentve – akkor sem vész el, ha most abbahagyod'}[st]||'Amit beírsz, automatikusan mentjük';
+  el.className='save '+st;el.innerHTML='<i></i><span>'+t+'</span>';
 }
 
 /* ═══════════ ÖSSZESÍTŐ ═══════════ */
@@ -666,7 +708,65 @@ function renderSummary(){
   box.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{cart.splice(+b.dataset.rm,1);touch();renderSummary();if(view==='build')render();});
   document.getElementById('mbTotal').textContent=fmt(o.applied);
   const show=view!=='done';mb.classList.toggle('show',show);document.body.classList.toggle('has-mb',show);
+  renderAcc();
 }
+
+/* ═══════════ „HÚZD JOBBRA” – az irányár elfogadása ═══════════
+   Akkor jelenik meg, ha a látogató legörget az irányárig, vagy a ragadós sáv nyilára koppint.
+   Jobbra húzva elfogadja az irányárat, és a következő lépésre visz: tételek → időpont → cím → foglalás elküldése.
+   Billentyűzettel: a gombra Enter/Szóköz. Egérrel/ujjal csak a húzás számít (véletlen koppintás nem fogad el). */
+let accShown=false,accBusy=false,sumVisible=false;
+function accInfo(){
+  if(!cart.length||['build','calendar','form'].indexOf(view)<0)return null;
+  if(view==='build')return {cap:'Elfogadod az irányárat, és jön az időpont.',aria:'Elfogadom az irányárat, tovább az időponthoz',
+    run:()=>{go('calendar');}};
+  if(view==='calendar')return {cap:'Elfogadod az irányárat, és megadod a címet.',aria:'Elfogadom az irányárat, tovább a címhez',
+    run:()=>{if(!dates.size)return 'Előbb jelölj be legalább egy napot a naptárban.';go('form');}};
+  return {cap:'Elfogadod az irányárat, és elküldjük a foglalást.',aria:'Elfogadom az irányárat, és elküldöm a foglalást',
+    run:()=>{submit();if(view!=='done')return 'Valami még hiányzik – nézd át a fenti mezőket.';}};
+}
+function renderAcc(msg){
+  const el=document.getElementById('acc');const a=accInfo();
+  if(!a){el.innerHTML='';el.classList.remove('show');return;}
+  if(sumVisible)accShown=true;
+  el.innerHTML='<div class="sw" id="sw"><span class="sw-fill"></span><span class="sw-label">Húzd jobbra az elfogadáshoz</span>'
+    +'<button type="button" class="sw-knob" aria-label="'+esc(a.aria)+'">'+ic('arrow',22)+'</button></div>'
+    +'<p class="cap'+(msg?' err':'')+'" id="accCap">'+esc(msg||a.cap)+'</p>';
+  el.classList.toggle('show',accShown);
+  bindSlide();
+}
+function revealAcc(pulse){
+  const el=document.getElementById('acc');if(!el||!accInfo())return;
+  accShown=true;el.classList.add('show');
+  if(pulse){el.classList.remove('pulse');void el.offsetWidth;el.classList.add('pulse');}
+}
+function bindSlide(){
+  const sw=document.getElementById('sw');if(!sw)return;
+  const knob=sw.querySelector('.sw-knob'),fill=sw.querySelector('.sw-fill'),lab=sw.querySelector('.sw-label');
+  let x0=0,dx=0,max=0,drag=false;
+  const set=x=>{knob.style.transform='translateX('+x+'px)';fill.style.width=(x+60)+'px';lab.style.opacity=String(Math.max(0,1-x/(max*.6)));};
+  knob.addEventListener('pointerdown',e=>{if(accBusy)return;drag=true;dx=0;max=sw.clientWidth-60;x0=e.clientX;sw.classList.add('drag');sw.classList.remove('back','hint');
+    try{knob.setPointerCapture(e.pointerId);}catch(err){}e.preventDefault();});
+  knob.addEventListener('pointermove',e=>{if(!drag)return;dx=Math.max(0,Math.min(max,e.clientX-x0));set(dx);});
+  const end=()=>{if(!drag)return;drag=false;sw.classList.remove('drag');
+    if(dx>=max*.82){set(max);accept();}
+    else{sw.classList.add('back');set(0);lab.style.opacity='';if(dx<8){sw.classList.add('hint');setTimeout(()=>sw.classList.remove('hint'),750);}}};
+  knob.addEventListener('pointerup',end);knob.addEventListener('pointercancel',end);
+  knob.addEventListener('click',e=>{if(e.detail===0&&!accBusy){max=sw.clientWidth-60;set(max);accept();}});   // billentyűzet
+  function accept(){
+    accBusy=true;sw.classList.add('ok');lab.textContent='Elfogadva';lab.style.opacity='1';knob.innerHTML=ic('check',22);
+    setTimeout(()=>{accBusy=false;const a=accInfo();const msg=a?a.run():'';
+      if(typeof msg==='string'&&msg){renderAcc(msg);revealAcc(false);}},420);
+  }
+}
+(function(){
+  const sum=document.getElementById('summaryCard'),mb=document.getElementById('mbar');
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(es=>es.forEach(e=>{sumVisible=e.isIntersecting;mb.classList.toggle('away',sumVisible);if(sumVisible)revealAcc(false);}),{threshold:.3}).observe(sum);
+  }else accShown=true;
+  mb.querySelector('a').addEventListener('click',e=>{e.preventDefault();revealAcc(true);
+    requestAnimationFrame(()=>{const a=document.getElementById('acc');(a&&a.innerHTML?a:sum).scrollIntoView({behavior:'smooth',block:'center'});});});
+})();
 
 /* ═══════════ LÉPÉSJELZŐ ═══════════ */
 function renderSteps(){
@@ -749,29 +849,7 @@ function renderContact(){
   if(mp)h+='<div class="pill">'+ci(PICKS[mp].icon,PICKS[mp].col,16)+'<span>'+esc(PICKS[mp].name)+' – ezzel kezdünk majd</span></div>';
   h+='<h2 class="q">Szia! Kezdjük egy rövid bemutatkozással.</h2>';
   h+='<p class="qs">Kérlek, add meg a neved és az elérhetőségeidet – így tudjuk elküldeni az írásos ajánlatot, és ha kérdésünk van, gyorsan elérünk. Köszönjük.</p>';
-  const mail=esc(cfg.settings.notifyEmail||'');
-  const details='<details><summary>Mit jelent ez pontosan?</summary><ul>'
-    +'<li><b>Mit mentünk:</b> a neved, e-mail-címed, telefonszámod, a címed és a kalkulátorban választott tételeket.</li>'
-    +'<li><b>Mikor:</b> már gépelés közben – így egy félbemaradt foglalás sem vész el: te ott folytathatod, ahol abbahagytad, mi pedig vissza tudunk hívni.</li>'
-    +'<li><b>Mire használjuk:</b> csak az ajánlatod és a foglalásod intézésére. Nem adjuk tovább, hírlevelet nem küldünk.</li>'
-    +'<li><b>Hol tároljuk:</b> a böngésződben (helyi tároló, süti) és a '+esc(BIZ)+' Google Drive-alapú nyilvántartásában.</li>'
-    +'<li><b>Beépülő modulok:</b> Google Fonts (betűtípusok) és Google Apps Script (az adatok fogadása).</li>'
-    +'<li><b>Törlés:</b> bármikor kérheted e-mailben ('+mail+'), erről az eszközről pedig az oldal alján egy gombbal magad is törölheted.</li></ul></details>';
-  if(!consent){
-    h+='<div class="gdpr" role="region" aria-label="Adatkezelés és sütik"><h3>'+ic('shield',22)+'Mielőtt kezdünk</h3>'
-      +'<p>A kalkulátor sütiket és beépülő modulokat használ, és <b>már gépelés közben elmenti</b>, amit beírsz. Az adataidat csak az ajánlatodhoz és a foglalásodhoz használjuk.</p>'
-      +details
-      +'<div class="acts"><button type="button" class="cta" id="acceptBtn"><span>Elfogadom, kezdjük</span><span class="cc">'+ic('check',18)+'</span></button>'
-      +'<button type="button" class="back" id="nopeBtn">Inkább nem</button></div>'
-      +(showNope?'<div class="note nope">'+ic('info',18)+'<span>Semmi gond. Ebben az esetben nem mentünk semmit – hívj minket, vagy írj e-mailt ('+mail+'), és úgy egyeztetünk. Ha meggondolod magad, itt bármikor elfogadhatod.</span></div>':'')
-      +'</div>';
-    viewEl.innerHTML=h;bindTop();
-    document.getElementById('acceptBtn').onclick=acceptConsent;
-    document.getElementById('nopeBtn').onclick=()=>{showNope=true;render();};
-    return;
-  }
-  h+='<div class="gdpr ok"><span class="ck">'+ic('check',16)+'</span><span>Elfogadtad az adatkezelést és a sütiket – köszönjük.</span></div>';
-  h+='<div style="margin-top:22px">'
+  h+='<div style="margin-top:4px">'
     +fieldHtml('name','Hogyan szólíthatunk?','type="text" autocomplete="name" autocapitalize="words" enterkeyhint="next"','pl. Kovács Anna')
     +fieldHtml('email','Az e-mail-címed','type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" enterkeyhint="next"','pl. anna@email.hu')
     +fieldHtml('phone','A telefonszámod','type="tel" autocomplete="tel" inputmode="tel" enterkeyhint="done"','pl. +36 30 123 4567')
@@ -789,14 +867,47 @@ function renderContact(){
     flushLead();go('property');
   };
 }
-function acceptConsent(){
-  consent={at:Date.now(),v:CONSENT_V};
+/* ═══════════ SÜTI-ABLAK / HOZZÁJÁRULÁS (3C) ═══════════
+   A döntés a főoldalon születik (ugyanez az ablak), és a kalkulátor-link ?ck=<elfogadás ideje>-<kattintás ideje>
+   paraméterrel hozza át (más domain, ezért nem látja a főoldal tárolóját). „ck=0” = csak a szükségesek.
+   A paraméter csak 3 órán belül érvényes, így egy továbbküldött régi link nem hoz magával hozzájárulást.
+   Ha nincs döntés (pl. QR-kódról jött), itt jelenik meg ugyanez az ablak. Gépelés közbeni mentés csak elfogadás után. */
+const CKKEY='deeply_ck_v1';
+function readCk(){try{const c=JSON.parse(localStorage.getItem(CKKEY)||'null');if(c&&c.v===CONSENT_V)return c;}catch(e){}return null;}
+function writeCk(ok,at){try{localStorage.setItem(CKKEY,JSON.stringify({ok:ok,at:at||Date.now(),v:CONSENT_V}));}catch(e){}}
+const URLCK=(function(){try{const v=(new URLSearchParams(location.search).get('ck')||'').toLowerCase();
+  if(v==='0')return {ok:false};
+  const m=/^([0-9a-z]{6,12})-([0-9a-z]{6,12})$/.exec(v);
+  if(m){const at=parseInt(m[1],36),now=parseInt(m[2],36);if(at&&now&&Math.abs(Date.now()-now)<3*3600e3&&at<=now+6e4)return {ok:true,at:at};}
+}catch(e){}return null;})();
+let ckDecided=false;
+function acceptConsent(at){
+  consent={at:at||Date.now(),v:CONSENT_V};ckDecided=true;
+  writeCk(true,consent.at);
   if(!leadId)leadId=newId();
   profile.visits=(profile.visits||0)+1;
   mergeInterest();
-  store();setSave('local');render();
-  const f=document.getElementById('f_name');if(f)f.focus();
+  hideCookie();
+  touch();if(hasContact()){leadDirty=true;flushLead();}
+  document.querySelectorAll('[data-save]').forEach(paintSave);
 }
+function declineConsent(){
+  consent=null;ckDecided=true;writeCk(false);
+  try{localStorage.removeItem(SKEY);}catch(e){}
+  clearTimeout(leadTimer);leadDirty=false;saveState='';
+  hideCookie();
+  document.querySelectorAll('[data-save]').forEach(paintSave);
+}
+function showCookie(){const b=document.getElementById('ckb');b.hidden=false;}
+function hideCookie(){document.getElementById('ckb').hidden=true;}
+document.getElementById('ckList').innerHTML=
+   '<li><b>Szükséges:</b> a süti-döntésed megjegyzése – ez mindig működik.</li>'
+  +'<li><b>Kényelmi:</b> a választásaid és a kalkulátorba beírt adatok mentése (már gépelés közben), hogy ott folytathasd, ahol abbahagytad, és vissza tudjunk hívni.</li>'
+  +'<li><b>Beépülő modulok:</b> Google Fonts (betűtípusok), Google Apps Script (az ajánlatkérések fogadása).</li>'
+  +'<li>Az adataidat csak az ajánlatodhoz és a foglalásodhoz használjuk, nem adjuk tovább. Törlést kérhetsz: '+esc(cfg.settings.notifyEmail||'')+'. A döntésed az oldal alján, a „Süti-beállítások” linkkel bármikor módosíthatod.</li>';
+document.getElementById('ckYes').onclick=()=>acceptConsent();
+document.getElementById('ckNo').onclick=declineConsent;
+document.getElementById('ckSet').onclick=showCookie;
 
 /* ═══════════ 2 · INGATLAN ═══════════ */
 const PROP_TYPES=[
@@ -1149,7 +1260,7 @@ function submit(){
   if(!photos.length&&!noPhoto){
     const nn=document.getElementById('nophotoNote');
     if(nn)nn.innerHTML='<div class="note err">'+ic('cam',18)+'<span>Tölts fel legalább egy fotót a foltról, vagy pipáld be, hogy most nem tudsz fotót készíteni.</span></div>';
-    document.querySelector('.upload').focus();return;
+    document.querySelector('.upload').scrollIntoView({block:'center'});return;
   }
   const o=computeOrder();
   const booking={created:Date.now(),src:SRC,leadId:leadId,consent:consent,interest:interestText(),customer:clone(customer),dates:[...dates].sort(),
@@ -1225,7 +1336,15 @@ function renderDone(){
 
 /* ═══════════ INDULÁS ═══════════ */
 restore();
-if(consent){mergeInterest();store();}
+(function(){
+  const c=readCk();
+  if(URLCK&&URLCK.ok===false){declineConsent();}
+  else if(URLCK&&URLCK.ok){if(!consent)acceptConsent(URLCK.at);else{ckDecided=true;writeCk(true,consent.at);}}
+  else if(c&&c.ok===false){consent=null;ckDecided=true;}
+  else if(consent||(c&&c.ok)){if(!consent)consent={at:c.at||Date.now(),v:CONSENT_V};if(!leadId)leadId=newId();ckDecided=true;if(!c)writeCk(true,consent.at);}
+  else showCookie();
+  if(consent){mergeInterest();store();}
+})();
 render();
 </script>
 </body>

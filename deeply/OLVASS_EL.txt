@@ -1,5 +1,5 @@
-DEEPLY – főoldal-lapozó, új árkalkulátor, gépelés közbeni mentés (2026-10-19)
-===========================================================================
+DEEPLY – főoldal-lapozó, süti-ablak, új árkalkulátor, gépelés közbeni mentés (2026-10-19)
+========================================================================================
 
 Ez a mappa átadó csomag: a Deeply fájljai ide kerültek, mert a Deeply GitHub-repóba
 ebből a munkamenetből nem lehetett feltölteni. Három fájlt kell a helyére tenni.
@@ -13,20 +13,34 @@ ebből a munkamenetből nem lehetett feltölteni. Három fájlt kell a helyére 
    • A kalkulátor-linkek magukkal viszik, mire kattintott a látogató
      (melyik szolgáltatás, mely GYIK-kérdés, hány lépést nézett meg, melyik gombbal indult).
      Sütit nem használ – a kalkulátor csak a hozzájárulás után jegyzi meg.
-   • Asztali nézetben semmi nem változott.
+   • Süti-ablak a főoldalon (kicsi, alul): „Elfogadom” / „Csak a szükségesek”, „Részletek” lenyíló,
+     a láblécben „Süti-beállítások” link. A döntést a kalkulátor-link ?ck=… paraméterrel viszi át
+     (3 óráig érvényes, így egy továbbküldött régi link nem hoz magával hozzájárulást).
+     Elfogadás után a főoldal is megjegyzi, mire kattintott a látogató (következő látogatáskor is).
+   • A fő gomb (CTA) elütő arany: #D8AE47, sötétzöld felirattal (fejléc + mobilon alul ragadó gomb).
+   • A „Hivatkozások” átnéző gomb mobilon már nem takarja a ragadós gomb nyilát.
+   • Az „Így dolgozunk” lapozó asztali nézete nem változott.
    Utána a szokásos módon:  node _DeeplyLogo_Brand/08_Brand_OS/_generator/gen.js
    (és ha kell a megosztható fájl:  node .../_generator/megosztas.js A_kefe)
-   Nem kötelező: a súgó szövege a content.js-ből is állítható – a fooldal: { … } részbe:
+   Nem kötelező: a súgó és a süti-ablak szövege a content.js-ből is állítható – a fooldal: { … } részbe
        howHint: 'Húzd oldalra',
+   és egy cookie: { title, text, more, list: [...], yes, no, settings } objektum (a mostani szövegek a fooldal.js
+   elején, a CK konstansban vannak).
 
 2) arkalkulator_foglalas.html  →  Árkalkulátor/arkalkulator_foglalas.html (felülírja),
    majd a megszokott github_frissites.ps1 + git push a Deeply repóba.
    Mit tud:
    • A főoldal arculata: Pantone-színek, Libertinus Sans + Inter, sötétzöld fejléc a logóval,
      a főoldal pirula-gombjai és szolgáltatás-ikonjai; telefonon alul ragadó irányár-sáv.
-   • 1. lépés: adatkezelés + sütik + beépülő modulok elfogadása, utána udvariasan kéri a
-     nevet, az e-mail-címet és a telefonszámot – mindhárom kötelező, ellenőrzött.
-   • Gépelés közben ment: a látogató böngészőjébe azonnal, a Google-táblázatba
+   • Ugyanaz a süti-ablak, mint a főoldalon – de csak akkor jelenik meg, ha a látogató nem a
+     főoldalról jön (pl. QR-kódról), vagy még nem döntött.
+   • 1. lépés: udvariasan kéri a nevet, az e-mail-címet és a telefonszámot – mindhárom kötelező, ellenőrzött.
+   • Az irányár alatt „Húzd jobbra az elfogadáshoz” csúszka, finom arany csillogással. Akkor jelenik
+     meg, ha a látogató legörget az irányárig, vagy a ragadós irányár-sáv nyilára koppint. Jobbra
+     húzva elfogadja az irányárat és továbblép: tételek → időpont → cím → a végén elküldi a foglalást.
+     (Billentyűzettel: Enter a csúszka gombján.)
+   • A fő gomb (CTA) arany, mint a főoldalon.
+   • Gépelés közben ment (csak süti-elfogadás után): a látogató böngészőjébe azonnal, a Google-táblázatba
      (új „Érdeklődők” lap) 1,2 mp gépelési szünet után. Visszatérő látogató ott folytatja,
      ahol abbahagyta („Üdv újra, …!”).
    • Ajánl: a főoldalon választott szolgáltatás kerül előre („Ajánlott”), a listához
@@ -38,6 +52,11 @@ ebből a munkamenetből nem lehetett feltölteni. Három fájlt kell a helyére 
    A fájl elején lépésről lépésre le van írva (1 sor a doPost-ba + a blokk a fájl végére
    + „Új verzió” telepítése). Amíg ez nincs kész, a kalkulátor csak a böngészőbe ment,
    a foglalások ugyanúgy beérkeznek.
+
+Brandbook: az arany CTA új szín a Pantone-palettán kívül. A CLAUDE.md szabálya szerint ezt az
+Alapok/komponensek.md-ben (Button: „✕ narancs vagy palettán kívüli gomb” sor) és a design-alapok.md
+színtáblájában érdemes rögzíteni, és beírni a brandbook változásnaplójába – különben a következő
+generálás visszaállíthatja.
 
 Megjegyzés: az e-mail, ahová a törlési kérés mehet, a kalkulátor admin-beállításának
 „értesítési e-mail” címe (notifyEmail). Ha lesz külön adatkezelési tájékoztató oldal,
