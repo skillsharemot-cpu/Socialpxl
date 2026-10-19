@@ -1,10 +1,13 @@
-DEEPLY – átadó csomag (utolsó frissítés: 2026-10-19, 4. kör)
+DEEPLY – átadó csomag (utolsó frissítés: 2026-10-19, 5. kör)
 =============================================================
 
 Ez a mappa átadó csomag: a Deeply fájljai ide kerültek, mert a Deeply GitHub-repóba ebből a
 munkamenetből nem lehetett feltölteni. Mi hova kerül:
 
-  _generator/fooldal.js            →  08_Brand_OS/_generator/fooldal.js (felülírja), utána: node gen.js
+  _generator/fooldal.js            →  08_Brand_OS/_generator/fooldal.js (felülírja)
+  _generator/content.js            →  08_Brand_OS/_generator/content.js (felülírja – a Drive-on lévő teljes fájl, javítva)
+  _generator/docs.js               →  08_Brand_OS/_generator/docs.js (felülírja – ebből készül az Alapok/*.md brandbook)
+                                      Utána: node gen.js (ez újragenerálja a főoldalt ÉS az Alapok/ fájlokat is)
   arkalkulator_foglalas.html       →  saját tárhelyen: public_html/kalkulator/index.html
                                       (amíg nincs tárhely: Árkalkulátor/arkalkulator_foglalas.html + GitHub, mint eddig)
   szerver/api/                     →  public_html/api/        (a saját szerver – lásd szerver/TELEPITES.txt)
@@ -16,6 +19,17 @@ Olvasnivaló:
   szerver/TELEPITES.txt   – telepítés lépésről lépésre
   TEENDOK.txt             – a ti teendőitek (WhatsApp is) és a még nyitott javaslatok
 
+
+ÚJ AZ 5. KÖRBEN
+---------------
+• Főoldal: „Budapest és agglomeráció” a 23 kerület helyett – Budapest egyben + 30 település; az első 8 látszik,
+  a többi az „Összes helyszín” alatt (content.js: areaTitle, areas, areaNav – szabadon szerkeszthető).
+• Nincs előleg: kikerült a kalkulátorból (összesítő, kész oldal), az értesítő levélből és a GYIK-ből
+  („Előleget nem kérünk.”); a vevői visszaigazolásba bekerült: „Fizetés a munka után, a helyszínen – előleget nem kérünk.”
+• Brandbook: az arany CTA rögzítve a docs.js-ben → design-alapok.md (színtábla, kontraszt, szabály, CSS, új
+  Változásnapló rész) és komponensek.md („cta (arany)” gomb, a palettán-kívüli-szín szabály kivétele).
+  A Drive-on lévő .md fájlokat nem kézzel kell átírni: a docs.js cseréje után a gen.js elkészíti őket.
+• content.js: új WHATSAPP mező (üresen a PHONE-t használja).
 
 ÚJ A 4. KÖRBEN
 --------------
@@ -55,5 +69,3 @@ Korábbi körök (változatlanul benne): mobil lapozó-jelzés az „Így dolgoz
 (a döntést a kalkulátor-link ?ck=… paraméterrel viszi át), arany CTA (#D8AE47), „Húzd jobbra” elfogadó csúszka,
 gépelés közbeni mentés, ajánlások a főoldali kattintások alapján.
 
-Brandbook: az arany CTA a palettán kívüli szín – az Alapok/komponensek.md-ben és a design-alapok.md-ben
-rögzíteni kell, különben a következő generálás visszaállíthatja.

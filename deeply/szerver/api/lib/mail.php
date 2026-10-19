@@ -187,7 +187,6 @@ function mail_booking_notice(array $row, array $b): array {
     . email_rows([
       ['Részösszeg', h(huf($b['sub'] ?? 0))], ['Kiszállás', h(huf($b['travelFee'] ?? 0))],
       ['Becsült végösszeg', '<b style="font-size:17px">' . h(huf($b['total'] ?? 0)) . '</b>'],
-      ['Előleg / helyszínen', h(huf($b['deposit'] ?? 0)) . ' / ' . h(huf($b['onsite'] ?? 0))],
       ['Forrás', h(s($b['src'] ?? '', 40) ?: '–')], ['Érdeklődés', h(s($b['interest'] ?? '', 600) ?: '–')],
     ]);
   if ($photos) {
@@ -261,7 +260,7 @@ function mail_customer_confirmation(array $row, array $b): array {
       ['Napok, amikor otthon vagy', h($dates ? implode(', ', array_map('hu_day', $dates)) : '–')],
       ['Cím', h($addr ?: '–')],
     ])
-    . '<p style="margin:0;font-size:12px;color:#4E5948">Az árak tájékoztató jellegűek; a pontos ajánlatot a fotók alapján, írásban küldjük.</p></div>'
+    . '<p style="margin:0;font-size:12px;color:#4E5948">Az árak tájékoztató jellegűek; a pontos ajánlatot a fotók alapján, írásban küldjük. Fizetés a munka után, a helyszínen – előleget nem kérünk.</p></div>'
     . '<h2 style="font:400 19px/1.3 Georgia,serif;margin:18px 0 6px">Mi történik ezután?</h2>'
     . '<p style="margin:0 0 12px">Visszaigazoljuk az időpontot, a helyszínen először szálpróbát csinálunk, és megmondjuk, mi fog kijönni. Minden darabról előtte–utána fotó készül.'
     . ($upholstery ? ' A kárpitnak a munka után 4–6 óra kell a teljes száradáshoz.' : '') . '</p>'
@@ -275,7 +274,7 @@ function mail_customer_confirmation(array $row, array $b): array {
   $text = "Kedves $name!\n\nKöszönjük, hogy minket választottál. Megkaptuk a foglalási igényedet – 24 órán belül küldjük az írásos ajánlatot, és egyeztetjük veled a pontos időpontot.\n\n"
     . "A foglalásod:\n" . items_text((array) ($b['items'] ?? [])) . "\nBecsült végösszeg: " . huf($b['total'] ?? 0)
     . "\nNapok: " . ($dates ? implode(', ', array_map('hu_day', $dates)) : '-') . "\nCím: " . ($addr ?: '-')
-    . "\n(Az árak tájékoztató jellegűek; a pontos ajánlatot írásban küldjük.)\n\n"
+    . "\n(Az árak tájékoztató jellegűek; a pontos ajánlatot írásban küldjük. Fizetés a munka után, a helyszínen – előleget nem kérünk.)\n\n"
     . "Mi történik ezután? Visszaigazoljuk az időpontot, a helyszínen először szálpróbát csinálunk, és megmondjuk, mi fog kijönni. Minden darabról előtte–utána fotó készül."
     . ($upholstery ? " A kárpitnak a munka után 4–6 óra kell a teljes száradáshoz." : '') . "\n\n"
     . "Egy tipp: ha új folt kerül a kárpitra, ne dörzsöld – itasd fel egy fehér törlőkendővel, kívülről befelé.\n\n"

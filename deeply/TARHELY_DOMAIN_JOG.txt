@@ -110,7 +110,7 @@ RÖVIDEN
 
   i) ÁSZF-kérdések, amiket a weboldal érint:
      • az ár „irányár”, a pontos ajánlat írásban, 24 órán belül
-     • előleg: a kalkulátor „Foglalási előleget” mutat, máshol „fizetés a munka után” szerepel → egységesíteni
+     • előleg: NINCS (2026-10-19 döntés) – fizetés a munka után, a helyszínen; az ÁSZF-ben is így szerepeljen
      • lakásban végzett szolgáltatás → üzlethelyiségen kívül kötött szerződés: elállási jog, tájékoztatás
        (45/2014. Korm. rendelet) – hogyan kezeljük, ha a munka azonnal kezdődik
      • kényes anyagok (gyapjú, bársony, viszkóz): írásos hozzájárulás, felelősség-korlátozás

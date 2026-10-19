@@ -398,7 +398,7 @@ const SRC=(function(){
 const CFG_VERSION=2;
 const DEFAULTS={
   cfgVersion:CFG_VERSION,
-  settings:{businessName:'Deeply',currency:'Ft',minFee:6000,travelFee:6000,deposit:4000,notifyEmail:'skillsharemot@gmail.com'},
+  settings:{businessName:'Deeply',currency:'Ft',minFee:6000,travelFee:6000,deposit:0,notifyEmail:'skillsharemot@gmail.com'},
   services:[
     {id:'kanape',name:'Kanapé / ülőgarnitúra',unit:'ülőhely',price:4000,material:true},
     {id:'fotel',name:'Fotel',unit:'db',price:4000,material:true},
@@ -580,7 +580,7 @@ function computeOrder(){
   // kiszállási díj: fix tétel a szolgáltatás-értéken FELÜL, csak ha van tétel a kosárban
   const travelFee=cart.length?(+cfg.settings.travelFee||0):0;
   const applied=svc+travelFee;
-  const deposit=cart.length?(+cfg.settings.deposit||0):0;
+  const deposit=0; // nincs előleg (2026-10-19) – az admin-beállítás „előleg” mezőjét sem vesszük figyelembe
   return {sub,svc,travelFee,applied,minFeeHit:cart.length&&sub<minFee,deposit,onsite:Math.max(applied-deposit,0)};
 }
 // „Folt 1 – friss, vizes (kávé, tea…)” → cím + alsor a kártyára
@@ -728,8 +728,6 @@ function renderSummary(){
   if(o.minFeeHit)h+='<div class="tot"><span>Minimum rendelési érték</span><span>'+fmt(o.svc)+'</span></div>';
   if(o.travelFee>0)h+='<div class="tot"><span>Kiszállási díj</span><span>'+fmt(o.travelFee)+'</span></div>';
   h+='<div class="tot big"><span>Becsült végösszeg</span><span>'+fmt(o.applied)+'</span></div>';
-  h+='<div class="tot"><span>Foglalási előleg</span><span>'+fmt(o.deposit)+'</span></div>';
-  h+='<div class="tot"><span>Helyszínen fizetendő</span><span>'+fmt(o.onsite)+'</span></div>';
   document.getElementById('totals').innerHTML=h;
   box.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{cart.splice(+b.dataset.rm,1);touch();renderSummary();if(view==='build')render();});
   document.getElementById('mbTotal').textContent=fmt(o.applied);
@@ -1373,8 +1371,7 @@ function renderDone(){
 'Részösszeg: '+fmt(b.sub)+'\n'+
 ((+b.travelFee>0)?('Kiszállási díj: '+fmt(b.travelFee)+'\n'):'')+
 'Végösszeg: '+fmt(b.total)+'\n'+
-'Foglalási előleg: '+fmt(b.deposit)+'\n'+
-'Helyszínen fizetendő: '+fmt(b.onsite)+'\n\n'+
+'Fizetés: a munka után, a helyszínen (előleg nincs)\n\n'+
 'Elérhető napok: '+b.dates.join(', ');
   const mail='mailto:'+(cfg.settings.notifyEmail||'')+'?subject='+encodeURIComponent('Új foglalás – '+b.customer.name)+'&body='+encodeURIComponent(body);
   const upholstery=b.items.some(it=>['kanape','fotel','puff','auto','matrac'].indexOf(it.serviceId)>=0);

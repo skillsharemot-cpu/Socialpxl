@@ -347,7 +347,7 @@ const body = T => `
   <nav class="mn">
     <a href="#igy-dolgozunk"${r('fooldal.nav.0')}>${esc(F.nav[0])}</a>
     <div class="dd"><a href="#szolgaltatasok"${r('fooldal.nav.1')}>${esc(F.nav[1])} ${ic('chev', 16)}</a><div class="dd-m">${F.svc.map(([k, n]) => `<a href="${KALK}" data-pick="${k}">${esc(n)}</a>`).join('')}<a href="#szolgaltatasok" data-pick="b2b">Éttermeknek, irodáknak</a></div></div>
-    <div class="dd"><a href="#ahol"${r('fooldal.nav.2')}>${esc(F.nav[2])} ${ic('chev', 16)}</a><div class="dd-m">${F.areas.slice(4, 8).map(a => `<a href="#ahol">${esc(a)}</a>`).join('')}<a href="#ahol">${esc(F.areaMore[0])} →</a></div></div>
+    <div class="dd"><a href="#ahol"${r('fooldal.nav.2')}>${esc(F.nav[2])} ${ic('chev', 16)}</a><div class="dd-m">${(F.areaNav || F.areas.slice(4, 8)).map(a => `<a href="#ahol">${esc(a)}</a>`).join('')}<a href="#ahol">${esc(F.areaMore[0])} →</a></div></div>
     <a href="#gyik"${r('fooldal.nav.3')}>${esc(F.nav[3])}</a>
   </nav>
   <div class="nr">

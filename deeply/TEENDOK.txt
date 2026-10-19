@@ -11,6 +11,9 @@ A) MOST – a ti részetekről
 
 B) WHATSAPP – mi kell hozzá?
 -----------------------------
+  Költség: a WhatsApp Business alkalmazás INGYENES, előfizetés nem kell hozzá. Fizetős csak két dolog lenne:
+  a „Meta Verified” kék pipa (havidíjas, nem szükséges) és az automata üzenetküldő API (üzenetenként fizetős,
+  nagy cégeknek) – egyik sem kell nektek.
   Hozzáférést NEM kell adnotok senkinek, és API / Meta fejlesztői fiók sem kell: a gombok egyszerű
   „wa.me” linkek, amelyek a vevő telefonján megnyitják a beszélgetést a ti számotokkal.
   Amit nektek kell megcsinálni:
@@ -42,15 +45,20 @@ C) MÉG NYITOTT JAVASLATOK (a korábbi listából – emlékeztető)
   [ ] Élesítés előtt: a „Hivatkozások” (átnéző) gomb és a „(minta)” feliratok eltávolítása
   [ ] Google Cégprofil (Google Business Profile) + Google Search Console – a helyi kereséshez ez a legfontosabb
   [ ] Külön aloldal szolgáltatásonként (kárpit, szőnyeg, matrac, autókárpit) – keresőoptimalizálás
-  [ ] A „23 kerület” blokk helyett „Budapest és agglomeráció” (+ a fontosabb települések)
-  [ ] Árak „-tól” formában a főoldalon (pl. „Kanapé 4 000 Ft/ülőhelytől”)
+  [ ] Árak „-tól” formában a főoldalon – FIGYELEM: a brandbook szabálya szerint ár nem kerül a weboldal szövegébe
+      (CLAUDE.md: „a kalkulátorra mutatunk”). Ha mégis kell, előbb ezt a szabályt kell módosítani.
   [ ] Céges (B2B) aloldal: éttermek, irodák, szállások – rendszeres tisztítás
   [ ] Mérés: látogatottság és foglalási arány (pl. Plausible vagy GA4 – a süti-ablak bővítésével)
-  [ ] Előleg-szöveg egységesítése (kalkulátor: „Foglalási előleg” ↔ „fizetés a munka után”)
   [ ] Gyorsítás: az SVG-képek optimalizálása, a betűtípusok saját tárhelyről (ez a Google Fonts miatti
       adatvédelmi kérdést is megoldja)
-  [ ] Brandbook: az arany CTA (#D8AE47) rögzítése az Alapok/komponensek.md-ben és a design-alapok.md-ben
   [ ] Vélemények: valódi Google-értékelések a minta-vélemények helyett (a Cégprofil után)
+
+E) KÉSZ (2026-10-19)
+-------------------
+  [x] „Budapest és agglomeráció” a 23 kerület helyett (content.js: areaTitle, areas, areaNav)
+  [x] Nincs előleg: kivéve a kalkulátorból, a levelekből és a GYIK-ből („Előleget nem kérünk.”)
+  [x] Arany CTA a brandbookban (docs.js → design-alapok.md: színtábla, kontraszt, szabály, változásnapló;
+      komponensek.md: „cta (arany)” gomb)
 
 D) KÉSŐBB, HA KELL
 -------------------
