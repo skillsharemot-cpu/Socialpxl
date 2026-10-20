@@ -1,0 +1,5 @@
+# Titkos és élő adatok – soha ne kerüljenek a GitHubra
+api/config.php
+api/adat/*
+!api/adat/.htaccess
+!api/adat/index.php

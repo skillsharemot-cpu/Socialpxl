@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2D3C29">
+<title>Árkalkulátor és foglalás – Deeply Kárpit és szőnyegtisztítás</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%205100%205130%22%3E%3Cpath%20fill%3D%22%232E3C29%22%20fill-rule%3D%22evenodd%22%20d%3D%22M102.1%202563.1A2454.7%202454.7%200%201%200%205011.5%202563.1A2454.7%202454.7%200%201%200%20102.1%202563.1Z%20M2674.0%201786.0C2605.0%201763.7%202537.5%201751.0%202470.0%201744.0C2402.5%201737.0%202323.2%201740.3%202269.0%201744.0C2214.8%201747.7%202183.0%201755.7%202145.0%201766.0C2107.0%201776.3%202071.2%201790.8%202041.0%201806.0C2010.8%201821.2%201985.8%201839.2%201964.0%201857.0C1942.2%201874.8%201925.5%201890.5%201910.0%201913.0C1894.5%201935.5%201882.8%201933.7%201871.0%201992.0C1859.2%202050.3%201845.3%202174.2%201839.0%202263.0C1832.7%202351.8%201827.5%202384.3%201833.0%202525.0C1838.5%202665.7%201859.3%202973.7%201872.0%203107.0C1884.7%203240.3%201893.8%203255.3%201909.0%203325.0C1924.2%203394.7%201944.5%203478.7%201963.0%203525.0C1981.5%203571.3%201998.0%203583.0%202020.0%203603.0C2042.0%203623.0%202052.2%203636.5%202095.0%203645.0C2137.8%203653.5%202215.8%203658.2%202277.0%203654.0C2338.2%203649.8%202405.2%203634.7%202462.0%203620.0C2518.8%203605.3%202557.3%203594.2%202618.0%203566.0C2678.7%203537.8%202766.3%203490.2%202826.0%203451.0C2885.7%203411.8%202928.3%203376.2%202976.0%203331.0C3023.7%203285.8%203071.3%203234.3%203112.0%203180.0C3152.7%203125.7%203192.2%203059.3%203220.0%203005.0C3247.8%202950.7%203263.5%202907.0%203279.0%202854.0C3294.5%202801.0%203307.0%202736.7%203313.0%202687.0C3319.0%202637.3%203320.5%202612.2%203315.0%202556.0C3309.5%202499.8%203295.2%202406.7%203280.0%202350.0C3264.8%202293.3%203245.5%202257.0%203224.0%202216.0C3202.5%202175.0%203185.3%202145.5%203151.0%202104.0C3116.7%202062.5%203062.5%202004.7%203018.0%201967.0C2973.5%201929.3%202941.3%201908.2%202884.0%201878.0C2826.7%201847.8%202743.0%201808.3%202674.0%201786.0Z%20M2699.0%202616.1A115.2%20130.6%20175.2%201%200%202469.5%202635.5A115.2%20130.6%20175.2%201%200%202699.0%202616.1Z%22%2F%3E%3C%2Fsvg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libertinus+Sans:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap" rel="stylesheet">
+<!--
+  Deeply – vevői árkalkulátor + foglalás (2026-10-19-i változat)
+  • Arculat: a főoldallal közös Pantone-paletta, Libertinus Sans / Inter, a főoldal fejléce és gombjai (08_Brand_OS/A_kefe/Alapok).
+  • Süti-ablak: a főoldalon (vagy ha valaki közvetlenül, pl. QR-kódról érkezik, itt) – a döntést a főoldal ?ck=… paraméterrel adja át.
+  • Sorrend (2026-10-19, 4. kör): Tételek → Ingatlan → Időpont → Fotó → Adataid. A nevet, e-mailt, telefonszámot
+    (mind kötelező) és a címet a végén, udvariasan kéri. A fotó WhatsAppon is küldhető (ha van WhatsApp-szám).
+  • Saját szerver: ha a kalkulátor a saját domainen fut (nem github.io / helyi fájl), mindent a /api/-nak küld
+    (szerver/api), és onnan tölti a közzétett árlistát és az elérhetőségeket. Különben a régi Apps Scriptet használja.
+  • Az irányár alatt „Húzd jobbra” csúszka: elfogadja az irányárat és a következő lépésre visz (a végén elküldi a foglalást).
+  • A fő gomb (CTA) elütő arany (#D8AE47) – a felhasználó kérése 2026-10-19; a brandbook komponensek.md-jét ehhez frissíteni kell.
+  • Gépelés közben ment: a böngészőbe (localStorage) és – ha az Apps Script már ismeri a 'lead' műveletet – a Google-táblázat
+    „Érdeklődők” lapjára. Mentés csak az elfogadás után indul.
+  • Emlékszik, mire kattintott a látogató: a főoldal linkje hozza (?pick=…&int=…&faq=…&how=…&from=…), a kalkulátor pedig
+    a saját választásait is megjegyzi – ebből ajánl.
+  • Az árazás, a foglalás formátuma (tc_bookings_v1) és az admin-beállítások (tc_pricing_v1) változatlanok.
+-->
+<style>
+:root{--mv:#2D3C29;--cm:#F0EDE5;--gold:#D8AE47;--gold-d:#C99D36;--mg:#7E8772;--fog:#D6CBB9;--wt:#A0907F;--paper:#FAF8F3;--muted:#4E5948;--line:#DDD5C6;--err:#A33A1C;
+  --r-lg:14px;--r-sm:8px;--r-xl:24px;
+  --f-head:"Libertinus Sans",Georgia,serif;--sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--f-accent:"Architects Daughter","Segoe Print",cursive;
+  --grad:linear-gradient(90deg,#34462F,#25321F);
+  --sh1:0 1px 4px rgba(45,60,41,.08),0 0 1px rgba(45,60,41,.25);--sh2:0 4px 11px rgba(45,60,41,.16),0 5px 24px rgba(45,60,41,.12)}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--mv);font:400 16px/1.6 var(--sans)}
+h1,h2,h3,p{margin:0}
+a{color:inherit}
+button,input,textarea{font:inherit;color:inherit}
+button{-webkit-tap-highlight-color:transparent}
+.wrap{max-width:1120px;margin:0 auto;padding:0 max(21px,env(safe-area-inset-left,0px))}
+.i{display:block;flex:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:3px solid var(--mg);outline-offset:2px}
+
+/* ── Fejléc – ugyanaz, mint a főoldalon (sötét sáv, krém logó) */
+header.fx{position:sticky;top:0;z-index:40;background:var(--grad);color:var(--cm)}
+header.fx .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:72px}
+header.fx .logo{display:block;width:150px;height:auto;color:var(--cm)}
+.hd-tag{display:inline-flex;align-items:center;gap:8px;font:600 14px/1 var(--sans);letter-spacing:.015em;border:1px solid rgba(240,237,229,.3);border-radius:999px;padding:9px 14px;white-space:nowrap}
+@media(max-width:760px){header.fx .wrap{height:64px}header.fx .logo{width:136px}.hd-tag{padding:8px 12px;font-size:13px}}
+
+/* ── Bevezető */
+.intro{padding:44px 0 4px;text-align:center}
+.intro h1{font:400 52px/1.06 var(--f-head);letter-spacing:-.025em}
+.intro p{max-width:620px;margin:14px auto 0;font-size:18px;line-height:1.6;color:var(--muted)}
+.intro .acc{display:inline-block;margin-top:10px;font:400 18px/1.2 var(--f-accent);color:var(--muted);transform:rotate(-2deg)}
+.ul{position:relative;white-space:nowrap}
+.ul::after{content:"";position:absolute;left:-3%;right:-3%;bottom:-.2em;height:.36em;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 14' preserveAspectRatio='none'%3E%3Cpath d='M2 9C30 3 75 2 118 6M14 12C45 8 80 8 104 10' fill='none' stroke='%237E8772' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+@media(max-width:48rem){.intro{padding:24px 0 0}.intro h1{font-size:34px}.intro p{font-size:15px;line-height:1.55;margin-top:8px}.intro .acc{display:none}}
+
+/* ── Elrendezés */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start;padding-top:28px;padding-bottom:72px}
+@media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);padding-top:20px;padding-bottom:40px}}
+.card{background:#fff;border-radius:var(--r-xl);box-shadow:var(--sh1);padding:30px}
+#main{scroll-margin-top:84px}
+@media(max-width:640px){.card{padding:22px 18px;border-radius:20px}}
+
+/* ── Lépésjelző: asztalin címkés sáv, telefonon vékony szakaszok + egy sor szöveg */
+.prog{list-style:none;margin:0 0 6px;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.prog li{border-top:4px solid var(--line);padding-top:9px;font:600 12px/1.3 var(--sans);letter-spacing:.02em;color:var(--muted);display:flex;gap:6px;align-items:baseline;min-width:0}
+.prog li b{font-weight:600}
+.prog li span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prog li.done{border-color:var(--mg);color:var(--mv)}
+.prog li.on{border-color:var(--mv);color:var(--mv)}
+.prog li button{all:unset;cursor:pointer;display:flex;gap:6px;min-width:0}
+.prog li button:hover span{text-decoration:underline;text-underline-offset:3px}
+.prog li button:focus-visible{outline:3px solid var(--mg);outline-offset:3px;border-radius:4px}
+.prog-t{display:none;font:500 12px/1.4 var(--sans);letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:0 0 4px}
+.prog-wrap{margin-bottom:26px}
+@media(max-width:640px){.prog li{padding-top:0;border-top-width:5px;border-radius:3px}.prog li b,.prog li span{display:none}.prog-t{display:block}.prog-wrap{margin-bottom:20px}}
+
+/* ── Kérdés-címek */
+.q{font:400 32px/1.18 var(--f-head);letter-spacing:-.015em;outline:none}
+.qs{color:var(--muted);margin:8px 0 22px}
+.sub-h{font:600 15px/1.35 var(--sans);margin:24px 0 10px}
+@media(max-width:48rem){.q{font-size:26px}.qs{font-size:15px;margin-bottom:18px}}
+.pill{display:inline-flex;align-items:center;gap:8px;background:var(--cm);border-radius:999px;padding:5px 12px 5px 5px;font:500 13px/1.3 var(--sans);margin-bottom:14px}
+.pill .ci{width:28px;height:28px}
+
+/* ── Választó kártyák (a főoldal „Mit tisztítsunk?” sorának mintájára) */
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.opts.one{grid-template-columns:1fr}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:11px 14px 11px 11px;min-height:70px;cursor:pointer;transition:border-color .15s,box-shadow .15s,background .15s}
+.opt:hover{border-color:var(--mg);box-shadow:var(--sh1)}
+.opt.sel{border-color:var(--mv);box-shadow:inset 0 0 0 1px var(--mv);background:var(--paper)}
+.opt .tx{min-width:0;flex:1}
+.opt b{display:block;font:600 16px/1.3 var(--sans)}
+.opt small{display:block;font:400 14px/1.4 var(--sans);color:var(--muted);margin-top:2px}
+.opt .pr{flex:none;font:600 14px/1.2 var(--sans);white-space:nowrap}
+.opt .tick{flex:none;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;color:transparent;background:#fff}
+.opt.sel .tick{background:var(--mv);border-color:var(--mv);color:var(--cm)}
+.opt .go{flex:none;color:var(--mv)}
+.tag{display:inline-block;vertical-align:2px;margin-left:6px;background:var(--fog);color:var(--mv);border-radius:999px;padding:3px 8px;font:600 11px/1.2 var(--sans);letter-spacing:.04em;text-transform:uppercase}
+.tag.dk{background:var(--mv);color:var(--cm)}
+.ci{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center}
+
+/* ── Mezők */
+.field{margin:0 0 16px}
+.field>label,.lbl{display:block;font:600 14px/1.35 var(--sans);margin-bottom:6px}
+.field .opt-l{font-weight:400;color:var(--muted)}
+.req{color:var(--err)}
+.inp{width:100%;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-size:16px;line-height:1.4;min-height:50px;transition:border-color .15s,box-shadow .15s}
+.inp::placeholder{color:#8C8A80}
+.inp:focus{outline:none;border-color:var(--mv);box-shadow:0 0 0 3px rgba(126,135,114,.28)}
+.inp.bad{border-color:var(--err)}
+.inp,.upload{scroll-margin:96px 0 120px}
+textarea.inp{min-height:96px;resize:vertical}
+.msg{font:500 13px/1.4 var(--sans);color:var(--err);margin-top:6px}
+.msg:empty{display:none}
+.row2{display:grid;grid-template-columns:140px 1fr;gap:12px}
+@media(max-width:480px){.row2{grid-template-columns:1fr}}
+
+/* ── Süti-ablak (ugyanaz, mint a főoldalon): kicsi, nem takarja el az oldalt */
+.ckb{position:fixed;z-index:60;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));max-width:420px;background:#fff;color:var(--mv);border-radius:18px;box-shadow:0 10px 40px rgba(29,38,26,.28),0 0 0 1px rgba(45,60,41,.08);padding:18px 18px 16px;font:400 14px/1.55 var(--sans);animation:ckIn .35s ease}
+.ckb[hidden]{display:none}
+body.has-mb .ckb{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+.ckb-t{display:flex;align-items:center;gap:8px;font:400 22px/1.2 var(--f-head);letter-spacing:-.015em;margin:0 0 6px}
+.ckb p{margin:0}
+.ckb details{margin-top:8px;color:var(--muted);font-size:13px}
+.ckb summary{cursor:pointer;font-weight:600;color:var(--mv);text-decoration:underline;text-underline-offset:3px;list-style:none;display:inline}
+.ckb summary::-webkit-details-marker{display:none}
+.ckb ul{margin:8px 0 0;padding-left:1.1em}.ckb li+li{margin-top:4px}
+.ckb-a{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.ckb-a button{flex:1 1 140px;justify-content:center}
+.ckb-a .btn2{justify-content:center;min-height:44px}
+@keyframes ckIn{from{transform:translateY(16px);opacity:0}}
+@media(min-width:641px){.ckb{left:24px;right:auto;bottom:24px}}
+
+/* ── Gombok – a főoldal pirula-CTA-ja */
+.nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:28px;flex-wrap:wrap}
+.nav>span:empty{display:none}
+.nav>span:empty+.cta{margin-left:auto}
+.cta{display:inline-flex;align-items:center;justify-content:space-between;gap:16px;background:var(--gold);color:var(--mv);border:0;border-radius:999px;padding:6px 6px 6px 22px;min-height:52px;font:600 15px/1.2 var(--sans);letter-spacing:.015em;text-decoration:none;cursor:pointer;box-shadow:var(--sh2);transition:background .15s,opacity .15s}
+.cta .cc{width:40px;height:40px;border-radius:50%;background:var(--mv);color:var(--gold);display:grid;place-items:center;flex:none}
+.cta:not(.lt){box-shadow:0 6px 18px rgba(216,174,71,.45),0 2px 4px rgba(45,60,41,.15)}
+.cta:hover{background:var(--gold-d)}
+.cta[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none}
+.cta.lt{background:var(--cm);color:var(--mv);box-shadow:none}.cta.lt .cc{background:var(--mv);color:var(--cm)}
+.cta.sm{min-height:44px;padding:5px 5px 5px 18px;font-size:14px}.cta.sm .cc{width:34px;height:34px}
+.cta.lt:hover{background:#e6e1d6}
+.back{background:none;border:0;padding:10px 0;font:600 15px/1.2 var(--sans);color:var(--mv);text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.btn2{display:inline-flex;align-items:center;gap:8px;background:transparent;border:1.5px solid var(--mv);color:var(--mv);border-radius:999px;padding:9px 16px;font:600 14px/1.2 var(--sans);cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn2:hover{background:var(--cm)}
+.btn2.sm{padding:7px 12px;font-size:13px}
+@media(max-width:640px){.nav{flex-direction:column-reverse;align-items:stretch}.nav .cta{width:100%}.nav .back{align-self:center}}
+
+/* ── Megjegyzések, ajánlások */
+.note{display:flex;gap:10px;align-items:flex-start;background:var(--cm);border-left:3px solid var(--wt);border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.55;margin-top:14px}
+.note .i{color:var(--mv);margin-top:1px}
+.note.ok{border-left-color:var(--mg)}
+.note.err{border-left-color:var(--err)}
+.note.warn{border-left-color:var(--gold-d);background:#FBF3DD}
+.wa-btn{margin-top:8px}
+.wa-box{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center;background:var(--cm);border-radius:14px;padding:14px 16px;margin:16px 0}
+.wa-box .tx b{display:block;font:600 15px/1.3 var(--sans)}
+.wa-box small{display:block;color:var(--muted);font-size:13px;line-height:1.45;margin-top:2px}
+.wa-box .cta{grid-column:1/-1;justify-self:start}
+@media(min-width:620px){.wa-box{grid-template-columns:auto minmax(0,1fr) auto}.wa-box .cta{grid-column:auto}}
+.reco{background:var(--cm);border-radius:16px;padding:14px 16px;margin:0 0 20px}
+.reco h3{display:flex;align-items:center;gap:8px;font:600 12px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 4px}
+.reco-i{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:6px 12px;background:#fff;border-radius:12px;padding:10px 12px;margin-top:8px}
+.reco-i b{display:block;font:600 15px/1.3 var(--sans)}
+.reco-i small{display:block;color:var(--muted);font-size:13px;line-height:1.45}
+.reco-i .ci{width:38px;height:38px}
+@media(max-width:520px){.reco-i{grid-template-columns:auto minmax(0,1fr)}.reco-i .btn2{grid-column:2;justify-self:start}}
+.hello{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--cm);border-radius:14px;padding:12px 14px;margin:0 0 20px;font-size:14px}
+.hello .tx{flex:1;min-width:180px}
+.who{display:flex;align-items:center;gap:12px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:0 0 20px;font-size:14px}
+.who .tx{flex:1;min-width:0;overflow-wrap:anywhere}
+.who b{display:block}
+
+/* ── Mentés-jelző */
+.save{display:flex;align-items:center;gap:8px;font:500 12px/1.4 var(--sans);letter-spacing:.04em;color:var(--muted);margin-top:2px;min-height:18px}
+.save i{width:8px;height:8px;border-radius:50%;background:var(--line);flex:none}
+.save.local i{background:var(--wt)}.save.typing i{background:var(--mg);animation:pulse 1s ease-in-out infinite}.save.cloud i{background:var(--mv)}
+@keyframes pulse{50%{opacity:.3}}
+.lock{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:14px}
+
+/* ── Mennyiség */
+.qty{display:flex;align-items:center;gap:10px;margin:4px 0 6px}
+.qty button{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;color:var(--mv)}
+.qty button:hover{border-color:var(--mv)}
+.qty input{width:100px;text-align:center;font:600 20px/1 var(--sans);border:1.5px solid var(--line);border-radius:12px;padding:12px 8px;min-height:50px}
+.qty input:focus{outline:none;border-color:var(--mv)}
+.qty span{color:var(--muted)}
+
+/* ── Naptár */
+.calhead{display:flex;align-items:center;justify-content:space-between;margin:4px 0 10px}
+.calhead strong{font:400 24px/1.2 var(--f-head);letter-spacing:-.015em}
+.calhead button{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;color:var(--mv)}
+.calhead button:disabled{opacity:.35;cursor:not-allowed}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal .dow{text-align:center;font:500 12px/1.4 var(--sans);letter-spacing:.04em;color:var(--muted);padding:2px 0 4px}
+.cal .day{aspect-ratio:1;border:1.5px solid var(--line);border-radius:12px;background:#fff;display:grid;place-items:center;font:500 15px/1 var(--sans);cursor:pointer;padding:0;color:var(--mv)}
+.cal .day:hover{border-color:var(--mv)}
+.cal .day.empty{border:0;background:none;cursor:default}
+.cal .day.past{color:#B5AE9F;background:transparent;border-color:transparent;cursor:not-allowed}
+.cal .day.today{border-color:var(--mg)}
+.cal .day.sel{background:var(--mv);border-color:var(--mv);color:var(--cm);font-weight:600}
+@media(max-width:400px){.cal{gap:4px}.cal .day{border-radius:10px;font-size:14px}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.dchip{display:inline-flex;align-items:center;gap:6px;background:var(--fog);border:0;border-radius:999px;padding:6px 8px 6px 12px;font:500 13px/1.2 var(--sans);cursor:pointer;color:var(--mv)}
+.empty-t{font-size:14px;color:var(--muted);margin-top:12px}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg label{position:relative;border:1.5px solid var(--line);border-radius:999px;padding:10px 18px;font:600 14px/1.2 var(--sans);cursor:pointer;background:#fff}
+.seg label:has(input:checked){background:var(--mv);border-color:var(--mv);color:var(--cm)}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label:has(input:focus-visible){outline:3px solid var(--mg);outline-offset:2px}
+
+/* ── Fotók */
+.photos{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+.photos:empty{display:none}
+.thumb{position:relative;width:86px;height:86px;border-radius:12px;overflow:hidden;box-shadow:var(--sh1)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb button{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(45,60,41,.82);color:var(--cm);display:grid;place-items:center;cursor:pointer}
+.upload{display:flex;align-items:center;justify-content:center;gap:10px;border:1.5px dashed var(--wt);border-radius:14px;padding:16px;font:600 15px/1.2 var(--sans);cursor:pointer;color:var(--mv);background:#fff;min-height:56px}
+.upload:hover{background:var(--cm)}
+.field .upload{display:flex;margin:0;font:600 15px/1.2 var(--sans)}
+.tickrow,.field .tickrow{display:flex;gap:12px;align-items:center;margin-top:12px;font:400 15px/1.4 var(--sans);background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;font-size:15px}
+.box{appearance:none;-webkit-appearance:none;flex:none;width:24px;height:24px;margin:0;border:1.5px solid var(--mv);border-radius:7px;background:#fff;display:grid;place-items:center;cursor:pointer}
+.box:checked{background:var(--mv)}
+.box:checked::after{content:"";width:11px;height:6px;border:2px solid var(--cm);border-top:0;border-right:0;transform:translate(0,-1px) rotate(-45deg)}
+
+/* ── Összesítő (irányár) */
+.sum{position:sticky;top:96px;scroll-margin-top:84px}
+.sum h3{font:400 28px/1.18 var(--f-head);letter-spacing:-.015em}
+.sum .lead{font-size:14px;color:var(--muted);margin:4px 0 12px}
+.line{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.line .tx{flex:1;min-width:0}
+.line b{display:block;font:600 15px/1.35 var(--sans)}
+.line small{display:block;color:var(--muted);font-size:13px;line-height:1.45;margin-top:2px}
+.line .am{font:600 15px/1.35 var(--sans);white-space:nowrap}
+.line .rm{flex:none;width:30px;height:30px;border-radius:50%;border:0;background:var(--cm);color:var(--mv);display:grid;place-items:center;cursor:pointer;margin-top:-3px}
+.tot{display:flex;justify-content:space-between;gap:12px;font-size:14px;margin-top:10px;color:var(--muted)}
+.tot span:last-child{color:var(--mv);font-weight:600;white-space:nowrap}
+.tot.big{margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--mv);color:var(--cm);align-items:baseline}
+.tot.big span:first-child{font:600 14px/1.2 var(--sans)}
+.tot.big span:last-child{font:400 30px/1 var(--f-head);color:var(--cm)}
+.sum .empty{text-align:center;color:var(--muted);padding:22px 8px 8px;font-size:14px}
+.sum .empty .ci{margin:0 auto 10px;background:var(--cm);color:var(--mv)}
+.fine{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.55}
+body.is-done .sum{display:none}body.is-done .layout{grid-template-columns:minmax(0,1fr);max-width:780px}
+@media(max-width:900px){.sum{position:static}}
+
+/* ── Telefonon alul ragadó irányár-sáv (a főoldal „Árkalkulátor megnyitása” sávjának párja) */
+.mb{display:none}
+@media(max-width:900px){.mb.show{display:block;position:fixed;left:0;right:0;bottom:0;z-index:45;background:#fff;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));box-shadow:0 -2px 14px rgba(45,60,41,.12)}
+ body.has-mb{padding-bottom:84px}}
+.mb a{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--mv);color:var(--cm);border-radius:999px;padding:6px 6px 6px 22px;text-decoration:none;font:600 15px/1.2 var(--sans)}
+.mb a b{font:400 24px/1 var(--f-head);margin-left:6px}
+.mb .cc{width:44px;height:44px;border-radius:50%;background:var(--gold);color:var(--mv);display:grid;place-items:center;transform:rotate(90deg);box-shadow:0 0 0 0 rgba(216,174,71,.6);animation:glow 2.4s ease-in-out infinite}
+.mb{transition:transform .3s ease}.mb.away{transform:translateY(120%)}
+/* ── „Húzd jobbra” csúszka az irányár alatt: görgetéskor / a nyílra koppintva jelenik meg, finom csillogással */
+.acc{max-height:0;opacity:0;overflow:hidden;transition:max-height .5s ease,opacity .4s ease,margin-top .4s ease}
+.acc.show{max-height:220px;opacity:1;margin-top:18px}
+.sw{position:relative;height:60px;border-radius:999px;background:var(--mv);box-shadow:inset 0 2px 8px rgba(0,0,0,.28);overflow:hidden;touch-action:pan-y;-webkit-user-select:none;user-select:none}
+.sw-fill{position:absolute;left:0;top:0;bottom:0;width:60px;border-radius:999px;background:linear-gradient(90deg,rgba(216,174,71,.12),rgba(216,174,71,.55))}
+.sw-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:0 14px 0 64px;font:600 14px/1.2 var(--sans);letter-spacing:.02em;white-space:nowrap;
+  background:linear-gradient(100deg,rgba(240,237,229,.5) 0 38%,#FFF3C9 48%,#fff 50%,#FFF3C9 52%,rgba(240,237,229,.5) 62% 100%);background-size:260% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:shine 2.8s linear infinite}
+.sw-knob{position:absolute;left:4px;top:4px;width:52px;height:52px;border-radius:50%;border:0;padding:0;background:var(--gold);color:var(--mv);display:grid;place-items:center;cursor:grab;touch-action:none;animation:glow 2.2s ease-in-out infinite;z-index:2}
+.sw.drag .sw-knob{cursor:grabbing;animation:none}
+.sw.back .sw-knob{transition:transform .4s cubic-bezier(.3,1.5,.5,1)}.sw.back .sw-fill{transition:width .4s cubic-bezier(.3,1.5,.5,1)}
+.sw.hint .sw-knob{animation:nudge .7s ease}
+.sw.ok{background:var(--gold)}.sw.ok .sw-fill{opacity:0}
+.sw.ok .sw-label{background:none;-webkit-text-fill-color:var(--mv);color:var(--mv);animation:none;padding:0 64px 0 14px}
+.acc .cap{font-size:13px;color:var(--muted);text-align:center;margin:8px 0 0}
+.acc .cap.err{color:var(--err);font-weight:500}
+.acc.pulse .sw{animation:swPulse 1.1s ease 2}
+@keyframes shine{from{background-position:100% 0}to{background-position:0 0}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(216,174,71,.55),0 3px 8px rgba(0,0,0,.25)}50%{box-shadow:0 0 0 9px rgba(216,174,71,0),0 0 22px 4px rgba(255,214,110,.55)}}
+@keyframes nudge{30%{transform:translateX(26px)}60%{transform:translateX(-4px)}}
+@keyframes swPulse{50%{box-shadow:inset 0 2px 8px rgba(0,0,0,.28),0 0 0 6px rgba(216,174,71,.35)}}
+
+/* ── Kész */
+.done-h{text-align:center;padding:6px 0 4px}
+.done-h .ck{width:64px;height:64px;border-radius:50%;background:var(--mv);color:var(--cm);display:grid;place-items:center;margin:0 auto 16px}
+.done-h p{color:var(--muted);max-width:520px;margin:10px auto 0}
+.state{text-align:center;font-size:14px;margin:14px 0 4px;min-height:20px}
+.state .ok{color:var(--mv);font-weight:600}.state .err{color:var(--err)}
+.facts{display:grid;gap:10px;margin:20px 0}
+.facts div{display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.5}
+.facts .ci{width:34px;height:34px}
+pre.sumtxt{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px;white-space:pre-wrap;font:400 13px/1.55 ui-monospace,Consolas,monospace;color:var(--mv);margin:16px 0 0;max-height:320px;overflow:auto}
+details.raw summary{cursor:pointer;font:600 14px/1.4 var(--sans);margin-top:18px}
+
+/* ── Lábléc */
+footer.fo{background:linear-gradient(#34452F,#1C2619);color:var(--cm);padding:26px 0 calc(26px + env(safe-area-inset-bottom,0px));font-size:13px}
+footer.fo .wrap{display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;align-items:center}
+footer.fo .lk{display:flex;flex-wrap:wrap;gap:8px 20px}
+footer.fo a,footer.fo button{color:#D9D4C7;background:none;border:0;padding:0;font:400 13px/1.5 var(--sans);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+footer.fo .logo{width:110px;color:var(--cm)}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.save.typing i,.sw-label,.sw-knob,.mb .cc,.ckb{animation:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="wm" viewBox="0 0 4050 1050"><path d="M0 0 C0.4 -0 0.4 -0 2.3 -0 C12.5 0 22.6 0.3 32.8 1.1 C33.7 1.1 34.7 1.2 35.7 1.3 C39.8 1.7 43.7 2.2 47.7 3.2 C51.4 4.2 54.9 4.7 58.8 5.1 C64.7 5.8 70 7.1 75.6 9.2 C78.5 10.2 81.2 10.8 84.1 11.4 C107.2 17 133.4 32.2 146.5 52.2 C147.6 53.9 148.5 55.7 149.5 57.4 C150.5 59.2 150.5 59.2 151.6 60.8 C156.6 67.8 158.9 76.1 161.5 84.2 C161.8 85.2 162.1 86.2 162.5 87.3 C168.6 109 168.6 134.3 163.5 156.2 C163.4 156.5 163.4 156.5 163 158.2 C161.3 166 159.4 172.9 154.5 179.2 C153.8 180.1 153.2 181 152.5 181.9 C142.8 194.3 132.6 199.5 117.3 202.6 C116.3 202.8 115.4 203 114.4 203.2 C97.3 206.8 79.9 209.3 62.6 211.7 C59.5 212.2 56.5 212.9 53.4 213.6 C48.7 214.8 44 215.6 39.2 216.2 C20.5 218.7 20.5 218.7 12.5 223.2 C10.3 226.1 9.5 227.5 9.5 231.2 C10.8 235 12.4 236.7 15.5 239.2 C19.3 241.1 21.8 241.3 25.9 240.9 C31.9 240.3 37.8 239.9 43.8 239.7 C44.8 239.6 45.7 239.6 46.7 239.5 C63.7 238.7 80.7 238 97.7 237.9 C99.1 237.9 100.5 237.9 101.9 237.8 C119.2 237.6 140.9 239.5 154.5 251.2 C161.6 258.2 166.4 265.5 169.1 275.1 C169.3 275.8 169.5 276.5 169.8 277.3 C171.8 284.5 172.7 291.7 173.3 299.1 C173.4 300.6 173.6 302 173.8 303.5 C176 323.3 176.7 346.4 166.5 364.2 C166.2 364.7 166.2 364.7 164.9 367.1 C161.2 373.3 157.3 377.9 151.5 382.2 C150.9 382.7 150.2 383.2 149.6 383.8 C136.7 393.6 117.6 394.8 102.2 397.2 C99 397.7 95.8 398.2 92.6 398.7 C90.5 399.1 88.4 399.4 86.2 399.8 C74.9 401.6 63.5 403.6 52.2 405.7 C49.6 406.2 47.1 406.6 44.5 407 C43.7 407.1 43 407.3 42.2 407.4 C40.3 407.7 38.5 408 36.6 408.3 C32.1 409.6 28.8 411.9 25.5 415.2 C25.3 417.4 25.3 417.4 25.4 419.8 C25.4 420.6 25.4 421.4 25.4 422.3 C25.4 422.6 25.4 422.6 25.5 424.2 C37.8 428 53.1 424.5 65.6 422.8 C69 422.3 72.4 421.8 75.8 421.4 C76.7 421.3 77.5 421.2 78.4 421 C84.6 420.3 90.7 419.8 97 419.5 C100.5 419.2 104 418.7 107.6 418.1 C116.5 416.9 125.4 416.9 134.5 416.9 C137.3 416.9 140.2 416.9 143.1 416.8 C144.9 416.8 146.8 416.8 148.6 416.8 C149.5 416.8 150.3 416.8 151.2 416.8 C160.6 416.9 168.5 419.5 176.2 424.9 C176.8 425.4 177.5 425.8 178.2 426.3 C182.8 429.5 186.9 432.8 190.5 437.2 C191.2 438 191.9 438.8 192.6 439.7 C214.5 467.3 219.1 499.3 215.9 533.7 C212.9 553.9 203.2 571.7 186.7 583.9 C178.5 589.4 169.9 592.5 160.5 595.3 C158.1 596 155.9 596.8 153.6 597.8 C148.8 599.6 143.9 600.4 138.9 601.4 C135.2 602.2 131.7 603.3 128.1 604.4 C124.1 605.6 120.2 606.5 116.2 607.3 C113.1 608 110.1 608.8 107 609.6 C100.8 611.1 94.6 612.5 88.3 613.7 C87.8 613.8 87.8 613.8 84.9 614.4 C81.3 615.1 77.7 615.8 74.1 616.6 C72.8 616.8 71.6 617.1 70.3 617.3 C46.1 622.1 21.9 626.5 -2.5 629.9 C-2.9 629.9 -2.9 629.9 -4.8 630.2 C-10 630.9 -15.3 631.6 -20.5 632.2 C-20.9 632.2 -20.9 632.2 -22.9 632.5 C-37.1 634.2 -51.2 634.5 -65.4 634.4 C-69 634.4 -72.6 634.4 -76.2 634.5 C-78.5 634.5 -80.8 634.5 -83.2 634.5 C-84.2 634.5 -85.3 634.5 -86.3 634.5 C-93.9 634.4 -101.1 633.5 -108.5 632.2 C-108.9 632.1 -108.9 632.1 -110.6 631.8 C-142.3 626.3 -171.4 612.9 -190.9 586.3 C-194.9 580.6 -197.8 574.6 -200.5 568.2 C-200.9 567.2 -201.4 566.2 -201.8 565.1 C-205.2 557.2 -208.1 549.2 -210.8 541.1 C-211.5 539.2 -212.2 537.3 -212.9 535.4 C-215.1 529.2 -217.2 523.1 -218.8 516.7 C-219.5 514.4 -220.2 512.1 -221 509.8 C-222.6 505.3 -223.6 500.6 -224.6 495.9 C-225.5 492.2 -226.4 488.6 -227.4 484.9 C-229.6 476 -231.4 467.1 -233.1 458.1 C-233.5 455.8 -233.9 453.5 -234.4 451.2 C-234.7 449.7 -235 448.2 -235.2 446.7 C-236.2 441.9 -237.1 437.1 -238.1 432.2 C-239.3 426.4 -240.3 420.5 -241.1 414.6 C-241.3 412.8 -241.6 411 -241.8 409.2 C-241.9 408.3 -242 407.5 -242.2 406.6 C-242.6 403.4 -243.1 400.3 -243.6 397.1 C-244.5 390.8 -245.1 384.4 -245.7 378 C-246.2 373 -246.8 368.1 -247.4 363.2 C-256.8 290.2 -256.3 212.5 -245.6 139.8 C-245.4 139 -245.3 138.2 -245.2 137.4 C-241.1 109.8 -232 79.9 -212.5 59.2 C-211.7 58.3 -210.9 57.4 -210.1 56.5 C-192.8 38.1 -167.7 25.5 -143.5 19.2 C-142.4 18.9 -141.3 18.6 -140.1 18.3 C-136.9 17.4 -133.7 16.5 -130.5 15.7 C-129.2 15.4 -127.9 15 -126.6 14.7 C-116.7 12 -106.9 10.1 -96.8 8.5 C-94.6 8.2 -92.5 7.8 -90.3 7.5 C-78.4 5.5 -66.4 4.3 -54.3 3.1 C-53.5 3 -52.6 2.9 -51.7 2.8 C-34.5 1.1 -17.3 -0 0 0 Z " fill="currentColor" transform="translate(1746.5,84.8125)"/>
+<path d="M0 0 C18.4 15.5 23.7 36.3 26.1 59.2 C26.3 61.6 26.6 64 27 66.4 C28.1 74.5 28.6 82.5 28.9 90.7 C28.9 91.8 29 92.9 29 94.1 C29.5 106.3 29.7 118.6 29.8 130.8 C29.9 134.9 29.9 139 30 143 C30.1 153.2 30.3 163.3 30.4 173.4 C30.5 181.4 30.7 189.3 30.8 197.2 C30.8 200.6 30.9 204 30.9 207.4 C31 211.2 31 214.9 31.1 218.7 C31.1 219.3 31.1 219.3 31.1 222 C31.2 227.7 31.5 233.3 32.1 238.9 C32.5 241.7 32.6 244.5 32.7 247.3 C32.7 248.3 32.7 249.4 32.8 250.5 C32.8 252.7 32.9 254.9 33 257.2 C33 258.2 33.1 259.3 33.1 260.4 C33.1 261.4 33.2 262.3 33.2 263.3 C33.4 265.9 33.8 268.4 34.4 271 C34.5 272.6 34.6 274.1 34.6 275.7 C34.6 276.1 34.6 276.1 34.7 278.3 C34.7 278.8 34.7 278.8 34.8 281.1 C36 308 36 308 46.1 317.6 C53.8 322.3 63.3 320.4 71.7 318.5 C72.5 318.2 73.4 318 74.3 317.8 C91.8 313.6 110.2 309.6 128.2 309.5 C129 309.5 129.7 309.5 130.4 309.5 C135.1 309.6 139 310.7 143.3 312.3 C145.9 313.2 148.5 313.7 151.2 314.2 C165.3 317.8 177.2 327.8 184.8 340.1 C185.7 341.7 186.5 343.4 187.4 345 C187.6 345.4 187.6 345.4 188.7 347.6 C191.2 352.3 193.4 357.1 195.4 362 C195.7 362.7 196 363.4 196.3 364.2 C212.4 407.1 221.7 484.9 203 527.6 C200.5 532.7 197.7 537.4 194.4 542 C193.7 542.9 193.1 543.8 192.5 544.7 C188.1 550.5 183.4 554.8 177.4 559 C176.4 559.7 175.5 560.4 174.5 561.1 C168.3 565.4 162.4 568.4 155.4 571 C152.4 572.2 149.5 573.5 146.5 574.8 C139.4 577.6 132.1 579.7 124.7 581.8 C123.9 582 123.1 582.3 122.3 582.5 C120.5 583 118.7 583.5 116.9 584 C115 584.6 113 585.1 111.1 585.7 C97.4 589.6 83.7 592.7 69.7 595.1 C67.7 595.4 65.8 595.7 63.8 596.1 C47.6 598.9 31.3 601.3 15 603.5 C11.5 604 8.1 604.5 4.7 605.1 C-1.7 606.1 -8.1 606.6 -14.6 607 C-21.1 607.4 -27.6 608 -34.1 609 C-43.6 610.4 -53.2 610.9 -62.8 611.6 C-65.5 611.8 -68.3 611.9 -71.1 612.1 C-72.9 612.3 -74.6 612.4 -76.4 612.5 C-80.8 612.8 -85.1 613.1 -89.5 613.6 C-98.3 614.3 -107.1 614.3 -116 614.3 C-118.1 614.3 -120.2 614.3 -122.3 614.4 C-139.1 614.6 -156.4 614.1 -171.7 606.3 C-172.4 606 -173.1 605.6 -173.8 605.3 C-180 602.1 -184.9 598.1 -189.6 593 C-190.3 592.3 -191 591.5 -191.7 590.8 C-203.6 577.2 -210.1 558.4 -213.6 541 C-213.9 539.8 -214.1 538.6 -214.4 537.3 C-216.8 525.3 -218.9 513.3 -220.9 501.2 C-221.7 496.5 -222.5 491.7 -223.4 486.9 C-229.1 454.1 -229.1 454.1 -230.7 439.3 C-231.2 433.8 -232 428.5 -233 423.1 C-234.8 413.3 -236.2 403.5 -237.6 393.6 C-237.8 392.7 -237.9 391.8 -238 390.8 C-239.8 378.6 -241.4 366.3 -242.7 354 C-243.3 347.4 -244.2 340.8 -245.1 334.2 C-246.6 323.9 -247.6 313.5 -248.5 303.1 C-249.1 297.1 -249.7 291.1 -250.6 285.1 C-251.8 277.3 -252.4 269.5 -253 261.6 C-253.3 258.4 -253.5 255.1 -253.8 251.8 C-253.8 251 -253.9 250.1 -254 249.2 C-254.5 242.4 -255.1 235.6 -255.7 228.7 C-255.9 226.6 -256 224.5 -256.2 222.4 C-256.5 219.3 -256.7 216.2 -257 213.1 C-259.3 187.3 -259.8 161.6 -259.8 135.7 C-259.8 132.2 -259.8 128.7 -259.8 125.1 C-260 74 -260 74 -255 58.1 C-254.7 57.2 -254.5 56.4 -254.2 55.5 C-250.5 43.7 -244.6 33.4 -236.6 24 C-236.3 23.6 -236.3 23.6 -234.7 21.5 C-224.2 9 -205.8 1.1 -190.6 -4 C-190 -4.2 -189.4 -4.4 -188.7 -4.6 C-178.5 -8 -168.3 -10.1 -157.6 -11.6 C-155.3 -11.9 -152.9 -12.3 -150.6 -12.7 C-138.1 -14.8 -125.7 -15.9 -113 -16.6 C-110.1 -16.8 -107.2 -17 -104.2 -17.2 C-102.5 -17.3 -100.7 -17.4 -98.9 -17.5 C-94.1 -17.8 -89.3 -18.2 -84.6 -18.8 C-56.3 -21.9 -23 -17.6 0 0 Z " fill="currentColor" transform="translate(3114.625,105)"/>
+<path d="M0 0 C0.8 -0 1.5 -0 2.3 -0 C3.9 -0 5.5 -0 7.1 0 C9.5 0 11.9 0 14.3 -0 C15.8 -0 17.4 -0 18.9 0 C19.3 -0 19.3 -0 21.1 -0 C25.9 0 30.5 0.5 35.2 1.1 C37.6 1.3 39.9 1.5 42.2 1.6 C42.8 1.6 42.8 1.6 46.1 1.8 C46.8 1.9 47.4 1.9 48.1 1.9 C115.1 5.9 115.1 5.9 134.2 26.1 C142.3 35.5 142.5 45.9 142.8 57.8 C142.9 59.9 142.9 62.1 143 64.2 C143 65.2 143 66.1 143.1 67.1 C143.2 70.1 143.2 70.1 143.7 73.7 C144.5 79.6 144.5 85.6 144.7 91.6 C144.8 93.6 144.8 95.5 144.9 97.5 C145 102.4 145.2 107.3 145.3 112.1 C147.5 192.3 147.5 192.3 157.2 203.4 C159.7 205.5 161 206.1 164.2 206.1 C170.1 203.2 172.5 198.9 175.2 193.1 C176.5 189.2 177.2 185.3 177.9 181.3 C178.1 180.2 178.3 179.1 178.5 177.9 C180.8 164.8 182.4 151.6 183.9 138.4 C184 137.2 184.2 135.9 184.3 134.6 C186.3 117.9 187.9 101.2 189.1 84.5 C189.8 74.3 190.6 64.2 191.9 54 C192.2 52.1 192.4 50.2 192.6 48.3 C193.4 42.2 194.2 37.9 198.2 33.1 C198.7 32.5 199.1 31.9 199.6 31.3 C211.1 18.6 229.1 15.7 245.2 13.1 C246.3 12.9 247.4 12.8 248.5 12.6 C260.4 10.7 272.4 10.7 284.4 10.7 C285.6 10.7 286.7 10.7 287.9 10.7 C305.9 10.7 323.6 11.7 341.5 13.4 C342.6 13.6 343.7 13.7 344.8 13.8 C357.1 15 369.1 16.7 381.2 19.1 C383.5 19.6 385.8 20 388.1 20.4 C404.7 23.4 421 26.4 437 32.1 C440.1 33.1 443 33.6 446.2 34.1 C446.3 49.9 446.4 65.6 446.4 81.4 C446.5 88.7 446.5 96 446.5 103.3 C446.6 109.7 446.6 116 446.6 122.4 C446.6 125.8 446.6 129.1 446.7 132.5 C446.7 136.3 446.7 140 446.7 143.8 C446.7 144.9 446.7 146 446.7 147.2 C446.7 148.2 446.7 149.2 446.7 150.3 C446.7 150.7 446.7 150.7 446.7 153 C446.6 153.7 446.4 154.4 446.2 155.1 C444.3 156.3 444.3 156.3 442.2 157.1 C440.5 159.6 440.5 159.6 438.9 162.6 C438.6 163.2 438.6 163.2 437 165.9 C436.4 167 435.8 168 435.2 169.1 C427.1 183.1 418.3 196.7 409.2 210.1 C401 222.4 393 234.7 385.1 247.2 C382.2 251.8 379.2 256.3 376.3 260.9 C373.7 264.9 371.1 268.9 368.6 272.9 C365.8 277.3 362.8 281.7 359.8 286 C352.9 295.9 346.3 305.9 340 316.2 C336.8 321.3 333.4 326.4 330.1 331.4 C325.5 338.3 321 345.2 316.5 352.1 C315.3 354 314.1 355.9 312.9 357.8 C308.6 364.5 304.3 371.2 300.1 378 C297.9 381.4 295.7 384.9 293.5 388.3 C288.8 395.4 284.3 402.5 280.2 409.9 C279.9 410.6 279.5 411.2 279.1 411.9 C272.2 425.1 272.7 439.1 272.6 453.6 C272.6 456.8 272.5 460 272.5 463.1 C272.5 465.1 272.4 467 272.4 469 C272.4 469.9 272.4 470.7 272.4 471.6 C272.4 472.4 272.4 473.2 272.4 474 C272.2 476.1 272.2 476.1 271.7 478 C270.9 481.5 271.1 485.1 271.1 488.7 C271.1 489.6 271 490.4 271 491.3 C271 493.2 271 495.1 271 497 C271 499.9 271 502.9 270.9 505.9 C270.9 514.4 270.8 522.9 270.8 531.3 C270.7 536.5 270.7 541.7 270.6 546.9 C270.6 548.9 270.6 550.8 270.6 552.8 C270.5 581.8 270.5 581.8 265.5 594.9 C265.3 595.7 265 596.4 264.8 597.1 C259.6 610.6 250 619.7 237.2 626.1 C217.6 634.8 195.4 633.6 174.5 633.5 C170.3 633.5 166.2 633.5 162.1 633.5 C96.6 633.8 96.6 633.8 72.2 622.1 C71.2 621.7 70.2 621.2 69.2 620.8 C56.1 614.8 45.4 604.6 40.1 591.1 C38 584.9 37 578.7 36.1 572.2 C35.8 570 35.5 567.8 35.2 565.6 C35 564.6 34.9 563.7 34.8 562.7 C34.5 560.8 34.2 558.8 33.7 556.9 C31.7 546.9 31.9 536.8 31.9 526.6 C31.9 523.1 31.9 519.6 31.9 516.1 C31.8 506.2 31.8 496.4 31.8 486.5 C31.8 480.4 31.7 474.3 31.7 468.3 C31.7 466 31.7 463.7 31.7 461.4 C31.7 438 29 417.7 17.2 397.1 C16 394.9 14.9 392.7 13.7 390.4 C11.6 386.7 9.6 383 7.3 379.3 C4.4 374.6 1.9 369.6 -0.5 364.7 C-4.8 356.1 -9.3 347.6 -13.8 339.1 C-14.1 338.5 -14.4 337.9 -14.8 337.3 C-17.7 331.8 -20.6 326.4 -23.7 321.1 C-27.3 314.8 -30.7 308.4 -33.9 301.9 C-35.8 298.1 -37.7 294.3 -39.8 290.6 C-42.4 285.8 -44.9 280.8 -47.4 275.9 C-50.4 269.8 -53.5 263.8 -56.7 257.8 C-60.4 250.7 -64 243.6 -67.4 236.3 C-70.6 229.4 -74.2 222.9 -78.1 216.4 C-81.4 210.9 -84.2 205.2 -86.9 199.4 C-88.9 194.8 -91.2 190.4 -93.6 186.1 C-97.6 178.7 -101 171.1 -104.5 163.5 C-107.7 156.5 -111 149.5 -114.3 142.5 C-151.9 64.4 -151.9 64.4 -146.8 45.7 C-141.7 32.2 -131 23.6 -118.4 17.8 C-117.2 17.2 -116 16.7 -114.8 16.1 C-113.7 15.7 -112.7 15.2 -111.6 14.7 C-103.8 11.4 -96.2 10 -87.8 8.9 C-83.9 8.4 -80.1 7.5 -76.2 6.6 C-68.3 4.9 -60.4 4.2 -52.3 3.5 C-50.8 3.4 -49.3 3.3 -47.9 3.1 C-38.1 2.3 -28.4 1.7 -18.6 1.4 C-17.7 1.4 -16.9 1.4 -16 1.3 C-15.3 1.3 -14.5 1.3 -13.8 1.3 C-11.8 1.1 -11.8 1.1 -10 0.6 C-6.7 -0.1 -3.4 -0 0 0 Z " fill="currentColor" transform="translate(3603.765625,85.8671875)"/>
+<path d="M0 0 C0.7 -0 1.5 -0 2.2 -0 C3.7 -0 5.2 -0 6.8 0 C9.1 0 11.4 0 13.7 -0 C15.2 -0 16.7 -0 18.2 0 C18.9 -0 19.5 -0 20.2 -0 C25 0 29.5 0.5 34.2 1.1 C36 1.3 37.9 1.4 39.8 1.4 C40.8 1.5 41.8 1.5 42.8 1.5 C44.9 1.6 47 1.7 49 1.7 C49.5 1.8 49.5 1.8 52 1.9 C52.9 1.9 53.8 1.9 54.7 1.9 C57.2 2.1 57.2 2.1 59 2.6 C62.1 3.4 65.2 3.5 68.4 3.7 C87.8 5 106.3 7.4 125.2 12.1 C126.2 12.4 127.1 12.6 128.2 12.9 C147.5 17.6 165.6 24.7 183.2 34.1 C184.2 34.7 185.3 35.3 186.4 35.9 C201.7 44.4 217.2 57.3 225.2 73.1 C225.8 74.3 226.5 75.5 227.1 76.6 C241.3 102.7 241.9 133.5 236.2 162.1 C235.9 163.4 235.7 164.7 235.5 166 C232.1 184.5 223.7 201.9 208.2 213.1 C195 221.3 182.1 222.4 166.8 222.6 C164.6 222.7 162.5 222.7 160.3 222.8 C157.3 222.8 154.2 222.9 151.2 223 C107.9 223.9 107.9 223.9 88.6 225.6 C87.9 225.7 87.2 225.8 86.5 225.8 C75 226.8 75 226.8 70.2 229.1 C68.3 231.5 68.1 233.5 67.6 236.5 C68.3 241 69.8 242.2 73.2 245 C77.1 247.3 81.3 247.4 85.8 247.7 C86.4 247.8 87.1 247.8 87.7 247.9 C89.2 248 90.6 248.1 92 248.2 C94.3 248.4 96.5 248.6 98.8 248.8 C105.3 249.3 111.8 249.8 118.2 250.3 C169 254.3 169 254.3 187.2 261.1 C187.9 261.4 188.7 261.7 189.5 262 C201.3 266.5 210.5 274.9 216.2 286.2 C226.1 309.9 223.4 348.5 214.3 372.4 C211.7 378.3 208.8 383.9 205.2 389.1 C204.6 389.9 204.1 390.7 203.6 391.5 C196.2 402 184.1 408 171.8 410.5 C162.5 411.9 153.1 411.9 143.8 412.1 C139.9 412.2 136.1 412.3 132.2 412.4 C127 412.6 121.8 412.8 116.6 412.9 C106.8 413.2 97 413.5 87.2 413.9 C85.3 414 83.5 414 81.7 414.1 C79.2 414.2 76.6 414.3 74.1 414.4 C73.4 414.4 72.7 414.4 71.9 414.4 C66 414.7 62.4 417 58.2 421 C57.2 423.1 57.2 423.1 56.8 426.1 C58.4 429.8 59.2 429.9 62.8 431.3 C69.9 433.7 76.5 433.6 83.9 433.5 C85.3 433.4 86.7 433.4 88.1 433.4 C91.8 433.4 95.4 433.3 99.1 433.3 C105 433.2 110.8 433.1 116.7 433.1 C118.7 433.1 120.7 433 122.7 433 C130.8 432.9 138.5 433.5 146.5 434.6 C153.8 435.6 161.2 435.9 168.6 436.3 C188.2 437.4 201.8 443.9 215.2 458.1 C221.5 465.5 225.4 474.2 229.2 483.1 C229.4 483.6 229.4 483.6 230.4 486 C233.9 494.2 235.2 501.9 236 510.8 C236.1 512.1 236.2 513.3 236.3 514.6 C239.1 544.1 233.2 570.2 215 593.9 C199.2 612.8 177.5 616.5 154.2 619.1 C152.8 619.3 151.5 619.4 150.1 619.6 C132.1 621.7 114.2 623.6 96.1 624.9 C93.1 625.1 90 625.4 87 625.7 C85.9 625.7 84.8 625.8 83.8 625.9 C81.8 626.1 79.9 626.3 78 626.4 C54.5 628.4 30.9 628.3 7.3 628.4 C3.6 628.4 -0 628.4 -3.7 628.4 C-25 628.5 -45.8 628.3 -66.8 625.1 C-67.6 625 -68.3 624.9 -69.1 624.8 C-73.1 624.2 -77 623.5 -81 622.8 C-82.1 622.5 -83.2 622.3 -84.3 622.1 C-119 615.3 -151.2 599.9 -173 571.1 C-202.3 524.5 -203.9 451.1 -203.7 398 C-203.7 393.1 -204.1 388.3 -204.6 383.4 C-204.9 380.5 -205 377.7 -205 374.7 C-205 373.6 -205 372.5 -205 371.3 C-205 370.2 -205 369.1 -205 367.9 C-205 366.8 -205 365.6 -205 364.5 C-205 358.8 -204.8 353.3 -204.4 347.6 C-203.7 338.8 -203.6 330 -203.5 321.2 C-203.1 300.5 -202.1 280.2 -199.4 259.7 C-198.9 256.1 -198.6 252.5 -198.3 248.8 C-192.1 180.3 -183.1 86.8 -130.8 37.1 C-127.3 34.2 -123.7 31.6 -119.8 29.1 C-118.9 28.5 -118.1 27.9 -117.1 27.3 C-106 20 -94.6 14.9 -81.8 11.1 C-81.5 11 -81.5 11 -79.8 10.5 C-66.2 6.3 -52.6 4.7 -38.5 3.4 C-36.2 3.2 -34.1 2.7 -31.8 2.1 C-29.1 1.9 -26.3 1.8 -23.5 1.6 C-22.1 1.6 -20.6 1.5 -19.1 1.4 C-18.5 1.4 -17.8 1.4 -17.1 1.3 C-15.3 1.2 -13.4 0.9 -11.6 0.6 C-7.7 0.1 -3.9 -0 0 0 Z " fill="currentColor" transform="translate(1030.83984375,90.8671875)"/>
+<path d="M0 0 C3.4 0 6.8 0 10.1 -0 C24.6 -0 38.9 0.3 53.2 1.8 C58.4 2.3 63.6 2.5 68.8 2.6 C82.7 3.1 96.4 5.2 110.2 7.3 C111.3 7.4 112.4 7.6 113.5 7.7 C142.2 11.9 169.9 19 197.2 28.3 C198.4 28.7 199.6 29.1 200.8 29.5 C208.9 32.3 216.5 35.6 224.2 39.3 C224.9 39.6 225.6 40 226.4 40.3 C241.3 47.4 255.9 55.5 269.2 65.3 C270.6 66.2 271.9 67.2 273.3 68.2 C282.2 74.4 290.6 80.9 298.4 88.5 C299.7 89.8 301 91 302.3 92.3 C311.6 101.2 320.4 110.2 328 120.6 C329.2 122.2 330.4 123.8 331.6 125.4 C340.1 136.4 346 148.9 352.2 161.3 C352.5 162 352.9 162.7 353.3 163.4 C375 206.6 379.7 265.5 365.7 311.9 C365.1 313.6 364.5 315.4 363.9 317.1 C363.3 318.8 362.8 320.5 362.3 322.2 C360 330.2 357 337.5 353.3 345 C352.8 346.1 352.3 347.1 351.8 348.2 C348.7 354.6 345.3 360.5 341.2 366.3 C340.6 367.3 339.9 368.2 339.3 369.3 C334.2 376.6 328.6 383.1 322.6 389.6 C320.6 391.8 318.8 394 316.9 396.2 C272.2 447.4 195.5 466.6 130.8 471.5 C127.4 471.7 123.9 471.8 120.5 472 C107.2 472.4 94.8 474.1 84.7 483.6 C81.1 490 80.9 496.5 81.2 503.6 C81.2 504.4 81.3 505.3 81.3 506.2 C81.4 509 81.5 511.8 81.6 514.6 C81.7 518.2 81.8 521.9 81.9 525.5 C81.9 526.4 82 527.3 82 528.2 C83.1 564.9 83.1 564.9 78.2 579.3 C77.3 581.8 76.7 584.2 76.2 586.8 C75.1 590.6 73.8 592.3 71.2 595.3 C70.3 596.5 69.4 597.8 68.6 599.1 C57.4 613.8 39.6 619.8 22.2 623.3 C21.2 623.5 20.3 623.7 19.3 623.9 C-20.3 631.7 -64.1 628.4 -103.8 622.3 C-104.9 622.1 -106 621.9 -107.1 621.8 C-128.6 618.5 -149.5 611.2 -163 593 C-171.8 579.1 -174.2 561.2 -177.2 545.2 C-177.6 543.3 -178 541.5 -178.3 539.6 C-182.3 519.6 -183.7 499.4 -185.4 479.2 C-185.8 474.3 -186.3 469.4 -186.7 464.6 C-188.6 443.4 -189 422.2 -189 400.9 C-189 398.5 -189 396.2 -189 393.8 C-189 388.9 -189 383.9 -189 379 C-189 374 -189 369.1 -189 364.1 C-189.1 339.1 -189 314.2 -187.9 289.2 C-187.8 288.3 -187.8 287.4 -187.8 286.5 C-187.1 271.3 -185.8 256.2 -184.2 241 C-183.7 235.9 -183.2 230.7 -182.8 225.5 C-179.5 187.2 -174.6 149.2 -167.8 111.3 C-167.7 110.4 -167.5 109.5 -167.3 108.6 C-163.5 87.4 -159.7 67.2 -146.8 49.3 C-146.2 48.5 -145.7 47.7 -145.1 46.9 C-133.6 31.5 -119.3 22.3 -101.8 15.1 C-100.1 14.4 -98.4 13.6 -96.7 12.8 C-83.1 6.5 -67.8 3.9 -52.8 2.7 C-49.7 2.4 -46.5 2.1 -43.4 1.8 C-28.9 0.1 -14.5 -0 0 0 Z M98.4 208.2 C90.5 219.1 89.7 229.5 91.4 242.5 C93.6 252.8 99.5 260 108 266 C117.9 271.8 129.8 271.5 140.7 269 C145.2 267.7 148.5 266.3 152.2 263.3 C152.9 262.7 153.6 262.1 154.4 261.6 C161.4 255.9 165.8 249.3 167.2 240.3 C168 226.9 165.6 216.4 157.2 205.7 C150 197.9 140.8 194 130.2 193 C116.5 192.5 107.4 198.2 98.4 208.2 Z " fill="currentColor" transform="translate(2317.81005859375,92.7392578125)"/>
+<path d="M0 0 C0.6 0.1 0.6 0.1 3.4 0.7 C39.4 8.3 74.4 22.7 105.7 42 C108.5 43.7 111.4 45.4 114.2 47.1 C119.8 50.4 124.9 54.2 130 58 C131.3 59 132.6 59.9 133.9 60.9 C154.9 76.5 154.9 76.5 160.2 82.6 C165.4 88.8 171.3 94.3 177.1 100 C183.2 106 188.7 112.3 194 119 C194.5 119.6 194.9 120.2 195.4 120.8 C200.7 127.4 205.1 134.3 209.2 141.7 C210.7 144.5 212.3 147.1 213.9 149.8 C223.5 165.7 231 182.4 237 200 C237.3 201 237.7 201.9 238 202.9 C239 206.1 239.8 209.2 240.4 212.5 C240.7 213.6 240.9 214.7 241.1 215.8 C241.3 216.4 241.4 217 241.5 217.7 C241.9 219.5 242.3 221.2 242.7 223 C244.8 232.3 246.1 241.5 247.2 250.9 C247.3 251.7 247.4 252.5 247.4 253.3 C249.8 274 249.2 293.5 246.4 314.2 C246 316.7 245.8 319.2 245.5 321.8 C244.7 330.2 243.2 338.1 241 346.2 C240.1 349.6 239.3 353 238.6 356.4 C228.7 399.7 205.2 441.8 176.4 475.4 C175.1 476.9 173.8 478.5 172.5 480.1 C168.5 485.1 164.5 489.7 159.9 494.1 C158 496 156.2 498 154.5 500.1 C150.5 504.7 146 508.6 141.3 512.4 C139 514.3 137 516 135.1 518.4 C132.8 521.3 130.3 523.1 127.4 525.2 C124.7 527.2 122.2 529.3 119.8 531.5 C111.3 538.7 102.1 544.8 93 551 C92.3 551.5 91.6 552 90.8 552.5 C75.2 563.1 58.7 572.8 41.4 580.4 C38.7 581.7 36 583 33.3 584.4 C27.9 587.1 22.3 589.3 16.6 591.4 C15.6 591.8 14.5 592.1 13.5 592.5 C11.3 593.3 9.2 594.1 7 594.9 C4.3 595.9 1.5 596.9 -1.3 598 C-12.1 601.9 -23 604.9 -34.3 607.4 C-36.9 608 -39.5 608.6 -42.1 609.2 C-92.7 621.4 -165.1 628.4 -211.7 600.8 C-227.7 590 -236.4 574.6 -241 556 C-242.2 549.7 -242.7 543.4 -243.2 537 C-243.4 535.3 -243.6 533.7 -243.7 532 C-244 529.7 -244.2 527.4 -244.4 525 C-244.7 522 -245 518.9 -245.5 515.9 C-246.1 511.2 -246.4 506.6 -246.6 501.9 C-246.6 500.9 -246.6 499.9 -246.7 498.9 C-247.1 489 -247.1 479.2 -247.1 469.3 C-247.1 467.4 -247.1 465.5 -247.1 463.5 C-247.1 459.6 -247.1 455.6 -247.1 451.7 C-247.1 446.7 -247.1 441.7 -247.1 436.7 C-247.2 408.9 -246.7 381.3 -244.1 353.6 C-243.7 349.6 -243.3 345.7 -243 341.7 C-242.9 340.8 -242.8 339.8 -242.7 338.9 C-242 331.7 -241.5 324.4 -241 317.2 C-240.1 304.3 -238.4 291.6 -236.7 278.8 C-235.8 271.6 -235 264.3 -234.1 257.1 C-229.9 221.5 -223.4 186.3 -216.4 151.2 C-215.9 148.9 -215.5 146.6 -215 144.3 C-210.8 123 -206.4 101.8 -200 81 C-199.8 80.5 -199.8 80.5 -199 77.7 C-198.4 75.6 -197.7 73.6 -197.1 71.5 C-196.3 69.1 -195.7 66.8 -195 64.4 C-188.7 42.8 -171.6 24.2 -152.2 13.2 C-136.7 4.9 -120.2 -0.7 -103 -4 C-102.5 -4.1 -102.5 -4.1 -100.2 -4.6 C-67.4 -10.9 -32.3 -6.6 0 0 Z M-17 260 C-17.3 260.3 -17.3 260.3 -18.9 261.8 C-28.6 271.8 -31.2 283.7 -31.3 297.1 C-31.3 298.2 -31.4 299.3 -31.4 300.4 C-31.5 311.7 -28.1 319.4 -21 328 C-20.4 328.8 -19.8 329.7 -19.2 330.5 C-16.7 333.4 -14.4 334.6 -10.9 336.2 C-10.4 336.5 -10.4 336.5 -7.8 337.8 C0.5 341.5 12.3 342 20.9 338.8 C33.3 332.4 39.9 322.7 44.8 309.9 C48.2 298 47.5 281.3 41.6 270.5 C40.2 268.2 38.6 266.1 37 264 C36.3 262.9 35.5 261.9 34.8 260.8 C27.7 253.6 19.3 250.1 9.2 249.7 C-1.3 250 -9.4 252.7 -17 260 Z " fill="currentColor" transform="translate(367,102)"/>
+<path d="M0 0 C2.2 0.9 2.2 0.9 4 2 C3.5 7.7 2.2 11.2 -1 16 C-4 18 -4 18 -6.6 17.8 C-7.4 17.5 -8.2 17.3 -9 17 C-10 14 -10 14 -8.7 11.2 C-8 10.1 -7.4 9 -6.8 7.9 C-6.1 6.9 -5.5 5.8 -4.9 4.7 C-3 2 -3 2 0 0 Z " fill="currentColor" transform="translate(526,821)"/>
+<path d="M0 0 C0.9 3.6 1.2 5.5 -0.2 9 C-0.8 9.9 -1.4 10.8 -2.1 11.8 C-2.7 12.8 -3.2 13.7 -3.8 14.7 C-6.5 17.5 -8.2 17.8 -12 18 C-13.2 16.3 -13.2 16.3 -14 14 C-13 11.3 -13 11.3 -11.3 8.4 C-10.8 7.5 -10.2 6.5 -9.7 5.6 C-6.8 1.1 -5.5 -0.4 0 0 Z " fill="currentColor" transform="translate(1302,821)"/>
+<path d="M0 0 C0.5 0 0.5 0 2.9 0.1 C4.1 2.9 4 4 2.9 7 C2.3 8 1.8 9.1 1.2 10.1 C0.7 11.2 0.2 12.2 -0.3 13.3 C-2 16 -3.3 17.5 -6.1 19.1 C-8.8 18.8 -8.8 18.8 -11.1 18.1 C-11.5 13.4 -10.1 10.8 -7.6 6.8 C-7 5.8 -6.3 4.7 -5.7 3.6 C-3.4 0.1 -3.4 0.1 0 0 Z " fill="currentColor" transform="translate(1956.0625,820.9375)"/>
+<path d="M0 0 C0.8 0 1.6 0.1 2.4 0.1 C3.4 3.1 3.4 3.1 2.6 5.4 C-2.2 14.8 -2.2 14.8 -6.6 18.1 C-9.4 18.4 -9.4 18.4 -11.6 18.1 C-12.4 16 -12.4 16 -12.6 13.1 C-11 10.3 -11 10.3 -8.8 7.4 C-8.1 6.5 -7.4 5.5 -6.6 4.6 C-3 0.1 -3 0.1 0 0 Z " fill="currentColor" transform="translate(1979.625,820.875)"/>
+<path d="M0 0 C2.5 0.1 2.5 0.1 3.5 1.1 C3.3 8.4 -0.4 14 -5.5 19.1 C-8.1 19 -8.1 19 -10.5 18.1 C-11.4 16.5 -11.4 16.5 -11.5 14.1 C-10.3 11.7 -9.1 9.6 -7.6 7.4 C-7.2 6.8 -6.9 6.3 -6.5 5.6 C-3 0.1 -3 0.1 0 0 Z " fill="currentColor" transform="translate(3640.5,820.875)"/>
+<path d="M0 0 C2.4 0.2 2.4 0.2 3.4 1.2 C3.3 6.8 1.6 10.2 -1.9 14.6 C-4.3 16.8 -6.3 17.2 -9.6 17.2 C-10.5 14.1 -10.8 12.6 -9.4 9.6 C-8.9 8.7 -8.3 7.9 -7.8 7 C-7.2 6.1 -6.7 5.3 -6.1 4.4 C-3.2 0.2 -3.2 0.2 0 0 Z " fill="currentColor" transform="translate(3383.5625,821.8125)"/>
+<path d="M0 0 C5.7 4.1 10.3 8.5 13 15 C12.7 20.3 12.7 20.3 11 22 C8.8 22.5 8.8 22.5 6 22 C3.7 19.9 1.9 17.4 0 15 C-4.9 9.6 -10.1 6.5 -17.4 5.8 C-25.1 5.5 -31.8 6.6 -37.9 11.5 C-41.2 14.9 -43 18.2 -43.2 23 C-42.7 27.7 -40.8 31.4 -37.2 34.6 C-31.1 38.7 -25.3 40.7 -18.2 42.4 C-5.8 45.8 5.6 49.7 13 61 C16.2 67.4 16.3 75.7 14.2 82.5 C13.3 84.5 12.3 86.2 11 88 C10.4 88.8 9.8 89.6 9.2 90.5 C6.8 93.2 4.5 94.9 1.5 96.8 C1 97 1 97 -1.3 98.5 C-7.1 101.7 -13.2 101.3 -19.6 101.3 C-20.1 101.3 -20.1 101.3 -22.8 101.4 C-33.1 101.5 -40.8 98.9 -48.2 91.8 C-48.8 91.2 -49.4 90.6 -50 90 C-50.5 89.5 -51 89 -51.6 88.5 C-55.4 84.5 -56 81.3 -56 76 C-54.9 73.9 -54.9 73.9 -53 73 C-50.6 73.1 -50.6 73.1 -48 74 C-45.9 76.5 -45.9 76.5 -43.8 79.8 C-39.1 86.5 -34.5 89.6 -26.6 91.6 C-18.5 92.9 -10.3 90.8 -3 87.3 C1.5 83.9 3.5 80.2 4.3 74.7 C4.5 69.9 3.9 67 1 63 C1 62.3 1 61.7 1 61 C-2.7 59.3 -6.6 58.1 -10.5 56.8 C-11.7 56.4 -13 55.9 -14.3 55.5 C-16.2 54.9 -18.2 54.2 -20.1 53.5 C-45.4 45.1 -45.4 45.1 -53 32.8 C-54.7 26.2 -55.3 19.1 -52.6 12.8 C-48.3 5.5 -40.1 -1.2 -32.1 -3.6 C-21.9 -5.6 -9 -5.3 0 0 Z " fill="currentColor" transform="translate(1451,854)"/>
+<path d="M0 0 C4.2 3.8 7.9 7.9 8.9 13.6 C8.9 14.6 8.9 15.7 8.9 16.7 C8.2 17.4 7.6 18.1 6.9 18.7 C2.9 18.7 1.3 18.2 -1.5 15.3 C-2.2 14.4 -2.9 13.4 -3.7 12.4 C-7.4 7.4 -10.8 3.8 -17.1 2.7 C-25.8 2 -32.3 3 -40.1 6.7 C-41.1 7.1 -42.1 7.4 -43.1 7.7 C-44.2 10.1 -44.2 10.1 -45.1 12.7 C-45.4 13.7 -45.8 14.7 -46.1 15.7 C-46.3 17.8 -46.3 17.8 -46.4 20.1 C-46.4 20.9 -46.4 21.6 -46.4 22.4 C-45.9 26.3 -44.1 28.9 -41.1 31.4 C-34.5 35.3 -28 37.6 -20.7 39.7 C-7.1 43.8 3.8 47.5 10.9 60.7 C13.2 67.5 12.8 74.7 9.7 81.2 C5.1 89.2 -2 94.8 -10.9 97.6 C-22.4 99.9 -35.9 99.6 -46.2 93.5 C-51.7 89.7 -56.1 84.8 -59.1 78.7 C-59.6 73.5 -59.6 73.5 -57.9 70.8 C-56.1 69.7 -56.1 69.7 -53.7 69.9 C-51.1 70.7 -51.1 70.7 -49.6 72.8 C-49.2 73.7 -48.7 74.6 -48.3 75.5 C-44.3 82.7 -38.9 85.5 -31.1 87.7 C-22.6 88.7 -14.6 87.9 -7.1 83.7 C-2.8 80.2 -0.3 76.2 0.9 70.7 C1.2 66.7 1 64.2 -1.1 60.7 C-8.4 53.8 -18.9 51.5 -28.3 48.6 C-40.7 44.7 -50.7 40 -57.5 28.4 C-59.2 21.2 -58.4 14.3 -55.1 7.7 C-50.5 1.1 -44.7 -4.6 -36.7 -6.6 C-23.5 -8.7 -10.9 -8.6 0 0 Z " fill="currentColor" transform="translate(1695.10546875,857.265625)"/>
+<path d="M0 0 C1.4 1.2 2.9 2.5 4.2 3.8 C4.9 4.3 5.5 4.8 6.1 5.3 C16.6 14.5 20.4 29.1 21.6 42.4 C22.1 58 17.9 73.7 8.1 86.1 C1.3 93.3 -8.7 98.7 -18.6 99.1 C-20.5 99.1 -22.3 99.1 -24.1 99.1 C-25 99.1 -25.9 99.1 -26.9 99.1 C-38.6 99.1 -46.6 94.3 -55.2 86.6 C-65.8 75.7 -69.6 61.9 -70.1 47.1 C-69.8 33.1 -67.3 19.5 -57.8 8.8 C-57.1 7.8 -56.4 6.9 -55.7 5.9 C-50.7 -0 -43.1 -4.8 -35.5 -6 C-23.1 -7 -10.4 -7.8 0 0 Z M-53.1 17.7 C-55.2 21.6 -56.5 25.5 -57.8 29.8 C-58 30.4 -58.2 31.1 -58.4 31.8 C-61.3 42.9 -60.1 52.9 -57.1 63.8 C-56.8 64.6 -56.6 65.5 -56.3 66.5 C-53.6 75.7 -48.9 80.2 -40.6 85.2 C-32.1 89.8 -24.3 90.8 -14.8 88.8 C-4.5 84.9 2.6 77.7 7.2 67.8 C11.5 55.5 11.9 43.5 9.2 30.8 C9.1 29.9 8.9 29 8.7 28.1 C6.6 20.2 1.2 12.3 -5.7 7.8 C-23.1 -1.6 -40.7 2.4 -53.1 17.7 Z " fill="currentColor" transform="translate(1987.75,856.25)"/>
+<path d="M0 0 C6.4 4.9 11.8 11.4 15.4 18.6 C15.7 21.6 15.7 21.6 15.4 24.6 C12.4 26.6 12.4 26.6 10 26.4 C6.8 25.4 5.5 24.2 3.4 21.6 C3 20.6 2.6 19.7 2.1 18.8 C-1.8 11.3 -7.7 7.3 -15.6 4.6 C-24.4 1.9 -33.5 3.2 -41.6 7.6 C-50.8 14.3 -55.5 21.4 -57.8 32.4 C-58 33.2 -58.2 33.9 -58.3 34.7 C-60.2 43.1 -59.9 50.7 -57.9 59.1 C-57.7 59.8 -57.5 60.5 -57.3 61.3 C-54.6 71.7 -50.1 78.8 -40.9 84.6 C-35.5 87.7 -30.8 88.2 -24.7 88.1 C-23.8 88.1 -22.9 88.1 -22 88.1 C-12.9 87.8 -7 85.4 -0.6 78.8 C3.4 73.7 5.1 68.5 5.8 62.1 C5.7 61.3 5.6 60.4 5.4 59.6 C2.3 57.5 1.5 57.3 -2.1 57.3 C-3 57.2 -3.8 57.2 -4.7 57.2 C-6.6 57.1 -8.4 57.1 -10.2 57.1 C-11.1 57.1 -12 57 -12.9 57 C-13.7 57 -14.5 57 -15.3 57 C-18.1 56.5 -19.5 55.5 -21.6 53.6 C-21.4 50.9 -21.4 50.9 -20.6 48.6 C-16.1 46.3 -10 47.3 -5 47.3 C-2.8 47.3 -0.5 47.2 1.7 47.2 C3.2 47.2 4.6 47.1 6 47.1 C7.3 47.1 8.6 47.1 10 47.1 C14 47.6 15.7 48.6 18.4 51.6 C19.6 62.4 16.2 74.8 9.4 83.4 C2 91.6 -5.6 97.8 -16.9 98.8 C-19.5 98.9 -22 98.9 -24.5 98.9 C-25.3 98.9 -26.2 98.9 -27.1 98.9 C-34.6 98.9 -41.8 97.6 -47.8 92.7 C-48.1 92.4 -48.1 92.4 -49.7 91.1 C-50 90.8 -50 90.8 -51.6 89.6 C-52.6 88.8 -53.6 88.1 -54.6 87.3 C-64.9 78.5 -69.2 65.6 -70.6 52.6 C-71.9 35.9 -67.8 19.7 -57.8 6.2 C-43.5 -9.3 -17.3 -11.5 0 0 Z " fill="currentColor" transform="translate(2606.5625,856.4375)"/>
+<path d="M0 0 C4.5 3.9 7.8 8.3 8.6 14.2 C8.1 16.8 8.1 16.8 7.1 18.8 C0.7 18.4 0.7 18.4 -1.9 15.7 C-2.6 14.7 -3.2 13.8 -3.9 12.8 C-7.8 7.4 -11.2 4 -17.9 2.8 C-26.5 1.9 -33.1 3.1 -40.9 6.8 C-41.9 7.1 -42.9 7.5 -43.9 7.8 C-45 10.2 -45 10.2 -45.9 12.8 C-46.2 13.5 -46.5 14.1 -46.9 14.8 C-47.4 19.5 -47.3 23.6 -45.6 28.1 C-38.6 35.1 -29.1 37.4 -19.9 40.2 C-9.4 43.4 0.3 46.6 7.1 55.8 C7.9 56.8 8.6 57.8 9.4 58.8 C12.8 65.1 12.1 72.3 10.3 79 C6.4 88.2 -0.2 92.6 -8.9 96.8 C-18.5 100.7 -33.4 99.6 -43 95.8 C-50.4 91.9 -56.1 86.3 -59.9 78.8 C-60.1 75.8 -60.1 75.8 -59.9 72.8 C-57.9 70.8 -57.9 70.8 -55 70.4 C-51.9 70.8 -51.9 70.8 -50.1 73 C-49.6 74 -49.1 75 -48.6 76 C-44.9 82.3 -40.9 85.2 -34 87.4 C-25.1 89.1 -15.8 88.3 -7.9 83.8 C-4.2 80.6 -1.4 77.5 0.1 72.8 C0.5 64.8 0.5 64.8 -1.9 60.8 C-8.4 54.8 -17 52.4 -25.3 49.8 C-37.7 45.9 -49.3 42 -56.9 30.8 C-59.9 24.3 -59.5 16.4 -57.2 9.7 C-53.7 3.1 -47.2 -3.5 -39.9 -5.8 C-25.9 -9.3 -12 -8.4 0 0 Z " fill="currentColor" transform="translate(2991.87890625,857.1953125)"/>
+<path d="M0 0 C4.8 4.3 8.7 9.5 9.3 16.1 C9 16.6 9 16.6 7.3 19.1 C3 19.1 1 18.7 -2.2 15.7 C-2.9 14.7 -3.6 13.7 -4.3 12.7 C-7.7 8 -10.4 5 -16.1 3.4 C-24.9 2.3 -32.5 1.9 -40 7 C-41.7 8.1 -41.7 8.1 -43.7 8.1 C-44.8 10.4 -44.8 10.4 -45.7 13.1 C-46 13.7 -46.4 14.4 -46.7 15.1 C-47.3 19.3 -47.6 23.3 -45.6 27.1 C-39.5 34.8 -30 37.1 -20.9 39.9 C1.9 47.3 1.9 47.3 8.2 57.9 C11.8 65.1 12.8 71.4 10.3 79.2 C6.9 86.9 2.6 91 -4.7 95.1 C-5.7 95.7 -6.8 96.3 -7.9 96.9 C-19.3 100.3 -33.2 100.3 -44.1 95.3 C-51.1 91.2 -56 86.3 -59.7 79.1 C-60.3 75.6 -60.3 74.1 -58.5 71.1 C-56.7 70.1 -56.7 70.1 -54.3 70.2 C-50.7 71.4 -50.1 73.1 -48.3 76.4 C-44.2 83.1 -40.2 85.9 -32.7 88.1 C-22.8 89 -12.8 88.3 -4.7 82.1 C-0.4 77.2 0.5 72.4 0.3 66.1 C-1.1 60.7 -4.4 58.3 -9 55.4 C-14 52.9 -19.3 51.5 -24.7 50.1 C-37.8 46.4 -49.5 42.4 -56.8 30.2 C-59.5 24.3 -59 18.3 -57.7 12.1 C-54.8 4.3 -47.6 -1.4 -40.4 -5.1 C-27.3 -9.8 -11.1 -8.3 0 0 Z " fill="currentColor" transform="translate(3801.6953125,856.93359375)"/>
+<path d="M0 0 C1.1 -0 2.3 -0 3.5 -0 C4.7 -0 5.9 0 7.1 0 C8.3 0 9.4 0 10.6 -0 C35.8 0 35.8 0 47 9.6 C54 18 54.8 25.5 54.2 36.1 C52.9 45.9 46.9 51.7 39.9 58.2 C38.2 60.1 38.2 60.1 37.5 63.3 C38.2 67.7 39.7 70.1 42.1 73.8 C44.9 78.3 47.5 82.9 50.1 87.4 C50.6 88.3 51.1 89.2 51.6 90.1 C52.1 90.9 52.6 91.8 53.1 92.6 C53.5 93.4 53.9 94.1 54.4 94.9 C55.4 97.7 55.2 99.3 54.2 102.1 C51.4 103.2 51.4 103.2 48.2 103.1 C42.3 99.8 40.1 93.8 37.2 88.1 C35.2 84.1 33.2 80.1 31.2 76.1 C30.6 75.1 30.1 74.1 29.6 73 C29.3 72.5 29.3 72.5 28 70 C27.8 69.6 27.8 69.6 26.7 67.3 C25 64.8 24 64.1 21.2 63.1 C18.6 62.9 18.6 62.9 15.7 62.9 C14.7 62.9 13.7 63 12.6 63 C11.6 63 10.5 63 9.4 63 C8.3 63 7.3 63 6.1 63 C3.5 63.1 0.8 63.1 -1.8 63.1 C-2.8 67.3 -2.9 71.1 -2.8 75.3 C-2.8 76.7 -2.8 78.1 -2.8 79.4 C-2.8 81.6 -2.7 83.8 -2.7 85.9 C-2.6 88 -2.6 90.1 -2.6 92.2 C-2.6 92.9 -2.6 92.9 -2.5 96 C-2.8 99.1 -2.8 99.1 -4.2 101 C-6.7 102.7 -8.8 102.5 -11.8 102.1 C-14.5 99.5 -14.1 97.5 -14.1 93.8 C-14.1 92.9 -14.1 92.1 -14.1 91.1 C-14.1 90.2 -14.1 89.3 -14.2 88.3 C-14.2 85.2 -14.2 82.1 -14.2 79 C-14.2 76.9 -14.2 74.8 -14.2 72.6 C-14.2 68.1 -14.2 63.6 -14.2 59.1 C-14.2 53.4 -14.2 47.6 -14.3 41.8 C-14.3 37.4 -14.3 33 -14.3 28.5 C-14.3 26.4 -14.3 24.3 -14.3 22.2 C-14.3 19.2 -14.3 16.2 -14.3 13.3 C-14.3 12.4 -14.3 11.5 -14.4 10.6 C-14.3 4.6 -14.3 4.6 -11.9 2.1 C-7.9 0.2 -4.5 0 0 0 Z M-1.8 11.1 C-4.9 16.6 -4.2 22.9 -4.2 29.1 C-4.2 31.1 -4.2 33.2 -4.2 35.3 C-4.2 36.6 -4.2 37.9 -4.2 39.3 C-4.2 40.5 -4.2 41.7 -4.2 42.9 C-3.8 46.4 -2.9 48.3 -0.8 51.1 C2.8 54 7.3 53.5 11.7 53.4 C12.1 53.4 12.1 53.4 14.1 53.4 C22.9 53.3 32.4 52.3 39.2 46.1 C44.1 39.6 43.9 32.6 42.8 24.8 C41.7 19.4 39.8 15.9 35.2 12.8 C28.1 8.9 22.2 8.5 14.3 8.7 C13.7 8.7 13.7 8.7 10.9 8.7 C1.3 8.9 1.3 8.9 -1.8 11.1 Z " fill="currentColor" transform="translate(648.83984375,850.8671875)"/>
+<path d="M0 0 C0.4 -0 0.4 -0 2.4 -0 C4 -0 5.6 -0 7.3 -0 C9.8 -0 12.3 -0 14.8 -0.1 C16.4 -0.1 18 -0.1 19.6 -0.1 C19.9 -0.1 19.9 -0.1 21.8 -0.1 C31.6 -0 38 3.4 45 10.2 C50.6 17.2 52.2 22.5 52.2 31.4 C52.3 32.3 52.3 33.1 52.3 33.9 C52.4 43.4 48.8 49.2 42.4 55.9 C33.6 64.1 21 65.5 9.4 65.2 C8.8 65.1 8.8 65.1 5.5 65 C1.5 65.2 -0 65.6 -3 68.2 C-3.6 71.4 -3.6 71.4 -3.6 75.4 C-3.6 76.1 -3.6 76.8 -3.6 77.5 C-3.7 79.8 -3.7 82 -3.6 84.2 C-3.6 86.5 -3.6 88.7 -3.7 91 C-3.7 93 -3.7 95 -3.7 97.1 C-3.7 97.6 -3.7 97.6 -4 100.2 C-7 102.2 -7 102.2 -10.6 101.9 C-14 101.2 -14 101.2 -15 100.2 C-15.1 97.2 -15.2 94.3 -15.2 91.3 C-15.2 90.4 -15.2 89.4 -15.2 88.5 C-15.2 85.4 -15.2 82.3 -15.2 79.2 C-15.2 77 -15.2 74.9 -15.2 72.7 C-15.3 68.2 -15.3 63.7 -15.3 59.2 C-15.3 53.5 -15.3 47.7 -15.3 41.9 C-15.3 37.5 -15.3 33.1 -15.3 28.6 C-15.3 26.5 -15.4 24.4 -15.4 22.2 C-15.4 19.3 -15.4 16.3 -15.4 13.3 C-15.4 12.4 -15.4 11.5 -15.4 10.6 C-15.4 9.8 -15.4 9 -15.4 8.2 C-15.4 7.5 -15.4 6.8 -15.4 6 C-14.9 3.6 -13.9 2.7 -12 1.2 C-8.2 -0.4 -4 0 0 0 Z M-3 11.2 C-5.5 15.3 -5.2 19.5 -5.1 24.2 C-5.1 25 -5.1 25.7 -5 26.5 C-5 28.1 -5 29.7 -4.9 31.3 C-4.8 33.8 -4.8 36.2 -4.7 38.7 C-4.7 40.3 -4.6 41.8 -4.6 43.4 C-4.6 44.1 -4.6 44.9 -4.6 45.6 C-4.5 48.5 -4.3 50.7 -2.8 53.1 C1.5 55.6 7.2 54.7 12 54.7 C13.2 54.8 14.3 54.8 15.6 54.8 C24 54.9 30.2 53.3 37 48.2 C42.5 42.1 42.7 35.6 42.4 27.6 C41.7 21.5 39.6 18.8 35.2 14.4 C27.7 9.2 21.1 8.7 12.2 8.9 C11.2 8.9 10.2 8.8 9.1 8.8 C0.1 8.9 0.1 8.9 -3 11.2 Z " fill="currentColor" transform="translate(796.01953125,850.83203125)"/>
+<path d="M0 0 C0.6 -0 0.6 -0 3.8 -0 C5.1 -0 6.5 -0 7.8 -0 C9.2 -0 10.6 -0 12 -0 C14.9 -0 17.8 -0 20.7 -0 C24.5 0 28.2 0 31.9 -0 C34.8 -0 37.7 -0 40.6 -0 C41.9 -0 43.3 -0 44.7 -0 C46.6 -0 48.5 -0 50.5 0 C51 0 51 0 53.8 0 C56.8 0.3 59 0.8 61.7 2.3 C61.9 2.8 61.9 2.8 62.7 5.3 C60.8 7.9 59.5 9.1 56.2 9.8 C55.3 9.8 54.4 9.8 53.4 9.8 C52.4 9.8 51.4 9.8 50.3 9.9 C49.3 9.9 48.2 9.9 47.2 9.9 C45.1 9.9 43 9.9 40.9 10 C40 10 39.1 10 38.1 10 C35.7 10.3 35.7 10.3 32.7 12.3 C31.5 16 31.6 19.5 31.6 23.4 C31.6 24.2 31.6 25 31.6 25.9 C31.6 27.6 31.6 29.4 31.6 31.2 C31.6 35 31.6 38.8 31.5 42.6 C31.5 49.7 31.5 56.8 31.5 63.9 C31.5 68.8 31.5 73.7 31.4 78.7 C31.4 80.5 31.4 82.4 31.4 84.3 C31.4 86.9 31.4 89.5 31.4 92.2 C31.4 92.6 31.4 92.6 31.4 94.5 C31.4 96.7 31.4 96.7 30.7 100.3 C28 102.6 26.7 103.3 23 103.1 C20.7 102.3 20.7 102.3 18.7 99.3 C18.5 96.5 18.4 93.8 18.5 91.1 C18.5 90.2 18.4 89.4 18.4 88.5 C18.4 86.7 18.4 84.9 18.4 83.1 C18.4 80.2 18.4 77.4 18.4 74.5 C18.3 66.4 18.3 58.2 18.3 50.1 C18.3 45.1 18.2 40.1 18.2 35.1 C18.2 33.2 18.2 31.3 18.2 29.4 C18.2 26.8 18.2 24.1 18.1 21.4 C18.1 20.7 18.1 19.9 18.1 19.1 C18.1 13.8 18.1 13.8 16.4 11.3 C14 9.8 12.3 9.9 9.5 9.9 C9 9.8 9 9.8 6.5 9.8 C5.4 9.8 4.4 9.8 3.3 9.8 C1.2 9.7 -0.9 9.7 -3 9.7 C-3.9 9.7 -4.8 9.7 -5.8 9.6 C-8.7 9.2 -10.1 8.3 -12.3 6.3 C-12.3 4.2 -12.3 4.2 -11.3 2.3 C-7.4 0.3 -4.3 0 0 0 Z " fill="currentColor" transform="translate(1025.271484375,850.7412109375)"/>
+<path d="M0 0 C1 -0 1.9 -0 2.9 -0 C3.4 -0 3.4 -0 6.1 -0 C7.1 -0 8.2 -0 9.3 -0 C11.6 -0 13.8 -0 16.1 -0 C19.5 -0 23 -0.1 26.5 -0.1 C28.7 -0.1 30.9 -0.1 33.1 -0.1 C34.1 -0.1 35.1 -0.1 36.2 -0.1 C41.2 -0.1 45.6 -0 50.3 2.1 C51.4 4.1 51.4 4.1 51.3 6.1 C49.5 8.1 48 9 45.3 9.4 C42.9 9.6 40.5 9.6 38 9.6 C37.1 9.6 36.2 9.7 35.3 9.7 C32.4 9.7 29.6 9.7 26.7 9.8 C23.8 9.8 21 9.8 18.1 9.9 C16.3 9.9 14.5 9.9 12.7 10 C11.9 10 11.1 10 10.3 10 C9.6 10 8.9 10 8.1 10 C6.3 10.1 6.3 10.1 3.3 11.1 C1.2 15.3 1.8 20.8 1.6 25.4 C1.5 26.5 1.4 27.7 1.4 28.8 C1.4 29.4 1.4 29.4 1.2 32.2 C1.2 33.2 1.2 34.2 1.1 35.2 C1.3 38.5 2 41.1 3.3 44.1 C6.5 45.8 10.1 45.3 13.6 45.3 C15.3 45.3 17 45.4 18.7 45.4 C21.4 45.4 24.1 45.5 26.8 45.5 C29.4 45.5 32 45.5 34.6 45.6 C35.4 45.6 36.2 45.6 37.1 45.6 C40.7 45.6 42.9 45.9 45.8 48 C46.1 48.4 46.1 48.4 47.3 50.1 C46.6 52.8 46.6 52.8 45.3 55.1 C42 56.8 38.4 56.3 34.9 56.4 C33.1 56.4 31.4 56.5 29.7 56.5 C27 56.5 24.3 56.6 21.6 56.6 C19 56.7 16.4 56.7 13.8 56.8 C13 56.8 12.2 56.8 11.3 56.8 C7.5 56.9 5.5 57 2.3 59.1 C1.6 63.2 1.5 67.3 1.4 71.4 C1.4 73.4 1.3 75.5 1.2 77.5 C1.2 78.8 1.1 80.1 1.1 81.4 C1 82.6 1 83.7 1 84.9 C1.3 88.6 1.8 90.4 4.3 93.1 C9.1 94.4 13.9 94.2 18.9 94.2 C20.4 94.2 21.8 94.1 23.3 94.1 C25.5 94.1 27.8 94.1 30 94 C32.2 94 34.4 94 36.6 94 C37.9 94 39.2 94 40.5 93.9 C44.6 94.2 47.5 94.8 51.3 96.1 C52.4 98.6 52.4 98.6 52.3 101.1 C48.9 103.4 47.8 103.4 43.8 103.4 C42.7 103.4 41.6 103.5 40.5 103.5 C39.3 103.5 38.1 103.5 36.8 103.5 C36.2 103.5 36.2 103.5 33.1 103.5 C30.5 103.5 27.9 103.5 25.3 103.5 C22.6 103.5 19.9 103.5 17.2 103.6 C13.4 103.6 9.5 103.6 5.7 103.6 C4.5 103.6 3.3 103.6 2.1 103.6 C0.9 103.6 -0.2 103.6 -1.3 103.6 C-2.3 103.6 -3.3 103.6 -4.3 103.6 C-6.7 103.1 -6.7 103.1 -8.6 101.7 C-10.4 97.8 -10.2 94.2 -10.1 90 C-10.1 89.1 -10.1 88.2 -10.1 87.2 C-10.1 84.2 -10.1 81.1 -10.1 78.1 C-10.1 76 -10.1 73.8 -10.1 71.7 C-10.1 67.3 -10.1 62.9 -10.1 58.4 C-10.1 52.7 -10.1 47 -10.1 41.3 C-10.1 37 -10.1 32.6 -10 28.2 C-10 26.1 -10 24 -10 21.9 C-10 19 -10 16.1 -10 13.1 C-10 12.3 -10 11.4 -10 10.5 C-10 4.5 -10 4.5 -7.7 1.1 C-4.9 0.2 -3 0 0 0 Z " fill="currentColor" transform="translate(1268.743408203125,850.854736328125)"/>
+<path d="M0 0 C1.1 -0 2.2 -0 3.4 -0 C4.6 -0 5.8 -0 7.1 -0 C8.3 -0 9.6 -0 10.8 -0 C14.1 -0 17.4 -0 20.8 0 C22.8 0 24.8 0 26.8 -0 C30.7 -0 34.6 -0 38.5 -0 C39.1 -0 39.1 -0 42.2 -0 C42.7 -0 42.7 -0 45.6 0 C46.5 0 47.5 0 48.5 0 C51.5 0.3 53.6 0.9 56.3 2.3 C57.4 4.4 57.4 4.4 57.3 7.3 C56.1 10 54.5 12.5 52.8 15 C52.3 15.7 51.9 16.4 51.4 17.2 C48.4 21.7 45.3 26 41.9 30.1 C39.4 33.4 37.3 36.9 35.2 40.3 C32.8 44 30.3 47.6 27.8 51.1 C24.5 55.9 21.3 60.6 18.2 65.4 C15.9 68.8 13.6 72.2 11.2 75.5 C10.7 76.2 10.2 76.9 9.7 77.7 C8.7 79 7.8 80.4 6.8 81.7 C6.3 82.3 5.9 83 5.4 83.6 C5 84.1 4.6 84.7 4.2 85.2 C2.9 88.1 2.6 91.1 2.3 94.3 C2.8 94.3 3.4 94.3 4 94.3 C9.8 94.2 15.7 94.2 21.5 94.2 C23.7 94.2 25.9 94.2 28.1 94.2 C31.2 94.2 34.4 94.2 37.5 94.2 C38.5 94.2 39.5 94.2 40.5 94.1 C45.5 94.1 50.3 94.2 55.3 95.3 C55.9 95.9 56.6 96.6 57.3 97.3 C57 99.8 57 99.8 56.3 102.3 C53.5 103.6 51.2 103.4 48.1 103.4 C47.5 103.4 47.5 103.4 44.2 103.5 C42.8 103.5 41.4 103.5 40 103.5 C39.3 103.5 38.6 103.5 37.9 103.5 C34.1 103.5 30.3 103.5 26.6 103.6 C22.7 103.6 18.8 103.6 14.9 103.6 C11.9 103.7 9 103.7 6 103.7 C4.5 103.7 3.1 103.7 1.7 103.7 C-0.3 103.7 -2.3 103.7 -4.3 103.7 C-5.5 103.7 -6.6 103.7 -7.8 103.7 C-11.4 103.2 -12.6 102.2 -14.7 99.3 C-13.9 95.1 -12 91.8 -9.7 88.3 C-9.1 87.3 -8.5 86.4 -7.9 85.5 C-7.2 84.5 -6.6 83.5 -5.9 82.5 C-5.2 81.5 -4.6 80.5 -3.9 79.4 C0.8 72.3 5.7 65.4 10.8 58.5 C14.8 52.9 18.6 47.2 22.3 41.4 C25.7 36 29.4 30.8 33.2 25.7 C33.8 24.9 34.4 24 35.1 23.1 C35.7 22.4 36.2 21.6 36.8 20.9 C38.2 18.5 38.7 16.7 39.4 14.1 C39.7 12.8 40 11.6 40.3 10.3 C39.7 10.3 39.1 10.2 38.5 10.2 C32.3 10.1 26.2 10 20 9.9 C17.7 9.9 15.4 9.9 13.1 9.8 C9.8 9.8 6.5 9.7 3.2 9.7 C2.1 9.7 1.1 9.6 0.1 9.6 C-0.9 9.6 -1.9 9.6 -2.9 9.6 C-3.7 9.6 -4.5 9.6 -5.4 9.5 C-7.9 9.2 -9.6 8.5 -11.7 7.3 C-11.5 4.9 -11.5 4.9 -10.7 2.3 C-7.1 0.4 -4 0 0 0 Z " fill="currentColor" transform="translate(1794.720703125,850.7412109375)"/>
+<path d="M0 0 C0.9 -0 1.8 -0 2.7 -0 C4.6 -0 6.6 -0 8.5 -0 C11.4 -0 14.3 -0 17.2 -0.1 C19 -0.1 20.9 -0.1 22.8 -0.1 C23.2 -0.1 23.2 -0.1 25.3 -0.1 C37 -0 37 -0 41.6 2.2 C42.4 4.2 42.4 4.2 42.6 6.2 C38 9.7 34.1 9.6 28.5 9.6 C27.7 9.6 26.8 9.6 25.9 9.6 C22.2 9.7 18.5 9.7 14.8 9.7 C12 9.7 9.3 9.7 6.6 9.8 C5.8 9.8 4.9 9.8 4.1 9.8 C0.7 9.8 -1.8 9.9 -4.9 11.3 C-6.9 13.9 -6.9 15.7 -7 19 C-7.1 20.1 -7.1 21.3 -7.2 22.4 C-7.2 23.6 -7.2 24.8 -7.2 26 C-7.3 26.6 -7.3 26.6 -7.4 29.6 C-7.7 39.7 -7.7 39.7 -5.4 44.2 C-2.1 45.8 1.4 45.3 5 45.4 C6.7 45.4 8.4 45.4 10.1 45.5 C12.8 45.5 15.5 45.5 18.2 45.6 C20.8 45.6 23.4 45.6 26 45.7 C26.4 45.7 26.4 45.7 28.4 45.7 C31.8 45.8 34.2 45.9 37.1 47.5 C38.6 49.2 38.6 49.2 39.1 51.7 C38.6 54.2 38.6 54.2 37.1 55.3 C33.6 56.5 30.2 56.5 26.6 56.5 C26.2 56.5 26.2 56.5 24.2 56.6 C21.7 56.6 19.2 56.6 16.7 56.7 C13.4 56.7 10.1 56.8 6.9 56.8 C6.5 56.8 6.5 56.8 4.6 56.8 C-3.1 57 -3.1 57 -6.4 59.2 C-7.1 61.9 -7.1 61.9 -7.1 65.3 C-7.2 66.5 -7.2 67.8 -7.3 69.1 C-7.3 69.7 -7.3 69.7 -7.3 73 C-7.3 74.3 -7.4 75.5 -7.4 76.9 C-7.7 87.4 -7.7 87.4 -5.4 92.2 C-3.5 94 -0.6 93.4 1.9 93.5 C3.2 93.5 4.5 93.6 5.8 93.6 C6.5 93.6 7.2 93.7 7.9 93.7 C9.9 93.7 11.9 93.8 14 93.9 C21 94.1 28 94.2 35.1 94 C38 94.2 40 94.9 42.6 96.2 C44 98.3 44 98.3 44.6 100.2 C42.9 102.4 42 103.1 39.2 103.5 C38.7 103.6 38.7 103.6 36.3 103.6 C35.8 103.6 35.8 103.6 33 103.6 C31.9 103.6 30.7 103.6 29.5 103.6 C28.3 103.6 27.1 103.6 25.8 103.6 C23.3 103.6 20.7 103.6 18.2 103.6 C14.3 103.5 10.4 103.6 6.5 103.6 C4 103.6 1.5 103.6 -0.9 103.6 C-1.5 103.6 -1.5 103.6 -4.5 103.6 C-5 103.6 -5 103.6 -7.8 103.6 C-8.7 103.6 -9.7 103.6 -10.7 103.5 C-14.1 103.1 -15.8 102.6 -18.4 100.2 C-19.1 97.1 -19 94.2 -19 91.1 C-19 90.1 -19 89.2 -19 88.2 C-19 85.2 -19 82.1 -19 79 C-19 76.8 -19 74.7 -19 72.6 C-19 68.1 -19 63.6 -19 59.1 C-18.9 53.3 -18.9 47.6 -18.9 41.8 C-19 37.4 -18.9 33 -18.9 28.5 C-18.9 26.4 -18.9 24.3 -18.9 22.2 C-18.9 19.2 -18.9 16.2 -18.9 13.3 C-18.9 12.8 -18.9 12.8 -18.9 10.6 C-18.8 4.7 -18.8 4.7 -16.5 2.1 C-11.2 -0.3 -5.7 0 0 0 Z " fill="currentColor" transform="translate(2419.359375,850.83203125)"/>
+<path d="M0 0 C1.2 -0 2.5 -0 3.8 -0 C5.1 -0 6.5 -0 7.8 -0 C9.2 -0 10.6 -0 12 -0 C14.9 -0 17.8 -0 20.7 -0 C24.5 0 28.2 0 31.9 -0 C34.8 -0 37.7 -0 40.6 -0 C41.9 -0 43.3 -0 44.7 -0 C46.6 -0 48.5 -0 50.5 0 C51.5 0 52.6 0 53.8 0 C56.6 0.3 58.3 0.6 60.6 2.3 C60.8 2.8 60.8 2.8 61.6 5.3 C60.5 7.4 60.5 7.4 58.6 9.3 C56.1 9.8 56.1 9.8 53.2 9.8 C52.6 9.8 52.6 9.8 50 9.8 C49.4 9.8 49.4 9.8 46.6 9.8 C44.4 9.8 42.2 9.9 40 9.9 C39.1 9.9 38.1 9.9 37.1 9.9 C34.6 10.3 34.6 10.3 32.8 11.6 C30 15.4 30.5 19.6 30.5 24.2 C30.5 25 30.5 25.8 30.5 26.6 C30.5 28.4 30.5 30.1 30.6 31.9 C30.6 34.6 30.6 37.4 30.6 40.2 C30.6 48 30.7 55.9 30.7 63.7 C30.7 68.5 30.7 73.4 30.7 78.2 C30.8 80 30.8 81.8 30.8 83.7 C30.8 86.2 30.8 88.8 30.8 91.3 C30.8 92.1 30.8 92.9 30.8 93.7 C30.8 97.4 30.7 99 28.6 102.3 C25.2 103.1 25.2 103.1 21.6 103.3 C18.6 101.3 18.6 101.3 17.9 99.1 C17.5 95.5 17.5 91.9 17.5 88.2 C17.5 87.4 17.5 86.6 17.5 85.8 C17.5 84.1 17.5 82.4 17.5 80.6 C17.5 77.9 17.5 75.2 17.5 72.5 C17.6 66.7 17.6 60.9 17.6 55.1 C17.6 48.4 17.6 41.7 17.7 35 C17.7 32.3 17.7 29.7 17.7 27 C17.7 25.3 17.7 23.7 17.7 22 C17.7 21.3 17.7 20.6 17.7 19.8 C17.7 16.7 17.6 14.2 16.6 11.3 C14.1 10 12.3 10.1 9.5 10 C8.5 10 7.5 10 6.5 10 C4.4 9.9 2.2 9.9 0.1 9.8 C-0.4 9.8 -0.4 9.8 -3 9.7 C-3.9 9.7 -4.8 9.7 -5.8 9.7 C-8.9 9.2 -10.8 8 -13.4 6.3 C-13.3 4.4 -13.3 4.4 -12.4 2.3 C-8.2 0.5 -4.5 0 0 0 Z " fill="currentColor" transform="translate(2705.40087890625,850.7412109375)"/>
+<path d="M0 0 C1.1 -0 2.2 -0 3.4 -0 C4.6 -0 5.8 -0 7.1 -0 C8.3 -0 9.6 -0 10.8 -0 C14.1 -0 17.4 -0 20.8 0 C22.8 0 24.8 0 26.8 -0 C30.7 -0 34.6 -0 38.5 -0 C39.1 -0 39.1 -0 42.2 -0 C42.7 -0 42.7 -0 45.6 0 C46.5 0 47.5 0 48.5 0 C51.5 0.3 53.6 0.9 56.3 2.3 C57.4 4.4 57.4 4.4 57.3 7.3 C56 10.1 54.4 12.6 52.7 15.2 C52.2 15.9 51.8 16.6 51.3 17.3 C49.3 20.5 47.1 23.5 44.6 26.5 C42.5 29 40.8 31.4 39.1 34.2 C28.8 50.7 17.6 66.7 6.3 82.5 C2 88.4 2 88.4 2.3 93.3 C2.9 93.3 3.4 93.3 4 93.3 C10 93.4 16 93.5 22 93.6 C24.2 93.6 26.4 93.6 28.7 93.7 C31.9 93.7 35.1 93.8 38.3 93.8 C39.3 93.9 40.3 93.9 41.3 93.9 C46.6 94 51.3 94.3 56.3 96.3 C57.4 98.8 57.4 98.8 57.3 101.3 C53.8 103.6 52.3 103.5 48.1 103.5 C47.5 103.5 47.5 103.5 44.3 103.5 C42.9 103.5 41.5 103.5 40.1 103.5 C38.7 103.5 37.3 103.5 35.9 103.5 C32.9 103.5 29.9 103.5 26.9 103.5 C23.1 103.5 19.3 103.5 15.5 103.5 C12.6 103.5 9.6 103.5 6.7 103.5 C5.3 103.5 3.9 103.5 2.5 103.5 C0.5 103.5 -1.5 103.5 -3.4 103.5 C-4.6 103.5 -5.7 103.5 -6.8 103.5 C-9.7 103.3 -11.4 102.9 -13.7 101.3 C-14.6 96.8 -13.4 94.1 -10.9 90.3 C-10.5 89.7 -10.1 89.2 -9.7 88.6 C-8.8 87.3 -8 86.1 -7.2 84.8 C-6.7 84.2 -6.3 83.6 -5.9 83 C-4.3 80.6 -2.8 78.2 -1.3 75.8 C1.8 70.9 5.1 66.3 8.4 61.7 C11.3 57.6 14.1 53.6 16.7 49.4 C20 44.1 23.5 39 27 33.9 C27.4 33.2 27.9 32.5 28.4 31.8 C31.1 27.8 34 23.9 37.2 20.2 C38.3 18.2 38.8 16.4 39.3 14.1 C39.7 12.9 40 11.6 40.3 10.3 C39.7 10.3 39.1 10.2 38.5 10.2 C32.3 10.1 26.2 10 20 9.9 C17.7 9.9 15.4 9.9 13.1 9.8 C9.8 9.8 6.5 9.7 3.2 9.7 C2.1 9.7 1.1 9.6 0.1 9.6 C-0.9 9.6 -1.9 9.6 -2.9 9.6 C-3.7 9.6 -4.5 9.6 -5.4 9.5 C-7.9 9.2 -9.6 8.5 -11.7 7.3 C-11.5 4.9 -11.5 4.9 -10.7 2.3 C-7.1 0.4 -4 0 0 0 Z " fill="currentColor" transform="translate(3090.720703125,850.7412109375)"/>
+<path d="M0 0 C1.2 -0 2.4 -0 3.7 -0 C4.4 -0 4.4 -0 7.7 -0 C9 -0 10.4 -0 11.8 -0 C14.7 -0 17.5 -0 20.4 -0 C24 0 27.7 0 31.4 -0 C34.2 -0 37 -0 39.8 -0 C41.8 -0 43.8 -0 45.8 -0 C46.5 -0 46.5 -0 49.5 0 C50.6 0 51.7 0 52.8 0 C55.8 0.3 58 0.8 60.7 2.3 C61.2 4.8 61.2 4.8 60.7 7.3 C57.4 9.5 56.1 9.5 52.2 9.6 C51.2 9.7 50.1 9.7 49 9.7 C47.9 9.8 46.8 9.8 45.6 9.8 C43.4 9.9 41.2 9.9 39 10 C38.6 10 38.6 10 36.1 10.1 C33.7 10.3 33.7 10.3 31.7 11.3 C30.5 15 30.6 18.4 30.6 22.2 C30.6 23.1 30.6 23.9 30.6 24.7 C30.6 26.5 30.7 28.2 30.7 30 C30.7 32.8 30.7 35.6 30.7 38.4 C30.7 46.3 30.8 54.3 30.8 62.2 C30.8 67.1 30.8 72 30.9 76.8 C30.9 78.7 30.9 80.5 30.9 82.4 C30.9 85 30.9 87.6 30.9 90.1 C30.9 90.9 30.9 91.7 30.9 92.5 C30.9 99.4 30.9 99.4 28.7 102.3 C25.3 103.3 25.3 103.3 21.7 103.3 C19.5 101.8 19.5 101.8 17.7 99.3 C17.3 96.5 17.2 94.1 17.3 91.4 C17.3 90.6 17.3 89.8 17.3 89 C17.3 86.4 17.3 83.8 17.4 81.1 C17.4 79.3 17.4 77.5 17.4 75.7 C17.4 70.9 17.5 66.1 17.5 61.3 C17.6 53.7 17.7 46 17.7 38.4 C17.8 35.7 17.8 33 17.8 30.3 C17.8 28.7 17.9 27 17.9 25.4 C17.9 24.7 17.9 23.9 17.9 23.2 C17.9 18.8 17.5 15.3 15.7 11.3 C13.2 10 11.4 10.1 8.6 10 C8.1 10 8.1 10 5.6 10 C3.4 9.9 1.3 9.9 -0.9 9.8 C-1.9 9.8 -2.9 9.8 -3.9 9.7 C-4.9 9.7 -5.8 9.7 -6.8 9.7 C-9.7 9.2 -11.1 8.3 -13.3 6.3 C-13.4 4.2 -13.4 4.2 -12.3 2.3 C-8.1 0.5 -4.5 0 0 0 Z " fill="currentColor" transform="translate(3232.293212890625,850.7412109375)"/>
+<path d="M0 0 C1.3 -0 2.7 -0 4 -0 C6.8 -0 9.6 -0 12.4 0 C16 0 19.6 0 23.2 -0 C26 -0 28.7 -0 31.5 -0 C33.5 -0 35.4 -0 37.4 -0 C38 -0 38 -0 41 0 C42.1 0 43.1 0 44.2 0 C47.5 0.3 50.1 0.9 53.2 2.3 C53.3 2.8 53.3 2.8 54.2 5.3 C52.2 8.3 52.2 8.3 49.2 9.3 C47.5 9.4 45.9 9.5 44.2 9.5 C43.7 9.6 43.7 9.6 41.2 9.7 C40.2 9.7 40.2 9.7 35.1 9.9 C34.6 9.9 34.6 9.9 32.2 10 C31.3 10 30.4 10 29.5 10.1 C27.2 10.3 27.2 10.3 24.2 11.3 C22 15.9 21.9 20.4 22 25.4 C22 25.8 22 25.8 22 27.8 C22 29.6 22 31.3 22 33 C22.1 35.7 22.1 38.4 22.1 41.2 C22.1 46.9 22.1 52.7 22.2 58.5 C22.2 65.1 22.3 71.8 22.3 78.5 C22.3 81.2 22.3 83.9 22.4 86.6 C22.4 88.2 22.4 89.9 22.4 91.5 C22.4 92.2 22.4 93 22.4 93.8 C22.4 97.5 22.3 99.1 20.2 102.3 C18.3 102.6 18.3 102.6 16.2 102.6 C15.5 102.6 14.8 102.6 14.1 102.6 C12.2 102.3 12.2 102.3 10.2 100.3 C10 97.6 9.9 95 9.9 92.3 C9.9 91.5 9.9 90.7 9.9 89.8 C9.9 88 9.9 86.2 9.8 84.4 C9.8 81.6 9.8 78.8 9.8 75.9 C9.7 69.9 9.7 63.9 9.7 57.9 C9.6 50.9 9.6 44 9.5 37 C9.5 34.2 9.5 31.4 9.5 28.6 C9.5 26.9 9.5 25.2 9.5 23.5 C9.5 22.7 9.5 21.9 9.5 21.1 C9.4 14.4 9.4 14.4 7.2 11.3 C4.7 10 2.9 10.1 0.1 10 C-0.4 10 -0.4 10 -3 9.9 C-5.2 9.9 -7.3 9.8 -9.5 9.7 C-10.5 9.7 -11.5 9.7 -12.6 9.6 C-13 9.6 -13 9.6 -15.4 9.6 C-17.8 9.3 -17.8 9.3 -20.8 7.3 C-21 4.6 -21 4.6 -20.8 2.3 C-14 -0.3 -7.2 -0 0 0 Z " fill="currentColor" transform="translate(3477.81640625,850.734375)"/>
+<path d="M0 0 C4.9 2.4 5.9 7.1 7.6 11.9 C8 12.9 8.3 13.8 8.6 14.7 C9.8 17.8 10.9 20.9 12 24 C12.4 25.1 12.8 26.2 13.2 27.4 C14.9 32.1 16.6 36.9 18.3 41.6 C21.4 50.5 24.7 59.3 28.1 68.1 C30.1 73.2 32 78.3 33.9 83.4 C34.2 84.2 34.4 85 34.7 85.8 C35.3 87.2 35.8 88.6 36.3 90.1 C36.9 91.8 37.6 93.6 38.3 95.4 C39 98 39 98 38 100.4 C36 102 36 102 33 101.9 C29.9 101 29 100.4 27 98 C26.1 95.9 26.1 95.9 25.3 93.5 C25 92.6 24.7 91.8 24.4 90.9 C23.9 89 23.3 87.2 22.7 85.4 C21.1 80.6 19.7 76.6 16 73 C12.3 71.6 8.4 71.8 4.6 71.8 C3.9 71.8 3.1 71.8 2.4 71.8 C0.9 71.8 -0.6 71.8 -2.1 71.8 C-4.4 71.8 -6.7 71.8 -9 71.8 C-10.5 71.8 -12 71.8 -13.4 71.8 C-13.8 71.8 -13.8 71.8 -15.5 71.7 C-19.4 71.8 -22.6 72 -26 74 C-27.2 75.8 -27.2 75.8 -27.9 77.9 C-28.2 78.6 -28.5 79.4 -28.8 80.2 C-29.1 81 -29.3 81.8 -29.6 82.6 C-29.9 83.4 -30.2 84.2 -30.5 85 C-31.6 88.1 -32.7 91.2 -33.8 94.3 C-35.6 99.8 -35.6 99.8 -39.4 101.8 C-43 102 -43 102 -45.3 100.4 C-47 98 -47 98 -46.5 95.1 C-46.1 94 -45.6 92.8 -45.1 91.7 C-44.9 91.1 -44.6 90.4 -44.4 89.8 C-43.6 87.9 -42.8 85.9 -42 84 C-41.1 81.8 -40.2 79.6 -39.3 77.4 C-39.1 76.8 -38.8 76.3 -38.6 75.7 C-35.8 68.8 -33.5 61.8 -31.1 54.8 C-27.5 44.2 -23.8 33.7 -19.9 23.3 C-19.3 21.7 -18.6 20 -18 18.3 C-16.9 15.5 -15.9 12.7 -14.8 9.9 C-14.7 9.5 -14.7 9.5 -13.8 7.3 C-13.7 6.9 -13.7 6.9 -12.9 4.9 C-12.6 4.2 -12.4 3.5 -12.1 2.8 C-9.2 -2 -4.8 -1.1 0 0 Z M-3 14 C-9.9 19.7 -12 29.6 -14.6 37.8 C-15.2 39.6 -15.8 41.4 -16.4 43.2 C-16.7 44 -16.9 44.8 -17.2 45.6 C-17.8 47.3 -18.4 49 -19.1 50.6 C-20.2 53.6 -20.3 55.8 -20 59 C-18.5 61 -17.3 61.9 -15 63 C-11.2 63.3 -7.4 63.2 -3.6 63.2 C-2.6 63.3 -1.5 63.3 -0.4 63.3 C0.1 63.3 0.1 63.3 2.6 63.3 C3.1 63.3 3.1 63.3 5.5 63.4 C8.5 62.9 9.8 62.1 12 60 C13.3 52.1 9.8 45.2 7 38 C6.1 35.6 5.2 33.1 4.4 30.7 C4 29.5 3.6 28.4 3.1 27.2 C2.1 24.4 1.2 21.5 0.3 18.7 C-1 15 -1 15 -3 14 Z " fill="currentColor" transform="translate(3635,852)"/>
+<path d="M0 0 C3 0.4 3.7 1 5.5 3.4 C5.9 5.3 5.9 5.3 5.8 7.4 C5.8 8.2 5.8 9.1 5.8 9.9 C5.8 10.8 5.8 11.6 5.8 12.5 C5.8 13.4 5.7 14.3 5.7 15.3 C5.7 18.1 5.7 21 5.6 23.9 C5.6 26.7 5.6 29.6 5.5 32.5 C5.5 34.3 5.5 36.1 5.5 37.9 C5.5 38.7 5.4 39.5 5.4 40.3 C5.4 41 5.4 41.7 5.4 42.5 C5.5 44.4 5.5 44.4 6.5 47.4 C11.5 47 13.4 44.8 16.6 41.1 C17.6 40 18.6 38.9 19.5 37.8 C20 37.2 20.5 36.6 21 36.1 C23.3 33.4 25.7 30.8 28.1 28.2 C28.3 28 28.3 28 29.4 26.8 C32.5 23.4 35.7 20.2 38.9 17 C42.3 13.7 44.9 10.3 47.5 6.4 C50.2 3.4 52.6 0.8 56.7 -0.1 C58.8 -0.1 58.8 -0.1 62.5 0.4 C62.8 0.7 62.8 0.7 64.5 2.4 C64.4 5.3 63.5 6.3 61.5 8.5 C60.6 9.2 59.8 9.9 58.9 10.6 C54.3 14.6 50.4 18.7 46.5 23.4 C43.1 27.4 39.8 31.2 35.8 34.5 C32.6 37.1 30.7 39.4 29.5 43.4 C30.7 48.7 33.4 52.5 36.5 56.9 C37 57.6 37.5 58.3 38 59 C39.5 61.1 41 63.3 42.5 65.4 C43.3 66.6 44.2 67.8 45 69 C48.5 73.9 52.1 78.8 55.8 83.6 C56.3 84.3 56.9 85.1 57.4 85.8 C58.5 87.2 59.6 88.6 60.7 90 C65.6 96.3 65.6 96.3 65.5 100.4 C62.5 102.4 62.5 102.4 59.6 102.3 C52.6 100.2 49.9 93.9 46.2 88.1 C44.8 85.8 43.3 83.9 41.6 81.9 C36.5 76.3 32.6 69.8 28.6 63.4 C28.4 63 28.4 63 26.9 60.7 C26.4 59.9 25.9 59.1 25.3 58.2 C22.8 55.7 21.1 55.4 17.5 55.4 C15.3 56.6 15.3 56.6 13.3 58.4 C12.7 59 12 59.5 11.3 60.1 C7.2 65.2 6.1 70.1 6.1 76.5 C6.1 77.8 6.1 79.2 6.1 80.5 C6.1 82.6 6.1 84.6 6.1 86.7 C6.1 88.7 6 90.7 6 92.8 C6 94 6 95.2 6 96.4 C5.5 99.4 5.5 99.4 3.7 101.3 C1.5 102.4 1.5 102.4 -1.7 101.6 C-4.5 100.4 -4.5 100.4 -5.5 99.4 C-5.6 96.4 -5.7 93.5 -5.7 90.5 C-5.7 89.6 -5.7 88.6 -5.7 87.7 C-5.7 84.6 -5.7 81.5 -5.7 78.4 C-5.7 76.2 -5.7 74.1 -5.7 72 C-5.7 67.5 -5.7 62.9 -5.7 58.4 C-5.7 52.7 -5.8 46.9 -5.8 41.1 C-5.8 36.7 -5.8 32.3 -5.8 27.8 C-5.8 25.7 -5.8 23.6 -5.8 21.4 C-5.9 18.5 -5.9 15.5 -5.9 12.5 C-5.9 11.6 -5.9 10.7 -5.9 9.8 C-5.9 9 -5.9 8.2 -5.9 7.4 C-5.9 6.7 -5.9 6 -5.9 5.2 C-5.2 1.8 -3.4 0.5 0 0 Z " fill="currentColor" transform="translate(343.5,851.625)"/>
+<path d="M0 0 C3 0.1 4.4 0.1 7 1.7 C9.6 5.7 11.1 9.9 12.7 14.3 C13.5 16.5 14.4 18.7 15.2 20.9 C17.6 26.9 19.7 33.1 21.6 39.2 C21.8 39.8 21.8 39.8 22.6 42.4 C22.8 42.8 22.8 42.8 23.5 45.2 C24.4 47.6 25.4 49.7 26.5 51.9 C29.3 57.3 31.1 63.1 33.1 68.9 C35.9 77.4 38.9 85.6 42.8 93.7 C43.8 96.7 43.6 98.3 42.7 101.3 C39.4 102.1 39.4 102.1 35.7 102.3 C30.9 99.1 29.8 93.6 28.2 88.4 C24.7 77.4 24.7 77.4 20.7 73.3 C17.6 71.8 14.4 72.1 11 72.1 C10.2 72.1 9.5 72.1 8.7 72.1 C7.1 72.1 5.5 72.1 3.9 72.1 C1.4 72.1 -1.1 72.1 -3.5 72.1 C-5.1 72.1 -6.7 72.1 -8.2 72.1 C-8.6 72.1 -8.6 72.1 -10.5 72.1 C-15.7 72.1 -19.5 72.5 -23.3 76.3 C-23.8 77.9 -24.2 79.5 -24.6 81.1 C-29.3 98.7 -29.3 98.7 -33.1 101.7 C-34.9 102.3 -34.9 102.3 -38.3 102.3 C-40.6 101.1 -40.6 101.1 -42.3 99.3 C-42.3 97.5 -42.3 97.5 -41.5 95.2 C-41.2 94.4 -40.9 93.5 -40.6 92.5 C-40.1 91.5 -39.7 90.4 -39.3 89.3 C-39.1 88.7 -38.8 88.1 -38.6 87.5 C-37.5 84.6 -36.4 81.8 -35.3 79 C-31.4 69.1 -27.9 59.2 -24.4 49.2 C-22.7 44.6 -21 40 -19.3 35.3 C-19 34.5 -18.7 33.7 -18.4 32.8 C-6.5 0.2 -6.5 0.2 0 0 Z M-0.3 17.3 C-3.5 21.4 -5.4 25.6 -7.1 30.5 C-7.3 31.1 -7.6 31.8 -7.8 32.5 C-8.3 33.9 -8.8 35.3 -9.3 36.7 C-10.1 38.8 -10.8 40.9 -11.6 43.1 C-12.1 44.4 -12.6 45.8 -13 47.2 C-13.5 48.4 -13.9 49.6 -14.4 50.9 C-15.3 54.2 -15.7 56.8 -15.3 60.3 C-10.8 64.8 -3.7 63.5 2.2 63.6 C3.3 63.6 4.4 63.6 5.4 63.6 C6.5 63.6 7.5 63.6 8.5 63.6 C9.4 63.6 10.3 63.7 11.3 63.7 C13.7 63.3 13.7 63.3 15.5 62 C17.5 59.1 17 56.7 16.7 53.3 C15.8 50.2 14.7 47.2 13.5 44.2 C12.9 42.6 12.2 40.9 11.6 39.2 C11.3 38.4 10.9 37.6 10.6 36.7 C8.9 32.2 7.3 27.6 5.7 23 C4.7 20.3 4.7 20.3 2.7 17.3 C1.7 17.3 0.7 17.3 -0.3 17.3 Z " fill="currentColor" transform="translate(517.3125,851.6875)"/>
+<path d="M0 0 C3.1 0.3 3.1 0.3 4.7 1.6 C6.3 3.7 6.4 4.7 6.4 7.3 C6.5 8.1 6.5 8.9 6.5 9.7 C6.5 10.6 6.5 11.5 6.5 12.4 C6.5 13.3 6.5 14.3 6.5 15.2 C6.5 18.3 6.5 21.4 6.5 24.5 C6.5 26.6 6.5 28.8 6.5 30.9 C6.5 35.4 6.5 39.9 6.5 44.4 C6.4 50.2 6.4 55.9 6.5 61.7 C6.5 66.1 6.5 70.5 6.5 74.9 C6.5 77.1 6.5 79.2 6.5 81.3 C6.5 84.3 6.5 87.2 6.5 90.2 C6.5 91.1 6.5 92 6.5 92.9 C6.5 93.3 6.5 93.3 6.4 95.3 C6.4 96 6.4 96.7 6.4 97.5 C5.9 99.9 5.1 100.8 3.1 102.3 C-0.6 102.1 -0.6 102.1 -3.9 101.3 C-5.6 97.9 -5.1 94 -5.1 90.2 C-5.1 89.3 -5.1 88.3 -5.1 87.4 C-5.1 84.2 -5.1 81.1 -5.1 78 C-5.1 75.8 -5.1 73.6 -5.1 71.5 C-5.1 66.9 -5.1 62.4 -5.1 57.8 C-5.1 52 -5.1 46.2 -5.2 40.3 C-5.2 35.8 -5.2 31.4 -5.2 26.9 C-5.2 24.7 -5.2 22.6 -5.2 20.4 C-5.2 17.4 -5.2 14.4 -5.2 11.4 C-5.2 10.5 -5.2 9.6 -5.2 8.7 C-5.2 0.5 -5.2 0.5 0 0 Z " fill="currentColor" transform="translate(928.9375,851.6875)"/>
+<path d="M0 0 C6.9 1 10.6 7.9 14.7 13.1 C18.9 18.8 22.7 24.7 26.5 30.7 C28.4 33.7 30.3 36.6 32.3 39.6 C32.7 40.2 33.1 40.8 33.5 41.4 C34.9 43.4 36.3 45.5 37.6 47.5 C40.1 51.1 42.5 54.8 44.9 58.4 C45.5 59.3 46.1 60.2 46.7 61.1 C47.3 61.9 47.8 62.8 48.4 63.7 C49 64.5 49.5 65.3 50.1 66.1 C52 69 53.7 72 55.5 75 C56.6 76.5 56.6 76.5 59.4 77.5 C60.2 77.5 60.9 77.5 61.6 77.5 C63.1 74.6 62.8 72 62.8 68.7 C62.8 68 62.8 67.3 62.8 66.6 C62.8 65.1 62.8 63.6 62.8 62 C62.8 59.6 62.9 57.2 62.9 54.8 C62.9 48 63 41.2 63 34.4 C63 30.2 63.1 26 63.1 21.9 C63.1 20.3 63.2 18.7 63.2 17.1 C63.2 14.9 63.2 12.6 63.2 10.4 C63.2 9.2 63.2 7.9 63.2 6.6 C63.6 3.5 63.6 3.5 65 1.6 C66.6 0.5 66.6 0.5 69.8 0.8 C72.6 1.5 72.6 1.5 73.6 2.5 C73.7 5.5 73.8 8.5 73.8 11.5 C73.8 11.9 73.8 11.9 73.8 14.3 C73.8 17.5 73.8 20.6 73.8 23.7 C73.8 25.9 73.8 28 73.8 30.2 C73.9 34.8 73.9 39.3 73.9 43.9 C73.9 49.7 73.9 55.5 73.9 61.4 C73.9 65.8 73.9 70.3 73.9 74.8 C74 76.9 74 79.1 74 81.2 C74 84.3 74 87.3 74 90.3 C74 91.2 74 92.1 74 93 C74 93.8 74 94.6 74 95.5 C74 95.8 74 95.8 74 97.6 C73.5 100.1 72.6 101 70.6 102.5 C66.6 103 64.5 103.1 61.1 100.8 C58.7 98.6 57.3 96.8 55.7 94 C52.2 88.4 48.5 83 44.7 77.6 C40 71 35.6 64.4 31.5 57.4 C30 55.1 28.5 53 26.8 50.8 C24.5 47.7 22.3 44.5 20.2 41.2 C19.6 40.2 19 39.3 18.4 38.4 C17.1 36.5 15.9 34.6 14.7 32.7 C14.2 31.8 13.6 30.8 13 29.9 C12.7 29.5 12.7 29.5 11.4 27.4 C9.2 25 7.7 25 4.6 24.5 C4.6 25.4 4.6 26.4 4.6 27.3 C4.5 36.1 4.4 44.9 4.3 53.7 C4.3 58.3 4.2 62.8 4.2 67.3 C4.2 71.7 4.1 76 4.1 80.4 C4 82.1 4 83.7 4 85.4 C4 87.7 4 90.1 3.9 92.4 C3.9 93.1 3.9 93.8 3.9 94.5 C3.9 99.3 3.9 99.3 1.6 101.5 C-1.4 101.8 -1.4 101.8 -4.4 101.5 C-7 98.8 -6.6 96.8 -6.7 93.2 C-6.7 92.3 -6.7 91.4 -6.6 90.5 C-6.7 89.6 -6.7 88.6 -6.7 87.7 C-6.7 84.6 -6.7 81.5 -6.7 78.4 C-6.7 76.3 -6.7 74.1 -6.7 72 C-6.7 67.5 -6.7 63 -6.7 58.5 C-6.7 52.7 -6.7 47 -6.7 41.2 C-6.7 36.8 -6.7 32.3 -6.7 27.9 C-6.7 25.8 -6.7 23.7 -6.8 21.5 C-6.8 18.6 -6.8 15.6 -6.7 12.6 C-6.8 11.7 -6.8 10.9 -6.8 9.9 C-6.8 9.1 -6.8 8.3 -6.7 7.5 C-6.7 6.8 -6.7 6.1 -6.7 5.4 C-5.9 1.4 -3.8 0.6 0 0 Z " fill="currentColor" transform="translate(2094.375,851.5)"/>
+<path d="M0 0 C1.7 1.9 1.7 1.9 3.3 4.4 C3.9 5.3 4.5 6.2 5.1 7.2 C5.8 8.1 6.4 9 7 10 C8.2 11.7 9.3 13.5 10.5 15.2 C11.7 16.9 12.8 18.7 14 20.4 C14.6 21.4 15.2 22.3 15.8 23.2 C28 41.5 28 41.5 28 44 C33.1 42.9 34.8 39.8 37.5 35.7 C38 34.9 38.5 34.1 39.1 33.2 C39.6 32.5 40.1 31.7 40.6 30.8 C41.6 29.3 42.6 27.7 43.6 26.1 C44.8 24.3 46 22.5 47.2 20.7 C48.7 18.4 50.1 16.1 51.3 13.7 C58 1.5 58 1.5 63 -1 C66 -1.2 66 -1.2 69 -1 C69.3 -0.7 69.3 -0.7 71 1 C70.6 3.3 70 5 69 7 C68.3 7 67.7 7 67 7 C66.3 8.7 65.6 10.3 65 12 C60.5 20 55.3 27.6 50 35.2 C35.4 56.2 35.4 56.2 35.8 67.9 C35.9 69.5 35.9 71.2 35.9 72.9 C36 75.6 36.1 78.2 36.1 80.8 C36.2 83.4 36.2 86 36.3 88.5 C36.3 89.3 36.3 90.1 36.4 90.9 C36.4 94.5 36.3 96.6 34.1 99.5 C32 101 32 101 29.4 100.9 C27 100 27 100 25 97 C24.9 94.4 24.8 91.9 24.9 89.3 C24.9 88.6 24.9 87.8 24.9 87 C24.9 83.8 25 80.6 25 77.4 C25.1 75 25.1 72.7 25.1 70.3 C25.1 69.6 25.2 68.9 25.2 68.2 C25.2 61.9 24.6 55.6 20.9 50.3 C20.7 50 20.7 50 19.6 48.5 C19.2 47.9 18.8 47.3 18.3 46.7 C17.4 45.4 16.5 44 15.6 42.7 C15.1 42.1 14.7 41.4 14.2 40.8 C12.6 38.5 11.1 36.1 9.6 33.8 C9.1 32.9 8.5 32 8 31.2 C6.9 29.4 5.7 27.6 4.6 25.8 C3.5 24.1 2.5 22.4 1.4 20.7 C0.4 19 -0.7 17.3 -1.7 15.6 C-3.8 12.3 -5.9 9.1 -8.4 6.1 C-10 4 -10 4 -9.9 1.8 C-7.8 -2.5 -3.8 -1.2 0 0 Z " fill="currentColor" transform="translate(2253,853)"/>
+<path d="M0 0 C6.6 0.6 6.6 0.6 8 2 C8.1 5 8.2 8 8.2 11 C8.2 11.9 8.2 12.9 8.2 13.8 C8.2 17 8.2 20.1 8.2 23.2 C8.2 24.3 8.2 25.3 8.3 26.4 C8.3 32.1 8.3 37.7 8.3 43.4 C8.3 49.2 8.3 55 8.4 60.9 C8.4 65.3 8.4 69.8 8.4 74.3 C8.4 76.4 8.4 78.6 8.5 80.7 C8.5 83.8 8.5 86.8 8.5 89.8 C8.5 90.7 8.5 91.6 8.5 92.5 C8.5 98.5 8.5 98.5 6.1 101.1 C3.4 102.3 1.8 101.9 -1 101 C-2.9 99.1 -2.1 96.2 -2.1 93.7 C-2.1 92.8 -2.1 91.9 -2.1 90.9 C-2.1 90 -2.2 89 -2.2 88 C-2.2 84.9 -2.2 81.7 -2.2 78.5 C-2.2 76.3 -2.2 74.2 -2.2 72 C-2.2 67.4 -2.2 62.8 -2.2 58.2 C-2.2 52.3 -2.2 46.4 -2.2 40.4 C-2.2 35.9 -2.2 31.4 -2.2 26.9 C-2.2 24.7 -2.2 22.5 -2.2 20.3 C-2.3 17.3 -2.2 14.2 -2.2 11.2 C-2.2 10.3 -2.3 9.4 -2.3 8.5 C-2.2 2.2 -2.2 2.2 0 0 Z " fill="currentColor" transform="translate(3373,852)"/>
+<path d="M0 0 C3.4 -0.2 3.4 -0.2 7 0 C9.7 2.7 9.2 4.7 9.3 8.3 C9.3 9.2 9.3 10.1 9.3 11 C9.3 11.9 9.3 12.9 9.3 13.8 C9.3 16.9 9.3 20 9.3 23.1 C9.3 25.3 9.3 27.4 9.3 29.6 C9.3 34.1 9.3 38.6 9.3 43.1 C9.2 48.8 9.3 54.6 9.3 60.4 C9.3 64.8 9.3 69.2 9.3 73.7 C9.3 75.8 9.3 77.9 9.3 80.1 C9.3 83 9.3 86 9.3 89 C9.3 89.9 9.3 90.8 9.3 91.7 C9.2 97.8 9.2 97.8 7 100 C4 100.2 4 100.2 1 100 C-1.7 97.3 -1.2 95.3 -1.3 91.7 C-1.3 90.8 -1.2 89.9 -1.2 89 C-1.2 88.1 -1.2 87.1 -1.2 86.2 C-1.3 83.1 -1.2 80 -1.2 76.9 C-1.2 74.7 -1.2 72.6 -1.2 70.4 C-1.2 65.9 -1.2 61.4 -1.2 56.9 C-1.2 51.2 -1.2 45.4 -1.2 39.6 C-1.2 35.2 -1.2 30.8 -1.2 26.3 C-1.2 24.2 -1.2 22.1 -1.2 19.9 C-1.2 17 -1.2 14 -1.1 11 C-1.1 10.1 -1.1 9.2 -1.1 8.3 C-1.1 2.2 -1.1 2.2 0 0 Z " fill="currentColor" transform="translate(2845,853)"/></symbol></svg>
+
+<header class="fx"><div class="wrap">
+  <a href="#" aria-label="Deeply – Kárpit és szőnyegtisztítás" id="homeLink"><svg class="logo" viewBox="0 0 4050 1050" role="img" aria-label="Deeply – Kárpit és szőnyegtisztítás"><use href="#wm"/></svg></a>
+  <span class="hd-tag" id="hdTag"></span>
+</div></header>
+
+<section class="intro"><div class="wrap">
+  <h1 id="bizName">Árkalkulátor és foglalás</h1>
+  <p>Pár kérdés és egy fotó: az <span class="ul">irányárat</span> rögtön látod, a pontos ajánlatot pedig írásban küldjük, 24 órán belül.</p>
+  <span class="acc">Előre szólunk, ha valami nem jön ki.</span>
+</div></section>
+
+<div class="wrap layout">
+  <main class="card" id="main">
+    <div class="prog-wrap"><p class="prog-t" id="stepT"></p><ol class="prog" id="steps" aria-label="Lépések"></ol></div>
+    <div id="view"></div>
+  </main>
+
+  <aside class="card sum" id="summaryCard" aria-live="polite">
+    <h3>Irányár</h3>
+    <p class="lead">Ahogy választasz, itt látod az összeget.</p>
+    <div id="cartBox"></div>
+    <div id="totals"></div>
+    <p class="fine">Az árak tájékoztató jellegűek; a pontos ajánlatot a fotók alapján írásban küldjük. Fizetés a munka után, a helyszínen – készpénzzel vagy utalással.</p>
+    <div class="acc" id="acc"></div>
+  </aside>
+</div>
+
+<div class="mb" id="mbar"><a href="#summaryCard"><span>Irányár <b id="mbTotal"></b></span><span class="cc" id="mbIc"></span></a></div>
+
+<footer class="fo"><div class="wrap">
+  <svg class="logo" viewBox="0 0 4050 1050" role="img" aria-label="Deeply"><use href="#wm"/></svg>
+  <span id="bizFoot"></span>
+  <span class="lk"><button type="button" id="ckSet">Süti-beállítások</button><button type="button" id="forgetBtn">Adataim törlése erről az eszközről</button><a href="arkalkulator_admin.html">Admin</a></span>
+</div></footer>
+
+<div class="ckb" id="ckb" role="dialog" aria-labelledby="ckbT" hidden>
+  <p class="ckb-t" id="ckbT">Sütiket használunk</p>
+  <p>A weboldal sütiket és hasonló technológiákat használ, hogy megjegyezze a választásaidat, és az árkalkulátorban ne vesszen el, amit beírsz. Az „Elfogadom” gombbal hozzájárulsz ezekhez és az adataid kezeléséhez.</p>
+  <details><summary>Részletek</summary><ul id="ckList"></ul></details>
+  <div class="ckb-a"><button type="button" class="cta sm" id="ckYes"><span>Elfogadom</span></button><button type="button" class="btn2" id="ckNo">Csak a szükségesek</button></div>
+</div>
+
+<script>
+const KEY='tc_pricing_v1', BKEY='tc_bookings_v1';
+/* Honnan jött a vevő? A ?src=… paraméter (QR-tábla: tabla, weboldal: web) a foglalással együtt
+   mentődik, és a Google-táblázat „Forrás" oszlopába kerül. Csak rövid betű/szám/kötőjel érték
+   megy át; hiányzó vagy furcsa érték → "kozvetlen". */
+const SRC=(function(){
+  let s='';try{s=new URLSearchParams(location.search).get('src')||'';}catch(e){}
+  s=s.trim().toLowerCase();
+  return /^[a-z0-9-]{1,24}$/.test(s)?s:'kozvetlen';
+})();
+const CFG_VERSION=2;
+const DEFAULTS={
+  cfgVersion:CFG_VERSION,
+  settings:{businessName:'Deeply',currency:'Ft',minFee:6000,travelFee:6000,deposit:0,notifyEmail:'skillsharemot@gmail.com'},
+  services:[
+    {id:'kanape',name:'Kanapé / ülőgarnitúra',unit:'ülőhely',price:4000,material:true},
+    {id:'fotel',name:'Fotel',unit:'db',price:4000,material:true},
+    {id:'szonyeg',name:'Szőnyeg',unit:'m²',price:900,material:true},
+    {id:'padloszonyeg',name:'Irodai / közületi padlószőnyeg',unit:'m²',price:1400,material:false},
+    {id:'auto',name:'Autóülés (szövet)',unit:'ülés',price:4500,material:true},
+    {id:'fuggony',name:'Függöny',unit:'db',price:2000,material:false},
+    {id:'matrac',name:'Matrac',unit:'db',price:6000,material:false},
+    {id:'puff',name:'Puff / ülőke',unit:'db',price:2500,material:false},
+    {id:'uvporszivo',name:'UV-s fertőtlenítő porszívózás (száraz, víz nélkül)',unit:'db',price:4500,material:false}
+  ],
+  materials:[
+    {id:'szint',name:'Szintetikus (PP / poliészter)',mult:1.0,risk:'Alacsony kockázat – gyorsan szárad'},
+    {id:'pamut',name:'Pamut / kevert',mult:1.2,risk:'Közepes kockázat'},
+    {id:'gyapju',name:'Gyapjú',mult:1.8,risk:'Magas – extra kíméletes kezelés, írásos belegyezés'},
+    {id:'barsony',name:'Bársony / viszkóz',mult:2.0,risk:'Magas – száraz módszer, NEM bő víz'}
+  ],
+  stains:[
+    {id:'folt1',name:'Folt 1 – friss, vizes (kávé, tea, üdítő, bor, ételfolt)',price:1500},
+    {id:'folt2',name:'Folt 2 – zsíros vagy régi (olaj, csoki, toll, rágógumi, viasz)',price:3500},
+    {id:'folt3',name:'Folt 3 – szagos vagy biológiai (vizelet, vér, hányás, dohányszag)',price:6500}
+  ],
+  addons:[
+    {id:'porszivo',name:'Porszívózás a tisztítás előtt',type:'fix',value:1500},
+    {id:'impreg',name:'Impregnálás (védőréteg)',type:'pct',value:0.5},
+    {id:'kartamasz',name:'Kartámasz tisztítás',type:'fix',value:1500},
+    {id:'gyorsszar',name:'Gyorsszárítás (ventilátor)',type:'fix',value:2000}
+  ],
+  chemicals:[],machines:[]
+};
+function clone(o){return JSON.parse(JSON.stringify(o));}
+// v2 migráció: a foltok 3 csoportra álltak össze (a régi 10 tétel kikerül a vevői választóból)
+function migrate(c,storedVer){
+  // FONTOS: a MENTETT verziót kell nézni, nem a DEFAULTS-szal összefésültét
+  if((+storedVer||0) >= CFG_VERSION) return c;
+  c.stains=clone(DEFAULTS.stains);
+  c.services=c.services||[];
+  DEFAULTS.services.forEach(d=>{ if(!c.services.some(x=>x.id===d.id)) c.services.push(clone(d)); });
+  c.cfgVersion=CFG_VERSION;
+  return c;
+}
+function load(){try{const s=localStorage.getItem(KEY);if(s){const p=JSON.parse(s);const c=Object.assign(clone(DEFAULTS),p);
+  // a mentett settings felülírná a DEFAULTS-ot: az új kulcsokat (pl. travelFee) vissza kell tölteni
+  c.settings=Object.assign(clone(DEFAULTS.settings),c.settings||{});return migrate(c,p.cfgVersion);}}catch(e){}return clone(DEFAULTS);}
+const cfg=load();
+const CUR=cfg.settings.currency||'Ft';
+// minden ezrest tagol (a hu-HU locale a négyjegyűeket nem tagolná), nem törhető szóközzel
+function fmt(n){return String(Math.round(+n||0)).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+' '+CUR;}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+const BIZ=cfg.settings.businessName||'Deeply';
+document.getElementById('bizFoot').textContent='© '+new Date().getFullYear()+' '+BIZ+' – Kárpit és szőnyegtisztítás · Budapest és környéke';
+
+/* ═══════════ IKONOK (a főoldal vonalas ikonkészlete + néhány új) ═══════════ */
+const ICON={
+  sofa:'<path d="M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3"/><path d="M2 13a2 2 0 0 1 4 0v2h12v-2a2 2 0 0 1 4 0v5H2z"/><path d="M5 18v2M19 18v2"/>',
+  rug:'<rect x="5" y="4" width="14" height="16" rx="1"/><rect x="8" y="7" width="8" height="10"/><path d="M7 2v2M10 2v2M14 2v2M17 2v2M7 20v2M10 20v2M14 20v2M17 20v2"/>',
+  bed:'<path d="M3 9h18v8H3z"/><path d="M3 13h18M6 9V7h5v2M3 17v2M21 17v2"/>',
+  car:'<path d="M5 16h14v-4l-2-5H7l-2 5z"/><path d="M5 12h14M5 16v2M19 16v2"/><circle cx="8" cy="14" r=".6"/><circle cx="16" cy="14" r=".6"/>',
+  curtain:'<path d="M3 4h18"/><path d="M5 4v16h4C7.5 14 7.5 9 9 4M19 4v16h-4c1.5-6 1.5-11 0-16"/>',
+  stool:'<rect x="5" y="6" width="14" height="8" rx="4"/><path d="M7.5 14v6M16.5 14v6"/>',
+  spark:'<path d="M12 3c.6 4.2 2.8 6.4 7 7-4.2.6-6.4 2.8-7 7-.6-4.2-2.8-6.4-7-7 4.2-.6 6.4-2.8 7-7z"/>',
+  house:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+  building:'<rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/>',
+  stairs:'<path d="M3 20h5v-5h5v-5h5V5h3"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.4 4.2-6.5 8-6.5s7 2.1 8 6.5"/>',
+  shield:'<path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+  lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  cam:'<path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  pin:'<path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+  phone:'<path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2z"/>',
+  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.4"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  chat:'<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/>',
+  wa:'<path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z"/><path d="M9.2 7.8c-.4 0-.9.4-.9 1.2 0 2.9 3.4 6.4 6.6 6.6.8 0 1.2-.5 1.2-.9v-.9l-1.9-.9-.9.9c-1-.4-2.4-1.8-2.8-2.8l.9-.9-.9-1.9z"/>',
+  arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+  chev:'<path d="M9 6l6 6-6 6"/>',
+  check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  minus:'<path d="M5 12h14"/>',
+  copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>'
+};
+function ic(k,s,cls){s=s||22;return '<svg class="'+(cls||'i')+'" viewBox="0 0 24 24" width="'+s+'" height="'+s+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(ICON[k]||ICON.spark)+'</svg>';}
+// a 4 szolgáltatás-szín (mint a főoldalon): Kárpit = Mountain View · Szőnyeg = Matte Green · Matrac = Weathered Teak · Autó = Fog
+const SC=[['var(--mv)','var(--cm)'],['var(--mg)','#fff'],['var(--wt)','var(--mv)'],['var(--fog)','var(--mv)']];
+function ci(k,col,s){const c=SC[(col||0)%4];return '<span class="ci" style="background:'+c[0]+';color:'+c[1]+'">'+ic(k,s||22)+'</span>';}
+const SVC_ICON={kanape:['sofa',0],fotel:['sofa',0],puff:['stool',0],szonyeg:['rug',1],padloszonyeg:['rug',1],matrac:['bed',2],uvporszivo:['spark',2],auto:['car',3],fuggony:['curtain',3]};
+function svcIcon(id,s){const m=SVC_ICON[id]||['spark',3];return ci(m[0],m[1],s);}
+document.getElementById('hdTag').innerHTML=ic('cal',16)+'Árkalkulátor';
+document.getElementById('mbIc').innerHTML=ic('arrow',20);
+
+/* ═══════════ MIRE KATTINTOTT A LÁTOGATÓ? (2B) ═══════════════════════════
+   A főoldal linkje hozza: ?pick=sofa&int=sofa.rug&faq=1.4&how=3&from=hero (lásd fooldal.js).
+   Ebből: a választott szolgáltatás kerül előre, és ehhez igazítjuk az ajánlásokat.
+   Hozzájárulás után a kalkulátor a saját választásait is megjegyzi (profile) – a következő
+   látogatáskor ezekből is ajánl. Csak ismert, rövid értékek mennek át. */
+const PICKS={
+  sofa:{name:'Kárpit',icon:'sofa',col:0,svc:['kanape','fotel','puff']},
+  rug:{name:'Szőnyeg',icon:'rug',col:1,svc:['szonyeg','padloszonyeg']},
+  bed:{name:'Matrac',icon:'bed',col:2,svc:['matrac','uvporszivo']},
+  car:{name:'Autókárpit',icon:'car',col:3,svc:['auto']},
+  b2b:{name:'Éttermeknek, irodáknak',icon:'building',col:0,svc:['padloszonyeg','kanape','fuggony']}
+};
+const FAQS=['Kijön minden folt?','Mennyi idő a száradás?','Mit nem vállaltok?','Mikor és hogyan fizetek?','Hogyan működik a javító garancia?','Honnan tudom előre az árat?'];
+const URLI=(function(){const o={pick:'',int:[],faq:[],how:0,from:''};
+  try{const q=new URLSearchParams(location.search);
+    const p=(q.get('pick')||'').toLowerCase();if(PICKS[p])o.pick=p;
+    (q.get('int')||'').toLowerCase().split('.').forEach(x=>{if(PICKS[x]&&o.int.indexOf(x)<0)o.int.push(x);});
+    if(o.pick&&o.int.indexOf(o.pick)<0)o.int.push(o.pick);
+    (q.get('faq')||'').split('.').forEach(x=>{const n=parseInt(x,10);if(n>=0&&n<FAQS.length&&o.faq.indexOf(n)<0)o.faq.push(n);});
+    const h=parseInt(q.get('how')||'0',10);if(h>0&&h<10)o.how=h;
+    const f=(q.get('from')||'').toLowerCase();if(/^[a-z]{1,10}$/.test(f))o.from=f;
+  }catch(e){}
+  return o;})();
+
+/* ═══════════ ÁLLAPOT ═══════════ */
+const STEPS=[['build','Tételek'],['property','Ingatlan'],['calendar','Időpont'],['photo','Fotó'],['contact','Adataid']];
+let view='build', buildStep=1;
+let property={type:null,floor:'',lift:null}; // type: csaladi|tarsashaz|emeletes
+let cart=[];
+let draft=null; // {serviceId, qty, materialId, stains:[], addons:[]}
+let dates=new Set();
+let calRef=new Date(); calRef.setDate(1);
+let customer={name:'',phone:'',email:'',zip:'',address:'',note:'',timepref:'Rugalmas'};
+let photos=[];      // array of base64 data URLs
+let noPhoto=false;  // "jelenleg nem tudok képet csinálni"
+let photoVia='';    // 'whatsapp' = a fotót WhatsAppon küldi
+let consent=null;   // {at, v} – az adatkezelés + sütik elfogadása
+let leadId='';      // a félbehagyott foglalás azonosítója (Érdeklődők lap)
+let profile={picks:[],faq:[],svc:{},booked:[],visits:0};
+let flash='',flashWarn=false,shownFlash=null; // egyszeri üzenet a következő nézet tetején (pl. „Hozzáadtuk…”); flashWarn = figyelmeztetés
+let welcomeBack=false;
+const touchedF={};  // mely mezőket hagyta már el a látogató (csak utána mutatunk hibát)
+
+const viewEl=document.getElementById('view');
+function svc(id){return cfg.services.find(s=>s.id===id);}
+function mat(id){return cfg.materials.find(m=>m.id===id);}
+
+/* ═══════════ ÁRAZÁS (változatlan) ═══════════ */
+function itemTotal(it){
+  const s=svc(it.serviceId);if(!s)return 0;
+  const m=(s.material&&it.materialId)?mat(it.materialId):null;
+  const mult=m?(+m.mult||1):1;
+  const base=(+s.price)*(+it.qty)*mult;
+  let stainSum=0;(it.stains||[]).forEach(id=>{const st=cfg.stains.find(x=>x.id===id);if(st)stainSum+=+st.price;});
+  let addonSum=0;(it.addons||[]).forEach(id=>{const a=cfg.addons.find(x=>x.id===id);if(a)addonSum+=a.type==='pct'?base*(+a.value):(+a.value);});
+  return base+stainSum+addonSum;
+}
+// tételes bontás – ebből tud az árajánlat-készítő mennyiség/egységár oszlopot csinálni
+function itemBreakdown(it){
+  const s=svc(it.serviceId);if(!s)return null;
+  const m=(s.material&&it.materialId)?mat(it.materialId):null;
+  const mult=m?(+m.mult||1):1;
+  const unitPrice=(+s.price)*mult;
+  const base=unitPrice*(+it.qty);
+  const stains=(it.stains||[]).map(id=>{const x=cfg.stains.find(y=>y.id===id);return x?{name:x.name,price:+x.price}:null;}).filter(Boolean);
+  const addons=(it.addons||[]).map(id=>{const a=cfg.addons.find(y=>y.id===id);
+    return a?{name:a.name,price:a.type==='pct'?base*(+a.value):(+a.value)}:null;}).filter(Boolean);
+  return {serviceId:it.serviceId,name:s.name,unit:s.unit,qty:+it.qty,
+    material:m?m.name:'',mult,unitPrice,base,stains,addons};
+}
+function itemLabel(it){
+  const s=svc(it.serviceId);const m=(s.material&&it.materialId)?mat(it.materialId):null;
+  let parts=[s.name+' × '+it.qty+' '+s.unit];
+  if(m)parts.push(m.name);
+  const sn=(it.stains||[]).map(id=>cfg.stains.find(x=>x.id===id)?.name).filter(Boolean);
+  const an=(it.addons||[]).map(id=>cfg.addons.find(x=>x.id===id)?.name).filter(Boolean);
+  if(sn.length)parts.push('Folt: '+sn.join(', '));
+  if(an.length)parts.push('+ '+an.join(', '));
+  return parts.join(' · ');
+}
+function computeOrder(){
+  const sub=cart.reduce((s,it)=>s+itemTotal(it),0);
+  const minFee=+cfg.settings.minFee||0;
+  // szolgáltatás-érték: a részösszeg, de legalább a minimum rendelési érték
+  const svc=cart.length?Math.max(sub,minFee):0;
+  // kiszállási díj: fix tétel a szolgáltatás-értéken FELÜL, csak ha van tétel a kosárban
+  const travelFee=cart.length?(+cfg.settings.travelFee||0):0;
+  const applied=svc+travelFee;
+  const deposit=0; // nincs előleg (2026-10-19) – az admin-beállítás „előleg” mezőjét sem vesszük figyelembe
+  return {sub,svc,travelFee,applied,minFeeHit:cart.length&&sub<minFee,deposit,onsite:Math.max(applied-deposit,0)};
+}
+// „Folt 1 – friss, vizes (kávé, tea…)” → cím + alsor a kártyára
+function splitName(n){let t=String(n).replace(/^Folt\s*\d+\s*[–-]\s*/i,'');const m=/^(.*?)\s*\((.*)\)\s*$/.exec(t);
+  let a=m?m[1]:t,b=m?m[2]:'';a=a.charAt(0).toUpperCase()+a.slice(1);return [a,b];}
+function multLabel(m){const p=Math.round(((+m.mult||1)-1)*100);return p>0?'+'+p+'%':'alapár';}
+
+/* ═══════════ TÁROLÁS – csak elfogadás után (4E) ═══════════ */
+const SKEY='deeply_kalk_v1';
+const CONSENT_V='2026-10-19';
+function newId(){return 'l-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);}
+function store(){
+  if(!consent)return;
+  try{localStorage.setItem(SKEY,JSON.stringify({v:1,savedAt:Date.now(),consent,leadId,customer,property,cart,draft,
+    dates:[...dates],view:view==='done'?'build':view,buildStep,noPhoto,photoVia,photoN:photos.length,profile}));}catch(e){}
+}
+function todayIso(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function restore(){
+  let s=null;try{s=JSON.parse(localStorage.getItem(SKEY)||'null');}catch(e){}
+  if(!s||!s.consent||s.consent.v!==CONSENT_V)return;
+  consent=s.consent;leadId=s.leadId||newId();
+  customer=Object.assign(customer,s.customer||{});
+  if(s.property&&typeof s.property==='object')property=Object.assign(property,s.property);
+  cart=(Array.isArray(s.cart)?s.cart:[]).filter(it=>it&&svc(it.serviceId));
+  draft=s.draft&&svc(s.draft.serviceId)?s.draft:null;
+  const t=todayIso();dates=new Set((s.dates||[]).filter(d=>typeof d==='string'&&d>=t));
+  noPhoto=!!s.noPhoto;photoVia=s.photoVia==='whatsapp'?'whatsapp':'';
+  profile=Object.assign(profile,s.profile||{});
+  view=stepIdx(s.view)>=0?s.view:'build';buildStep=(draft&&s.buildStep>1)?s.buildStep:1;
+  const gap=firstGap();
+  if(gap&&stepIdx(gap)<stepIdx(view)){
+    view=gap;
+    if(gap==='photo'&&s.photoN>0){flash='A fotókat biztonsági okból nem tároljuk a böngészőben – kérlek, töltsd fel őket újra.';flashWarn=true;}
+  }
+  welcomeBack=!!(customer.name.trim()||cart.length);
+}
+function stepIdx(v){return STEPS.findIndex(x=>x[0]===v);}
+function photoOk(){return photos.length>0||noPhoto||photoVia==='whatsapp';}
+/* Az első lépés, ahol még hiányzik valami ('' = minden megvan, jöhetnek az adatok). */
+function firstGap(){
+  if(!cart.length)return 'build';
+  if(!canLeaveProperty())return 'property';
+  if(!dates.size)return 'calendar';
+  if(!photoOk())return 'photo';
+  return '';
+}
+const GAP_MSG={build:'Még nincs tétel a listán – válaszd ki, mit tisztítsunk.',property:'Add meg, milyen ingatlanba megyünk.',
+  calendar:'Jelölj be legalább egy napot, amikor otthon vagy.',photo:'Tölts fel egy fotót, vagy jelöld be, hogy WhatsAppon küldöd / most nem tudsz.'};
+function forget(){
+  if(!confirm('Biztosan törlöd az ezen az eszközön tárolt adataidat (név, elérhetőség, választott tételek)?'))return;
+  try{localStorage.removeItem(SKEY);localStorage.removeItem(CKKEY);}catch(e){}
+  alert('Kész – erről az eszközről töröltük az adataidat.\nHa a nálunk rögzített adatok törlését is kéred, írj nekünk: '+(cfg.settings.notifyEmail||''));
+  location.href=location.pathname+(SRC!=='kozvetlen'?'?src='+SRC:'');
+}
+document.getElementById('forgetBtn').onclick=forget;
+
+/* Érdeklődés: a főoldalról hozott + a korábban megjegyzett */
+function picks(){const a=URLI.int.slice();(profile.picks||[]).forEach(p=>{if(PICKS[p]&&a.indexOf(p)<0)a.push(p);});return a;}
+function mainPick(){return URLI.pick||(profile.picks||[])[0]||'';}
+function faqSeen(n){return URLI.faq.indexOf(n)>=0||(profile.faq||[]).indexOf(n)>=0;}
+function mergeInterest(){ // csak elfogadás után kerül a profilba
+  profile.picks=profile.picks||[];profile.faq=profile.faq||[];
+  if(URLI.pick)profile.picks=[URLI.pick].concat(profile.picks.filter(p=>p!==URLI.pick));
+  URLI.int.forEach(p=>{if(profile.picks.indexOf(p)<0)profile.picks.push(p);});
+  URLI.faq.forEach(n=>{if(profile.faq.indexOf(n)<0)profile.faq.push(n);});
+  profile.picks=profile.picks.slice(0,5);
+}
+function interestText(){
+  const p=[];const ps=picks();
+  if(ps.length)p.push('Főoldal: '+ps.map(k=>PICKS[k].name).join(', '));
+  const fq=URLI.faq.concat((profile.faq||[]).filter(n=>URLI.faq.indexOf(n)<0));
+  if(fq.length)p.push('GYIK: '+fq.map(n=>FAQS[n]).join(' | '));
+  if(URLI.how)p.push('Így dolgozunk: '+(URLI.how+1)+'/4 lépés');
+  if(URLI.from)p.push('gomb: '+URLI.from);
+  const sv=Object.keys(profile.svc||{});if(sv.length)p.push('Kalkulátorban nézte: '+sv.map(id=>(svc(id)||{}).name||id).join(', '));
+  if((profile.booked||[]).length)p.push('Korábban foglalt: '+profile.booked.map(id=>(svc(id)||{}).name||id).join(', '));
+  return p.join(' · ');
+}
+
+/* ═══════════ MENTÉS GÉPELÉS KÖZBEN – felhőbe is (4E) ═══════════
+   Minden változás azonnal a böngészőbe kerül; ha van név / e-mail / telefon, 1,2 mp gépelési szünet
+   után (és mező elhagyásakor, lapváltáskor) felmegy a szervernek 'lead' műveletként (saját szerver: api/,
+   különben az Apps Script). Ugyanaz a sor frissül (leadId alapján). Ha a szerver nem ismeri a 'lead'
+   műveletet, a jelző „Mentve ezen az eszközön” marad – semmi nem törik el. Mivel az adatok a végén
+   jönnek, az érdeklődő akkor kerül a szerverre, amikor elkezdi beírni az elérhetőségét. */
+let leadTimer=0,leadDirty=false,leadSig='',cloudOk=null,leadOff=false;
+function hasContact(){return !!(customer.name.trim()||customer.email.trim()||customer.phone.trim());}
+function stageName(){return ({build:'tételek',property:'ingatlan',calendar:'időpont',photo:'fotó',contact:'adatok',done:'foglalt'})[view]||view;}
+function leadData(){const o=computeOrder();
+  return {leadId,created:consent.at,updated:Date.now(),src:SRC,stage:stageName(),consent:{at:consent.at,v:consent.v},
+    customer:{name:customer.name.trim(),email:customer.email.trim(),phone:customer.phone.trim(),zip:customer.zip.trim(),
+      address:customer.address.trim(),note:customer.note,timepref:customer.timepref},
+    property:propLabel(property),items:cart.map(itemLabel),total:cart.length?o.applied:0,dates:[...dates].sort(),
+    photos:photos.length,noPhoto,photoVia,interest:interestText()};}
+function touch(){
+  const cap=document.getElementById('accCap');   // a csúszka hibaüzenete eltűnik, ha a látogató javít
+  if(cap&&cap.classList.contains('err')){const a=accInfo();if(a){cap.textContent=a.cap;cap.classList.remove('err');}}
+  if(!consent)return;
+  store();
+  if(!hasContact()){setSave('');return;}
+  if(!cloudOn()||leadOff){setSave('local');return;}
+  leadDirty=true;setSave('typing');
+  clearTimeout(leadTimer);leadTimer=setTimeout(flushLead,1200);
+}
+function flushLead(beacon){
+  clearTimeout(leadTimer);
+  if(!leadDirty||!consent||!cloudOn()||leadOff||!hasContact())return;
+  leadDirty=false;
+  const d=leadData();const sig=JSON.stringify(Object.assign({},d,{updated:0}));
+  if(sig===leadSig){setSave(cloudOk?'cloud':'local');return;}
+  if(beacon===true){
+    try{const body=JSON.stringify({action:'lead',key:CLOUD.WRITE_KEY,data:d});
+      if(navigator.sendBeacon&&navigator.sendBeacon(CLOUD.URL,new Blob([body],{type:'text/plain;charset=utf-8'})))leadSig=sig;}catch(e){}
+    return;
+  }
+  cloudCall('lead',{data:d}).then(()=>{leadSig=sig;cloudOk=true;if(!leadDirty)setSave('cloud');})
+    .catch(err=>{cloudOk=false;if(/Ismeretlen művelet/.test(String(err&&err.message)))leadOff=true;if(!leadDirty)setSave('local');});
+}
+addEventListener('pagehide',()=>flushLead(true));
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushLead(true);});
+let saveState='';
+function setSave(s){saveState=s;document.querySelectorAll('[data-save]').forEach(paintSave);}
+function paintSave(el){
+  let t,st=saveState;
+  if(!consent){st='';t=ckDecided?'Az adataidat a foglalás elküldésekor kapjuk meg.':'Ha elfogadod a sütiket, gépelés közben mentjük, amit beírsz.';}
+  else t={local:'Mentve ezen az eszközön',typing:'Mentés…',cloud:'Mentve – akkor sem vész el, ha most abbahagyod'}[st]||'Amit beírsz, automatikusan mentjük';
+  el.className='save '+st;el.innerHTML='<i></i><span>'+t+'</span>';
+}
+
+/* ═══════════ ÖSSZESÍTŐ ═══════════ */
+function renderSummary(){
+  const box=document.getElementById('cartBox');
+  const mb=document.getElementById('mbar');
+  if(!cart.length){
+    box.innerHTML='<div class="empty">'+ci('spark',3,20)+'Még nincs tétel.<br>Válaszd ki, mit tisztítsunk – az irányár itt jelenik meg.</div>';
+    document.getElementById('totals').innerHTML='';
+    mb.classList.remove('show');document.body.classList.remove('has-mb');return;
+  }
+  box.innerHTML=cart.map((it,i)=>{const b=itemBreakdown(it)||{};const extra=[b.material].concat((b.stains||[]).map(x=>splitName(x.name)[0])).concat((b.addons||[]).map(x=>x.name)).filter(Boolean);
+    return '<div class="line"><div class="tx"><b>'+esc(b.name)+' × '+esc(b.qty)+' '+esc(b.unit)+'</b>'+(extra.length?'<small>'+esc(extra.join(' · '))+'</small>':'')+'</div>'
+      +'<span class="am">'+fmt(itemTotal(it))+'</span><button type="button" class="rm" data-rm="'+i+'" aria-label="Tétel törlése: '+esc(b.name)+'">'+ic('x',14)+'</button></div>';}).join('');
+  const o=computeOrder();
+  let h='';
+  h+='<div class="tot"><span>Részösszeg</span><span>'+fmt(o.sub)+'</span></div>';
+  if(o.minFeeHit)h+='<div class="tot"><span>Minimum rendelési érték</span><span>'+fmt(o.svc)+'</span></div>';
+  if(o.travelFee>0)h+='<div class="tot"><span>Kiszállási díj</span><span>'+fmt(o.travelFee)+'</span></div>';
+  h+='<div class="tot big"><span>Becsült végösszeg</span><span>'+fmt(o.applied)+'</span></div>';
+  document.getElementById('totals').innerHTML=h;
+  box.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{cart.splice(+b.dataset.rm,1);touch();renderSummary();if(view==='build')render();});
+  document.getElementById('mbTotal').textContent=fmt(o.applied);
+  const show=view!=='done';mb.classList.toggle('show',show);document.body.classList.toggle('has-mb',show);
+  renderAcc();
+}
+
+/* ═══════════ „HÚZD JOBBRA” – az irányár elfogadása ═══════════
+   Akkor jelenik meg, ha a látogató legörget az irányárig, vagy a ragadós sáv nyilára koppint.
+   Jobbra húzva elfogadja az irányárat, és a következő lépésre visz: tételek → ingatlan → időpont → fotó → adatok → foglalás elküldése.
+   Billentyűzettel: a gombra Enter/Szóköz. Egérrel/ujjal csak a húzás számít (véletlen koppintás nem fogad el). */
+let accShown=false,accBusy=false,sumVisible=false;
+const ACC={
+  build:['Elfogadod az irányárat, és jön pár gyors kérdés.','tovább az ingatlanhoz',
+    ()=>{go('property');}],
+  property:['Elfogadod az irányárat, és jön az időpont.','tovább az időponthoz',
+    ()=>{if(!canLeaveProperty())return property.type==='emeletes'?'Előbb add meg az emeletet és azt, hogy van-e lift.':'Előbb válaszd ki, milyen ingatlanba megyünk.';go('calendar');}],
+  calendar:['Elfogadod az irányárat, és jön a fotó.','tovább a fotóhoz',
+    ()=>{if(!dates.size)return 'Előbb jelölj be legalább egy napot a naptárban.';go('photo');}],
+  photo:['Elfogadod az irányárat – már csak az elérhetőséged kell.','tovább az utolsó lépéshez',
+    ()=>{if(!photoOk())return 'Tölts fel egy fotót, vagy jelöld be, hogy WhatsAppon küldöd / most nem tudsz.';go('contact');}],
+  contact:['Elfogadod az irányárat, és elküldjük a foglalást.','és elküldöm a foglalást',
+    ()=>{submit();if(view!=='done')return 'Valami még hiányzik – nézd át a fenti mezőket.';}]
+};
+function accInfo(){
+  const a=cart.length&&ACC[view];if(!a)return null;
+  return {cap:a[0],aria:'Elfogadom az irányárat, '+a[1],run:a[2]};
+}
+function renderAcc(msg){
+  const el=document.getElementById('acc');const a=accInfo();
+  if(!a){el.innerHTML='';el.classList.remove('show');return;}
+  if(sumVisible)accShown=true;
+  el.innerHTML='<div class="sw" id="sw"><span class="sw-fill"></span><span class="sw-label">Húzd jobbra az elfogadáshoz</span>'
+    +'<button type="button" class="sw-knob" aria-label="'+esc(a.aria)+'">'+ic('arrow',22)+'</button></div>'
+    +'<p class="cap'+(msg?' err':'')+'" id="accCap">'+esc(msg||a.cap)+'</p>';
+  el.classList.toggle('show',accShown);
+  bindSlide();
+}
+function revealAcc(pulse){
+  const el=document.getElementById('acc');if(!el||!accInfo())return;
+  accShown=true;el.classList.add('show');
+  if(pulse){el.classList.remove('pulse');void el.offsetWidth;el.classList.add('pulse');}
+}
+function bindSlide(){
+  const sw=document.getElementById('sw');if(!sw)return;
+  const knob=sw.querySelector('.sw-knob'),fill=sw.querySelector('.sw-fill'),lab=sw.querySelector('.sw-label');
+  let x0=0,dx=0,max=0,drag=false;
+  const set=x=>{knob.style.transform='translateX('+x+'px)';fill.style.width=(x+60)+'px';lab.style.opacity=String(Math.max(0,1-x/(max*.6)));};
+  knob.addEventListener('pointerdown',e=>{if(accBusy)return;drag=true;dx=0;max=sw.clientWidth-60;x0=e.clientX;sw.classList.add('drag');sw.classList.remove('back','hint');
+    try{knob.setPointerCapture(e.pointerId);}catch(err){}e.preventDefault();});
+  knob.addEventListener('pointermove',e=>{if(!drag)return;dx=Math.max(0,Math.min(max,e.clientX-x0));set(dx);});
+  const end=()=>{if(!drag)return;drag=false;sw.classList.remove('drag');
+    if(dx>=max*.82){set(max);accept();}
+    else{sw.classList.add('back');set(0);lab.style.opacity='';if(dx<8){sw.classList.add('hint');setTimeout(()=>sw.classList.remove('hint'),750);}}};
+  knob.addEventListener('pointerup',end);knob.addEventListener('pointercancel',end);
+  knob.addEventListener('click',e=>{if(e.detail===0&&!accBusy){max=sw.clientWidth-60;set(max);accept();}});   // billentyűzet
+  function accept(){
+    accBusy=true;sw.classList.add('ok');lab.textContent='Elfogadva';lab.style.opacity='1';knob.innerHTML=ic('check',22);
+    setTimeout(()=>{accBusy=false;const a=accInfo();const msg=a?a.run():'';
+      if(typeof msg==='string'&&msg){renderAcc(msg);revealAcc(false);}},420);
+  }
+}
+(function(){
+  const sum=document.getElementById('summaryCard'),mb=document.getElementById('mbar');
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(es=>es.forEach(e=>{sumVisible=e.isIntersecting;mb.classList.toggle('away',sumVisible);if(sumVisible)revealAcc(false);}),{threshold:.3}).observe(sum);
+  }else accShown=true;
+  mb.querySelector('a').addEventListener('click',e=>{e.preventDefault();revealAcc(true);
+    requestAnimationFrame(()=>{const a=document.getElementById('acc');(a&&a.innerHTML?a:sum).scrollIntoView({behavior:'smooth',block:'center'});});});
+})();
+
+/* ═══════════ LÉPÉSJELZŐ ═══════════ */
+function renderSteps(){
+  const idx=view==='done'?STEPS.length:STEPS.findIndex(s=>s[0]===view);
+  document.getElementById('steps').innerHTML=STEPS.map((s,i)=>{
+    const st=i<idx?'done':(i===idx?'on':'');
+    const inner='<b>'+(i+1)+'</b><span>'+s[1]+'</span>';
+    return '<li class="'+st+'"'+(i===idx?' aria-current="step"':'')+'>'+(i<idx&&view!=='done'?'<button type="button" data-go="'+s[0]+'">'+inner+'</button>':inner)+'</li>';
+  }).join('');
+  document.getElementById('stepT').textContent=view==='done'?'Kész – megkaptuk':(idx+1)+' / '+STEPS.length+' · '+STEPS[idx][1];
+  document.querySelectorAll('#steps [data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+}
+function go(v,opts){
+  welcomeBack=false;shownFlash=null;view=v;if(v==='build'&&!(opts&&opts.keepStep))buildStep=1;
+  touch();render();
+  const m=document.getElementById('main');const r=m.getBoundingClientRect();
+  if(r.top<0||r.top>innerHeight*.6)m.scrollIntoView({block:'start'});
+  const q=viewEl.querySelector('.q');if(q){q.setAttribute('tabindex','-1');q.focus({preventScroll:true});}
+}
+
+/* ═══════════ FŐ RENDER ═══════════ */
+function render(){
+  document.body.classList.toggle('is-done',view==='done');
+  renderSteps();renderSummary();
+  if(view==='build')renderBuild();
+  else if(view==='property')renderProperty();
+  else if(view==='calendar')renderCalendar();
+  else if(view==='photo')renderPhoto();
+  else if(view==='contact')renderContact();
+  else if(view==='done')renderDone();
+  document.querySelectorAll('[data-save]').forEach(paintSave);
+}
+function topHtml(){ // visszatérő látogató + egyszeri üzenet a nézet tetején
+  let h='';
+  if(welcomeBack){
+    const nm=customer.name.trim().split(/\s+/).slice(-1)[0]||'';
+    h+='<div class="hello">'+ci('user',3,20)+'<div class="tx"><b>Üdv újra'+(nm?', '+esc(nm):'')+'!</b> Ott folytatod, ahol abbahagytad.</div>'
+      +'<button type="button" class="btn2 sm" id="restartBtn">Újrakezdem</button></div>';
+  }
+  if(flash){h+='<div class="note '+(flashWarn?'warn':'ok')+'" role="status" style="margin:0 0 18px">'+ic(flashWarn?'info':'check',18)+'<span>'+flash+'</span></div>';shownFlash=[flash,flashWarn];flash='';flashWarn=false;}
+  return h;
+}
+function bindTop(){
+  const rb=document.getElementById('restartBtn');
+  if(rb)rb.onclick=()=>{welcomeBack=false;cart=[];draft=null;dates=new Set();photos=[];noPhoto=false;photoVia='';buildStep=1;go('build');};
+}
+function navHtml(backId,backTxt,nextId,nextTxt,disabled){
+  return '<div class="nav">'+(backId?'<button type="button" class="back" id="'+backId+'">'+backTxt+'</button>':'<span></span>')
+    +(nextId?'<button type="button" class="cta" id="'+nextId+'"'+(disabled?' disabled':'')+'><span>'+nextTxt+'</span><span class="cc">'+ic('arrow',18)+'</span></button>':'')+'</div>';
+}
+
+/* ═══════════ 1 · ADATAID + HOZZÁJÁRULÁS (3C, 3D) ═══════════ */
+const MAILRE=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+function phoneDigits(p){return String(p||'').replace(/\D/g,'');}
+function checkField(k){
+  const v=String(customer[k]||'').trim();
+  if(k==='name')return v.length>=2?'':'Kérlek, add meg a neved, hogy tudjuk, kit keresünk.';
+  if(k==='email')return !v?'Kérlek, add meg az e-mail-címed – ide küldjük az írásos ajánlatot.':(MAILRE.test(v)?'':'Ez nem tűnik érvényes e-mail-címnek – megnéznéd még egyszer?');
+  if(k==='phone'){const d=phoneDigits(v);return !v?'Kérlek, adj meg egy telefonszámot, amin elérünk.':(d.length>=9&&d.length<=15&&/^[+\d\s()\/-]+$/.test(v)?'':'Ez nem tűnik teljes telefonszámnak (pl. +36 30 123 4567).');}
+  if(k==='zip')return /^\d{4}$/.test(v)?'':'Az irányítószám 4 számjegy (pl. 1117).';
+  if(k==='address')return v.length>=3?'':'Kérlek, add meg az utcát és a házszámot.';
+  return '';
+}
+function fieldHtml(k,label,attrs,ph,hint){
+  const err=touchedF[k]?checkField(k):'';
+  return '<div class="field"><label for="f_'+k+'">'+label+' <span class="req" aria-hidden="true">*</span></label>'
+    +'<input class="inp'+(err?' bad':'')+'" id="f_'+k+'" '+attrs+' value="'+esc(customer[k])+'" placeholder="'+esc(ph)+'" required aria-required="true" aria-invalid="'+(err?'true':'false')+'" aria-describedby="m_'+k+'">'
+    +'<div class="msg" id="m_'+k+'" aria-live="polite">'+esc(err)+'</div>'+(hint||'')+'</div>';
+}
+function bindField(k){
+  const el=document.getElementById('f_'+k);if(!el)return;
+  el.oninput=()=>{customer[k]=el.value;if(touchedF[k])showErr(k);touch();};
+  el.onblur=()=>{touchedF[k]=true;customer[k]=el.value.trim();el.value=customer[k];showErr(k);touch();flushLead();};
+}
+function showErr(k){const el=document.getElementById('f_'+k),m=document.getElementById('m_'+k);if(!el||!m)return;
+  const e=checkField(k);m.textContent=e;el.classList.toggle('bad',!!e);el.setAttribute('aria-invalid',e?'true':'false');}
+function renderContact(){
+  let h=topHtml();
+  h+='<h2 class="q">Utolsó lépés: kinek és hova menjünk?</h2>';
+  h+='<p class="qs">Kérlek, add meg a neved és az elérhetőségeidet – ide küldjük az írásos ajánlatot, és ha kérdésünk van, gyorsan elérünk. Köszönjük!</p>';
+  h+='<div style="margin-top:4px">'
+    +fieldHtml('name','Hogyan szólíthatunk?','type="text" autocomplete="name" autocapitalize="words" enterkeyhint="next"','pl. Kovács Anna')
+    +fieldHtml('email','Az e-mail-címed','type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" enterkeyhint="next"','pl. anna@email.hu','<p class="fine" style="margin-top:6px">Ide küldjük a visszaigazolást és az írásos ajánlatot.</p>')
+    +fieldHtml('phone','A telefonszámod','type="tel" autocomplete="tel" inputmode="tel" enterkeyhint="next"','pl. +36 30 123 4567')
+    +'<div class="row2">'
+    +fieldHtml('zip','Irányítószám','type="text" autocomplete="postal-code" inputmode="numeric" maxlength="4" enterkeyhint="next"','pl. 1117')
+    +fieldHtml('address','Cím','type="text" autocomplete="street-address" enterkeyhint="next"','utca, házszám, emelet/ajtó')+'</div>'
+    +'<div class="field"><label for="f_note">Megjegyzés <span class="opt-l">(nem kötelező)</span></label><textarea class="inp" id="f_note" rows="3" placeholder="pl. parkolás, kapukód, kisállat">'+esc(customer.note)+'</textarea></div>'
+    +'</div>';
+  if(picks().indexOf('b2b')>=0)h+='<div class="note" style="margin:-4px 0 16px">'+ic('building',18)+'<span>Céges ügyfélként negyedéves szinten tartó tisztítást is kérhetsz – írd meg a megjegyzésben, és a cégnevet is.</span></div>';
+  h+='<div data-save></div>';
+  h+='<p class="lock">'+ic('lock',16)+'Az adataidat bizalmasan kezeljük – csak ehhez a foglaláshoz használjuk.</p>';
+  h+=navHtml('back','Vissza a fotóhoz','submit','Foglalás elküldése');
+  viewEl.innerHTML=h;bindTop();
+  const F=['name','email','phone','zip','address'];
+  F.forEach(bindField);
+  F.forEach((k,i)=>{document.getElementById('f_'+k).onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById(i<F.length-1?'f_'+F[i+1]:'f_note').focus();}};});
+  const n=document.getElementById('f_note');n.oninput=()=>{customer.note=n.value;touch();};n.onblur=()=>flushLead();
+  document.getElementById('back').onclick=()=>go('photo');
+  document.getElementById('submit').onclick=submit;
+}
+/* ═══════════ SÜTI-ABLAK / HOZZÁJÁRULÁS (3C) ═══════════
+   A döntés a főoldalon születik (ugyanez az ablak), és a kalkulátor-link ?ck=<elfogadás ideje>-<kattintás ideje>
+   paraméterrel hozza át (más domain, ezért nem látja a főoldal tárolóját). „ck=0” = csak a szükségesek.
+   A paraméter csak 3 órán belül érvényes, így egy továbbküldött régi link nem hoz magával hozzájárulást.
+   Ha nincs döntés (pl. QR-kódról jött), itt jelenik meg ugyanez az ablak. Gépelés közbeni mentés csak elfogadás után. */
+const CKKEY='deeply_ck_v1';
+function readCk(){try{const c=JSON.parse(localStorage.getItem(CKKEY)||'null');if(c&&c.v===CONSENT_V)return c;}catch(e){}return null;}
+function writeCk(ok,at){try{localStorage.setItem(CKKEY,JSON.stringify({ok:ok,at:at||Date.now(),v:CONSENT_V}));}catch(e){}}
+const URLCK=(function(){try{const v=(new URLSearchParams(location.search).get('ck')||'').toLowerCase();
+  if(v==='0')return {ok:false};
+  const m=/^([0-9a-z]{6,12})-([0-9a-z]{6,12})$/.exec(v);
+  if(m){const at=parseInt(m[1],36),now=parseInt(m[2],36);if(at&&now&&Math.abs(Date.now()-now)<3*3600e3&&at<=now+6e4)return {ok:true,at:at};}
+}catch(e){}return null;})();
+let ckDecided=false;
+function acceptConsent(at){
+  consent={at:at||Date.now(),v:CONSENT_V};ckDecided=true;
+  writeCk(true,consent.at);
+  if(!leadId)leadId=newId();
+  profile.visits=(profile.visits||0)+1;
+  mergeInterest();
+  hideCookie();
+  touch();if(hasContact()){leadDirty=true;flushLead();}
+  document.querySelectorAll('[data-save]').forEach(paintSave);
+}
+function declineConsent(){
+  consent=null;ckDecided=true;writeCk(false);
+  try{localStorage.removeItem(SKEY);}catch(e){}
+  clearTimeout(leadTimer);leadDirty=false;saveState='';
+  hideCookie();
+  document.querySelectorAll('[data-save]').forEach(paintSave);
+}
+function showCookie(){const b=document.getElementById('ckb');b.hidden=false;}
+function hideCookie(){document.getElementById('ckb').hidden=true;}
+function fillCkList(){document.getElementById('ckList').innerHTML=
+   '<li><b>Szükséges:</b> a süti-döntésed megjegyzése – ez mindig működik.</li>'
+  +'<li><b>Kényelmi:</b> a választásaid és a kalkulátorba beírt adatok mentése (már gépelés közben), hogy ott folytathasd, ahol abbahagytad, és vissza tudjunk hívni.</li>'
+  +'<li><b>Beépülő modulok:</b> Google Fonts (betűtípusok)'+(CLOUD.OWN?'':', Google Apps Script (az ajánlatkérések fogadása)')+'. A WhatsApp csak akkor nyílik meg, ha a WhatsApp-gombra koppintasz.</li>'
+  +'<li>Az adataidat csak az ajánlatodhoz és a foglalásodhoz használjuk, nem adjuk tovább. Törlést kérhetsz: '+esc(cfg.settings.notifyEmail||'')+'. A döntésed az oldal alján, a „Süti-beállítások” linkkel bármikor módosíthatod.</li>';}
+document.getElementById('ckYes').onclick=()=>acceptConsent();
+document.getElementById('ckNo').onclick=declineConsent;
+document.getElementById('ckSet').onclick=showCookie;
+
+/* ═══════════ 2 · INGATLAN ═══════════ */
+const PROP_TYPES=[
+  {id:'csaladi',name:'Családi ház',sub:'Földszintes bejárat',icon:'house'},
+  {id:'tarsashaz',name:'Társasház – földszint',sub:'Nincs lépcső / emelet',icon:'building'},
+  {id:'emeletes',name:'Emeletes lakás',sub:'Emeleten van a lakás',icon:'stairs'}
+];
+function propLabel(p){
+  if(!p||!p.type)return '-';
+  const t=PROP_TYPES.find(x=>x.id===p.type);
+  let s=t?t.name:p.type;
+  if(p.type==='emeletes'){
+    s+=' – '+(p.floor||'?')+'. emelet, '+(p.lift===true?'van lift':p.lift===false?'nincs lift':'lift?');
+  }
+  return s;
+}
+function canLeaveProperty(){
+  if(!property.type)return false;
+  if(property.type==='emeletes'){
+    return (parseInt(property.floor,10)>0)&&(property.lift===true||property.lift===false);
+  }
+  return true;
+}
+function optHtml(attrs,sel,icon,title,sub,right){
+  return '<button type="button" class="opt'+(sel?' sel':'')+'" '+attrs+' aria-pressed="'+(sel?'true':'false')+'">'+icon
+    +'<span class="tx"><b>'+title+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</span>'+(right||'<span class="tick">'+ic('check',14)+'</span>')+'</button>';
+}
+function renderProperty(){
+  let h=topHtml()+'<h2 class="q">Milyen ingatlanba megyünk?</h2><p class="qs">Ebből tudjuk, mire készüljünk a kiszállásnál: lépcső, lift, a gépek felhordása.</p>';
+  h+='<div class="opts">'+PROP_TYPES.map((t,i)=>optHtml('data-pt="'+t.id+'"',property.type===t.id,ci(t.icon,i===2?2:i,22),esc(t.name),esc(t.sub))).join('')+'</div>';
+  h+='<div id="emBox"></div>';
+  h+=navHtml('toBuild0','Vissza a tételekhez','toBuild','Tovább az időponthoz',!canLeaveProperty());
+  viewEl.innerHTML=h;bindTop();
+  viewEl.querySelectorAll('[data-pt]').forEach(b=>b.onclick=()=>{property.type=b.dataset.pt;if(property.type!=='emeletes'){property.floor='';property.lift=null;}touch();render();
+    if(property.type==='emeletes'){const f=document.getElementById('p_floor');if(f&&!property.floor)f.focus();}});
+  if(property.type==='emeletes'){
+    const em=document.getElementById('emBox');
+    let e='<div class="row2" style="margin-top:20px"><div class="field"><label for="p_floor">Hányadik emelet? <span class="req">*</span></label>'
+      +'<input class="inp" type="number" id="p_floor" min="1" step="1" inputmode="numeric" value="'+esc(String(property.floor||''))+'" placeholder="pl. 3"></div>';
+    e+='<div class="field"><span class="lbl">Van lift? <span class="req">*</span></span><div class="seg">'
+      +'<label><input type="radio" name="lift" value="1"'+(property.lift===true?' checked':'')+'>Van lift</label>'
+      +'<label><input type="radio" name="lift" value="0"'+(property.lift===false?' checked':'')+'>Nincs lift</label></div></div></div>';
+    e+='<div id="liftNote"></div>';
+    em.innerHTML=e;
+    document.getElementById('p_floor').oninput=ev=>{property.floor=ev.target.value;updateLiftNote();const tb=document.getElementById('toBuild');if(tb)tb.disabled=!canLeaveProperty();touch();};
+    em.querySelectorAll('input[name=lift]').forEach(r=>r.onchange=()=>{property.lift=r.value==='1';updateLiftNote();const tb=document.getElementById('toBuild');if(tb)tb.disabled=!canLeaveProperty();touch();});
+    updateLiftNote();
+  }
+  document.getElementById('toBuild0').onclick=()=>go('build',{keepStep:true});
+  document.getElementById('toBuild').onclick=()=>{if(!canLeaveProperty())return;go('calendar');};
+}
+function updateLiftNote(){
+  const el=document.getElementById('liftNote');if(!el)return;
+  const fl=parseInt(property.floor,10)||0;
+  if(property.lift===false&&fl>=2){
+    el.innerHTML='<div class="note">'+ic('info',18)+'<span>Lift nélkül a '+fl+'. emeletre a nagyobb, nehéz bútorok (kanapé, matrac) felhordása nehézkes lehet – ezt a felmérésnél figyelembe vesszük.</span></div>';
+  }else el.innerHTML='';
+}
+
+/* ═══════════ 3 · TÉTELEK + AJÁNLÁSOK (2B) ═══════════ */
+function recommendedIds(){ // a főoldalon választott → előre; utána a korábban nézett / foglalt
+  const out=[];const add=id=>{if(svc(id)&&out.indexOf(id)<0)out.push(id);};
+  const mp=mainPick();if(mp)PICKS[mp].svc.forEach(add);
+  picks().forEach(p=>PICKS[p].svc.forEach(add));
+  return out;
+}
+function crossSell(){ // „Gyakran kérik mellé” – a kosár és a főoldali érdeklődés alapján, legfeljebb 2
+  const r=[];const has=id=>cart.some(it=>it.serviceId===id);
+  const uph=cart.find(it=>['kanape','fotel','puff','auto'].indexOf(it.serviceId)>=0);
+  const imp=cfg.addons.find(a=>a.id==='impreg'),gy=cfg.addons.find(a=>a.id==='gyorsszar');
+  if(uph&&imp&&!cart.some(it=>(it.addons||[]).indexOf('impreg')>=0))
+    r.push({k:'addon:impreg',icon:['shield',0],t:imp.name,s:'Védőréteg a tisztítás után – a következő folt könnyebben kijön.',btn:'Hozzáadom'});
+  if(gy&&faqSeen(1)&&cart.some(it=>['kanape','fotel','puff','auto','matrac'].indexOf(it.serviceId)>=0)&&!cart.some(it=>(it.addons||[]).indexOf('gyorsszar')>=0))
+    r.push({k:'addon:gyorsszar',icon:['clock',2],t:gy.name,s:'A főoldalon a száradási időt nézted: ventilátorral hamarabb használható a bútor.',btn:'Hozzáadom'});
+  if(has('kanape')&&!has('fotel')&&svc('fotel'))
+    r.push({k:'svc:fotel',icon:['sofa',0],t:'Van a kanapé mellett fotel is?',s:'Egy kiszállással megoldjuk – nem kell újra kiszállási díj.',btn:'Fotel hozzáadása'});
+  if(has('matrac')&&!has('uvporszivo')&&svc('uvporszivo'))
+    r.push({k:'svc:uvporszivo',icon:['spark',2],t:'UV-s fertőtlenítő porszívózás',s:'Matrac mellé gyakran kérik: száraz, víz nélküli fertőtlenítés.',btn:'Megnézem'});
+  if(picks().indexOf('b2b')>=0&&!has('padloszonyeg')&&svc('padloszonyeg'))
+    r.push({k:'svc:padloszonyeg',icon:['building',0],t:'Irodai / közületi padlószőnyeg',s:'Éttermeknek, irodáknak: sok ülőhely és padlószőnyeg egy alkalommal.',btn:'Megnézem'});
+  return r.slice(0,2);
+}
+function applyReco(k){
+  const [type,id]=k.split(':');
+  if(type==='addon'){
+    const it=cart.find(x=>(id==='impreg'?['kanape','fotel','puff','auto']:['kanape','fotel','puff','auto','matrac']).indexOf(x.serviceId)>=0);
+    if(it){it.addons=it.addons||[];if(it.addons.indexOf(id)<0)it.addons.push(id);
+      flash='Hozzáadtuk: '+esc((cfg.addons.find(a=>a.id===id)||{}).name||id)+' ('+esc(svc(it.serviceId).name)+').';}
+    touch();render();return;
+  }
+  startDraft(id);
+}
+function startDraft(id){
+  draft={serviceId:id,qty:1,materialId:null,stains:[],addons:[]};
+  profile.svc=profile.svc||{};profile.svc[id]=(profile.svc[id]||0)+1;
+  buildStep=2;touch();render();
+  const m=document.getElementById('main');if(m.getBoundingClientRect().top<0)m.scrollIntoView({block:'start'});
+}
+function renderBuild(){
+  if(!draft)draft={serviceId:null,qty:1,materialId:null,stains:[],addons:[]};
+  const s=draft.serviceId?svc(draft.serviceId):null;
+  if(buildStep>1&&!s)buildStep=1;
+  // al-lépések: 1 szolgáltatás, 2 mennyiség + anyag, 3 folt + kiegészítők
+  if(buildStep===1){
+    let h=topHtml();
+    h+='<h2 class="q">'+(cart.length?'Kérsz még valamit?':'Mit szeretnél tisztíttatni?')+'</h2>';
+    h+='<p class="qs">'+(cart.length?'Adj hozzá újabb tételt, vagy menjünk tovább.':'Válassz egyet – utána megadod a mennyiséget és az anyagot. Több tételt is hozzáadhatsz. Az irányárat azonnal látod.')+'</p>';
+    const cs=cart.length?crossSell():[];
+    if(cs.length){
+      h+='<div class="reco"><h3>'+ic('spark',16)+'Gyakran kérik mellé</h3>'+cs.map(r=>'<div class="reco-i">'+ci(r.icon[0],r.icon[1],18)+'<div class="tx"><b>'+esc(r.t)+'</b><small>'+esc(r.s)+'</small></div><button type="button" class="btn2 sm" data-reco="'+r.k+'">'+ic('plus',14)+esc(r.btn)+'</button></div>').join('')+'</div>';
+    }
+    const rec=recommendedIds();const mp=mainPick();const recTag=mp?PICKS[mp].svc:[];
+    const prev=profile.booked||[];
+    if(!cart.length&&mp)h+='<div class="pill">'+ci(PICKS[mp].icon,PICKS[mp].col,16)+'<span>A főoldalon ezt nézted: '+esc(PICKS[mp].name)+' – ezeket tettük előre</span></div>';
+    const list=rec.map(svc).filter(Boolean).concat(cfg.services.filter(x=>rec.indexOf(x.id)<0));
+    h+='<div class="opts">'+list.map(sv=>{
+      const tag=recTag.indexOf(sv.id)>=0&&!cart.length?'<span class="tag">Ajánlott</span>':(prev.indexOf(sv.id)>=0?'<span class="tag">Legutóbb</span>':'');
+      const inCart=cart.filter(it=>it.serviceId===sv.id).length;
+      return optHtml('data-svc="'+esc(sv.id)+'"',false,svcIcon(sv.id),esc(sv.name)+tag,fmt(sv.price)+' / '+esc(sv.unit)+(inCart?' · már a listán':''),'<span class="go">'+ic('chev',18)+'</span>');
+    }).join('')+'</div>';
+    h+=navHtml('','',cart.length?'toCal':'',cart.length?'Tovább':'');
+    viewEl.innerHTML=h;bindTop();
+    viewEl.querySelectorAll('[data-svc]').forEach(b=>b.onclick=()=>startDraft(b.dataset.svc));
+    viewEl.querySelectorAll('[data-reco]').forEach(b=>b.onclick=()=>applyReco(b.dataset.reco));
+    const tc=document.getElementById('toCal');if(tc)tc.onclick=()=>go('property');
+    return;
+  }
+  if(buildStep===2){
+    const isM2=s.unit==='m²';
+    let h=topHtml()+'<div class="pill">'+svcIcon(s.id,16)+'<span>'+esc(s.name)+'</span></div>';
+    h+='<h2 class="q">Mennyit tisztítsunk'+(s.material?', és milyen az anyaga':'')+'?</h2>';
+    h+='<p class="qs">'+(isM2?'Elég egy becslés négyzetméterben – a helyszínen pontosítjuk.':'Add meg a darabszámot ('+esc(s.unit)+').')+'</p>';
+    h+='<div class="qty"><button type="button" id="minus" aria-label="Kevesebb">'+ic('minus',18)+'</button><input type="number" id="qty" min="'+(isM2?'0.1':'1')+'" step="'+(isM2?'0.1':'1')+'" inputmode="decimal" value="'+esc(draft.qty)+'" aria-label="Mennyiség ('+esc(s.unit)+')"><button type="button" id="plus" aria-label="Több">'+ic('plus',18)+'</button><span>'+esc(s.unit)+'</span></div>';
+    if(s.material){
+      h+='<p class="sub-h">Milyen anyagból van?</p><div class="opts one" id="mats">'
+        +cfg.materials.map(m=>optHtml('data-mat="'+esc(m.id)+'"',draft.materialId===m.id,'',esc(m.name),esc(m.risk||''),'<span class="pr">'+multLabel(m)+'</span><span class="tick">'+ic('check',14)+'</span>')).join('')+'</div>';
+      h+='<div id="riskBox"></div>';
+      h+='<p class="fine">Nem tudod biztosan? Válaszd a legvalószínűbbet – a helyszínen szálpróbával ellenőrizzük.</p>';
+    }
+    if(s.id==='szonyeg')h+='<div class="note">'+ic('info',18)+'<span>Selyem és kézi csomózású perzsa szőnyeget nem vállalunk.</span></div>';
+    h+=navHtml('back','Vissza','next','Tovább',s.material&&!draft.materialId);
+    viewEl.innerHTML=h;bindTop();
+    const qty=document.getElementById('qty');
+    const setQ=v=>{draft.qty=Math.max(isM2?0.1:1,Math.round(v*10)/10);qty.value=draft.qty;renderSummary();touch();};
+    document.getElementById('minus').onclick=()=>setQ((+draft.qty)-(isM2?0.5:1));
+    document.getElementById('plus').onclick=()=>setQ((+draft.qty)+(isM2?0.5:1));
+    qty.oninput=()=>{draft.qty=parseFloat(String(qty.value).replace(',','.'))||0;renderSummary();touch();};
+    qty.onblur=()=>{if(!(draft.qty>0))setQ(isM2?1:1);};
+    if(s.material){
+      viewEl.querySelectorAll('[data-mat]').forEach(b=>b.onclick=()=>{draft.materialId=b.dataset.mat;touch();render();});
+      const cm=draft.materialId?mat(draft.materialId):null;
+      if(cm&&(+cm.mult||1)>=1.8)document.getElementById('riskBox').innerHTML='<div class="note">'+ic('info',18)+'<span><b>'+esc(cm.name)+':</b> '+esc(cm.risk)+'. Előre szólunk, mire számíthatsz.</span></div>';
+    }
+    document.getElementById('back').onclick=()=>{buildStep=1;draft=null;touch();render();};
+    document.getElementById('next').onclick=()=>{if(!(draft.qty>0)){qty.focus();return;}buildStep=3;touch();render();};
+    return;
+  }
+  if(buildStep===3){
+    let h=topHtml()+'<div class="pill">'+svcIcon(s.id,16)+'<span>'+esc(s.name)+' × '+esc(draft.qty)+' '+esc(s.unit)+'</span></div>';
+    h+='<h2 class="q">Van rajta folt vagy szag?</h2><p class="qs">Többet is választhatsz. Ha nincs, egyszerűen lépj tovább.</p>';
+    h+='<div class="opts one">'+cfg.stains.map(st=>{const p=splitName(st.name);return optHtml('data-st="'+esc(st.id)+'"',draft.stains.indexOf(st.id)>=0,'',esc(p[0]),esc(p[1]),'<span class="pr">+'+fmt(st.price)+'</span><span class="tick">'+ic('check',14)+'</span>');}).join('')+'</div>';
+    h+='<p class="sub-h">Kiegészítők</p><div class="opts one">'+cfg.addons.map(a=>{
+      const lbl=a.type==='pct'?('+'+Math.round(a.value*100)+'%'):('+'+fmt(a.value));
+      const rec=(a.id==='gyorsszar'&&faqSeen(1))||(a.id==='impreg'&&mainPick()==='sofa');
+      return optHtml('data-ad="'+esc(a.id)+'"',draft.addons.indexOf(a.id)>=0,'',esc(a.name)+(rec?'<span class="tag">Ajánlott</span>':''),a.id==='porszivo'?'Ha nem porszívózod át előtte, mi elvégezzük a tisztítás elején.':(a.id==='gyorsszar'&&faqSeen(1)?'A kárpitnak 4–6 óra a száradás – ventilátorral rövidebb.':''),'<span class="pr">'+lbl+'</span><span class="tick">'+ic('check',14)+'</span>');}).join('')+'</div>';
+    h+=navHtml('back','Vissza','addItem','Hozzáadom a listához');
+    viewEl.innerHTML=h;bindTop();
+    viewEl.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{const id=b.dataset.st,i=draft.stains.indexOf(id);i<0?draft.stains.push(id):draft.stains.splice(i,1);touch();render();});
+    viewEl.querySelectorAll('[data-ad]').forEach(b=>b.onclick=()=>{const id=b.dataset.ad,i=draft.addons.indexOf(id);i<0?draft.addons.push(id):draft.addons.splice(i,1);touch();render();});
+    document.getElementById('back').onclick=()=>{buildStep=2;touch();render();};
+    document.getElementById('addItem').onclick=()=>{
+      cart.push(clone(draft));
+      flash='Hozzáadtuk: <b>'+esc(s.name)+' × '+esc(draft.qty)+' '+esc(s.unit)+'</b>. Kérsz még valamit, vagy mehetünk tovább?';
+      draft=null;buildStep=1;touch();render();
+      const m=document.getElementById('main');if(m.getBoundingClientRect().top<0)m.scrollIntoView({block:'start'});
+    };
+    return;
+  }
+}
+
+/* ═══════════ 4 · IDŐPONT ═══════════ */
+const HU_M=['jan.','febr.','márc.','ápr.','máj.','jún.','júl.','aug.','szept.','okt.','nov.','dec.'];
+const HU_D=['vasárnap','hétfő','kedd','szerda','csütörtök','péntek','szombat'];
+function fmtDay(iso){const p=iso.split('-').map(Number);const dt=new Date(p[0],p[1]-1,p[2]);return HU_M[p[1]-1]+' '+p[2]+'., '+HU_D[dt.getDay()];}
+function renderCalendar(){
+  let h=topHtml()+'<h2 class="q">Mikor vagy otthon?</h2><p class="qs">Jelölj be több napot is – ezek közül egyeztetünk veled pontos időpontot.</p>';
+  h+='<div class="calhead"><button type="button" id="prev" aria-label="Előző hónap">'+ic('chev',18).replace('<svg','<svg style="transform:scaleX(-1)"')+'</button><strong id="mlabel" aria-live="polite"></strong><button type="button" id="nxt" aria-label="Következő hónap">'+ic('chev',18)+'</button></div>';
+  h+='<div class="cal" id="cal"></div><div id="selDates"></div>';
+  h+='<p class="sub-h">Melyik napszak jó?</p><div class="seg" id="tp">'+['Délelőtt','Délután','Rugalmas'].map(t=>'<label><input type="radio" name="tp" value="'+t+'"'+(customer.timepref===t?' checked':'')+'>'+t+'</label>').join('')+'</div>';
+  if(cart.some(it=>['kanape','fotel','puff','auto','matrac'].indexOf(it.serviceId)>=0))
+    h+='<div class="note">'+ic('clock',18)+'<span>A kárpitnak a munka után 4–6 óra kell a teljes száradáshoz – ha vendégeket vársz, ezt az időpontnál számoljuk.</span></div>';
+  h+=navHtml('back','Vissza az ingatlanhoz','toForm','Tovább a fotóhoz',!dates.size);
+  viewEl.innerHTML=h;bindTop();
+  drawCal();
+  document.getElementById('prev').onclick=()=>{calRef.setMonth(calRef.getMonth()-1);drawCal();};
+  document.getElementById('nxt').onclick=()=>{calRef.setMonth(calRef.getMonth()+1);drawCal();};
+  viewEl.querySelectorAll('input[name=tp]').forEach(r=>r.onchange=e=>{customer.timepref=e.target.value;touch();});
+  document.getElementById('back').onclick=()=>go('property');
+  document.getElementById('toForm').onclick=()=>{if(dates.size)go('photo');};
+}
+function drawCal(){
+  const months=['Január','Február','Március','Április','Május','Június','Július','Augusztus','Szeptember','Október','November','December'];
+  const dows=['H','K','Sze','Cs','P','Szo','V'];
+  const y=calRef.getFullYear(),mo=calRef.getMonth();
+  document.getElementById('mlabel').textContent=y+'. '+months[mo];
+  const today=new Date();today.setHours(0,0,0,0);
+  const pv=document.getElementById('prev');if(pv)pv.disabled=(y<today.getFullYear()||(y===today.getFullYear()&&mo<=today.getMonth()));
+  const first=new Date(y,mo,1);const start=(first.getDay()+6)%7;const din=new Date(y,mo+1,0).getDate();
+  const cal=document.getElementById('cal');let h='';
+  dows.forEach(d=>h+='<div class="dow" aria-hidden="true">'+d+'</div>');
+  for(let i=0;i<start;i++)h+='<div class="day empty"></div>';
+  const tIso=todayIso();
+  for(let d=1;d<=din;d++){
+    const dt=new Date(y,mo,d);const iso=y+'-'+String(mo+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const past=dt<today;const sel=dates.has(iso);
+    h+=past?'<div class="day past" aria-hidden="true">'+d+'</div>'
+      :'<button type="button" class="day'+(sel?' sel':'')+(iso===tIso?' today':'')+'" data-d="'+iso+'" aria-pressed="'+(sel?'true':'false')+'" aria-label="'+fmtDay(iso)+'">'+d+'</button>';
+  }
+  cal.innerHTML=h;
+  cal.querySelectorAll('[data-d]').forEach(el=>el.onclick=()=>{const iso=el.dataset.d;dates.has(iso)?dates.delete(iso):dates.add(iso);drawCal();touch();});
+  updateSelDates();
+}
+function updateSelDates(){
+  const el=document.getElementById('selDates');if(!el)return;
+  const arr=[...dates].sort();
+  el.innerHTML=arr.length?('<div class="chips">'+arr.map(d=>'<button type="button" class="dchip" data-rmd="'+d+'" aria-label="'+fmtDay(d)+' törlése">'+fmtDay(d)+ic('x',12)+'</button>').join('')+'</div>'):'<p class="empty-t">Még nincs nap kiválasztva.</p>';
+  el.querySelectorAll('[data-rmd]').forEach(b=>b.onclick=()=>{dates.delete(b.dataset.rmd);drawCal();touch();});
+  const tf=document.getElementById('toForm');if(tf)tf.disabled=!dates.size;
+}
+
+/* ═══════════ 4 · FOTÓ (feltöltés, vagy WhatsAppon küldi, vagy most nem tud) ═══════════ */
+function renderPhoto(){
+  const wa=waNumber();
+  let h=topHtml()+'<h2 class="q">Küldenél egy fotót?</h2><p class="qs">Egy közeli fotó a foltról vagy a felületről sokat segít: előre megmondjuk, mi fog kijönni, és pontosabb lesz az ajánlat.</p>';
+  if(faqSeen(0))h+='<p class="fine" style="margin:-8px 0 14px">A főoldalon a foltokról olvastál: egy közeli fotóból látjuk, kijön-e.</p>';
+  h+='<div class="field"><div class="photos" id="photoList"></div>'
+    +'<label class="upload" for="f_photo">'+ic('cam',22)+'Fotó hozzáadása</label>'
+    +'<input type="file" id="f_photo" accept="image/*" multiple class="sr">'
+    +(wa?'<label class="tickrow"><input type="checkbox" class="box" id="f_wa" '+(photoVia==='whatsapp'?'checked':'')+'><span>Inkább WhatsAppon küldöm el</span></label>':'')
+    +'<label class="tickrow"><input type="checkbox" class="box" id="f_nophoto" '+(noPhoto?'checked':'')+'><span>Most nem tudok fotót készíteni</span></label>'
+    +'<div id="nophotoNote"></div></div>';
+  h+=navHtml('back','Vissza az időponthoz','toContact','Tovább az utolsó lépéshez');
+  viewEl.innerHTML=h;bindTop();
+  document.getElementById('f_photo').onchange=e=>{addPhotoFiles(e.target.files);e.target.value='';};
+  const fw=document.getElementById('f_wa');
+  if(fw)fw.onchange=e=>{photoVia=e.target.checked?'whatsapp':'';if(photoVia){noPhoto=false;document.getElementById('f_nophoto').checked=false;}updateNoPhotoNote();touch();};
+  document.getElementById('f_nophoto').onchange=e=>{noPhoto=e.target.checked;if(noPhoto){photos=[];photoVia='';if(fw)fw.checked=false;}renderPhotoList();updateNoPhotoNote();touch();};
+  document.getElementById('back').onclick=()=>go('calendar');
+  document.getElementById('toContact').onclick=()=>{
+    if(!photoOk()){updateNoPhotoNote(true);document.querySelector('.upload').scrollIntoView({block:'center',behavior:'smooth'});return;}
+    go('contact');
+  };
+  renderPhotoList();updateNoPhotoNote();
+}
+function updateNoPhotoNote(warn){
+  const el=document.getElementById('nophotoNote');if(!el)return;
+  const wa=waNumber();
+  if(warn&&!photoOk()){el.innerHTML='<div class="note err">'+ic('cam',18)+'<span>Tölts fel legalább egy fotót a foltról'+(wa?', jelöld be, hogy WhatsAppon küldöd,':'')+' vagy pipáld be, hogy most nem tudsz fotót készíteni.</span></div>';return;}
+  if(photoVia==='whatsapp'&&wa){
+    el.innerHTML='<div class="note">'+ic('wa',18)+'<span>Rendben! A foglalás után egy gombnyomással megnyílik a WhatsApp, és elküldheted a fotót. Ha most kéznél van, már el is küldheted:'
+      +'<br><a class="btn2 sm wa-btn" href="'+esc(waLink('Szia! A Deeply kalkulátorból küldöm a fotót a foglalásomhoz ('+cart.map(it=>(svc(it.serviceId)||{}).name).filter(Boolean).join(', ')+').'))+'" target="_blank" rel="noopener">'+ic('wa',16)+'WhatsApp megnyitása</a></span></div>';
+    return;
+  }
+  el.innerHTML=noPhoto?'<div class="note">'+ic('phone',18)+'<span>Rendben – mivel nincs fotó, telefonon keresünk, hogy pontosítsuk a folt jellegét.</span></div>':'';
+}
+function renderPhotoList(){
+  const el=document.getElementById('photoList');if(!el)return;
+  el.innerHTML=photos.map((src,i)=>'<div class="thumb"><img src="'+src+'" alt="Feltöltött fotó '+(i+1)+'"><button type="button" data-ph="'+i+'" aria-label="Fotó törlése">'+ic('x',14)+'</button></div>').join('');
+  el.querySelectorAll('[data-ph]').forEach(b=>b.onclick=()=>{photos.splice(+b.dataset.ph,1);renderPhotoList();updateNoPhotoNote();touch();});
+}
+function addPhotoFiles(files){
+  if(noPhoto){noPhoto=false;const cb=document.getElementById('f_nophoto');if(cb)cb.checked=false;updateNoPhotoNote();}
+  [...files].forEach(file=>{
+    if(!file.type.startsWith('image/'))return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const img=new Image();
+      img.onload=()=>{
+        const max=1000;let w=img.width,hgt=img.height;
+        if(w>max||hgt>max){if(w>hgt){hgt=Math.round(hgt*max/w);w=max;}else{w=Math.round(w*max/hgt);hgt=max;}}
+        const c=document.createElement('canvas');c.width=w;c.height=hgt;
+        c.getContext('2d').drawImage(img,0,0,w,hgt);
+        photos.push(c.toDataURL('image/jpeg',0.6));
+        renderPhotoList();updateNoPhotoNote();touch();
+      };
+      img.src=ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ═══════════ FELHŐ – Google Drive / Apps Script ═════════════════════════
+   A foglalások és a mentések a tulajdonos Google Drive-jára kerülnek egy
+   Apps Script webalkalmazáson keresztül. Telepítés: Drive_integracio/TELEPITES.md
+
+   • Amíg a CLOUD.URL üres, MINDEN a régi módon működik (localStorage) –
+     a felhő funkciók egyszerűen alszanak, semmi nem törik el.
+   • A kérés szándékosan 'text/plain' törzzsel megy: így nincs CORS-preflight,
+     amit az Apps Script nem kezel.
+   • WRITE_KEY: nyilvános (a forrásban látszik), csak foglalás és érdeklődő beküldésére jó.
+     ADMIN_KEY: soha nem kerül a fájlba – a gépen, localStorage-ban él.
+   • 'lead' művelet (gépelés közbeni mentés): az Apps Scriptbe be kell másolni a
+     deeply_backend_lead.gs részletet, és új verziót telepíteni.
+
+   FIGYELEM: ez a blokk két fájlban él (arkalkulator_foglalas.html és
+   arkalkulator_admin.html) – módosításkor mindkettőben át kell vezetni.
+   ════════════════════════════════════════════════════════════════════════ */
+const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbxBYLvankJ9lJ5w2LQ4zE9GG1MnV4l4KANaTeYcz5fIdyc_mTbvrP3ptJpRs0n4lSeW/exec';
+/* Saját szerver: ha a kalkulátor a saját domainen fut (pl. https://deeply.hu/kalkulator/), az API ugyanott van: /api/.
+   GitHub Pages-en vagy helyi fájlként megnyitva marad a régi Apps Script. */
+const OWN_API=(function(){try{
+  if(!/^https?:$/.test(location.protocol))return '';
+  if(/(^|\.)github\.io$|(^|\.)google(usercontent)?\.com$/.test(location.hostname))return '';
+  return location.origin+'/api/';}catch(e){return '';}})();
+const CLOUD={
+  URL:OWN_API||APPS_SCRIPT_URL,
+  WRITE_KEY:'F9YcCX1EyZ0Mqzpz',
+  OWN:!!OWN_API
+};
+const CLOUD_KKEY='tc_cloud_admin_key_v1';
+function cloudOn(){return !!CLOUD.URL;}
+function cloudAdminKey(){try{return localStorage.getItem(CLOUD_KKEY)||'';}catch(e){return '';}}
+function cloudSetAdminKey(k){try{localStorage.setItem(CLOUD_KKEY,k||'');}catch(e){}}
+function cloudCall(action,payload,key){
+  if(!cloudOn())return Promise.reject(new Error('A felhő nincs beállítva (hiányzik az URL).'));
+  const body=JSON.stringify(Object.assign({action:action,key:key||CLOUD.WRITE_KEY},payload||{}));
+  return fetch(CLOUD.URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+                          body:body,redirect:'follow'})
+    .then(r=>r.text())
+    .then(t=>{
+      let j;try{j=JSON.parse(t);}catch(e){throw new Error('Váratlan válasz a szervertől – lehet, hogy a telepítés nem "Bárki" hozzáférésű.');}
+      if(!j.ok)throw new Error(j.error||'Ismeretlen hiba.');
+      return j;
+    });
+}
+
+/* ── Elérhetőség (WhatsApp, telefon) – a saját szerver config.php-jából jön; Apps Script esetén az itteni érték ── */
+const CONTACT={business:'Deeply',phone:'',whatsapp:'',email:''};
+function waNumber(){let d=String(CONTACT.whatsapp||'').replace(/\D/g,'');if(/^06/.test(d))d='36'+d.slice(2);return d.length>=10?d:'';}
+function waLink(text){return 'https://wa.me/'+waNumber()+(text?'?text='+encodeURIComponent(text):'');}
+/* A közzétett árlista: az Ügyek oldalon „Árlista közzététele” után minden látogató ezt látja. */
+function loadServerPricing(){
+  if(!CLOUD.OWN)return;
+  fetch(CLOUD.URL+'?action=pricing',{credentials:'omit'}).then(r=>r.json()).then(j=>{
+    if(!j||!j.ok)return;
+    const before=JSON.stringify([cfg,CONTACT]);
+    if(j.contact)['business','phone','whatsapp','email'].forEach(k=>{if(typeof j.contact[k]==='string')CONTACT[k]=j.contact[k];});
+    const p=j.pricing;
+    if(p&&Array.isArray(p.services)&&p.services.length){
+      cfg.services=p.services;
+      ['materials','stains','addons'].forEach(k=>{if(Array.isArray(p[k]))cfg[k]=p[k];});
+      if(p.settings)cfg.settings=Object.assign(cfg.settings,p.settings);
+      cart=cart.filter(it=>svc(it.serviceId));
+      if(draft&&draft.serviceId&&!svc(draft.serviceId)){draft=null;buildStep=1;}
+    }
+    if(JSON.stringify([cfg,CONTACT])===before)return;
+    if(shownFlash&&!flash){flash=shownFlash[0];flashWarn=shownFlash[1];}   // az épp kiírt üzenet maradjon látható
+    const a=document.activeElement;   // gépelés közben nem rajzoljuk újra a mezőket
+    if(a&&viewEl.contains(a)&&/^(INPUT|TEXTAREA)$/.test(a.tagName))renderSummary();else render();
+  }).catch(()=>{});
+}
+
+/* ── A foglalás felküldése a szerverre (saját szerver vagy Apps Script) ── */
+function cloudSendBooking(b){
+  const el=()=>document.getElementById('cloudState');
+  if(!cloudOn()){const e0=el();if(e0)e0.remove();return;}
+  const e1=el();if(e1)e1.innerHTML='<span>Foglalás elküldése…</span>';
+  cloudCall('booking',{data:b}).then(r=>{
+    const e2=el();
+    if(e2)e2.innerHTML='<span class="ok">✓ A foglalásod megérkezett hozzánk'
+      +(r.photos?' ('+r.photos+' fotóval)':'')+(CLOUD.OWN&&b.customer.email?' – a visszaigazolást elküldtük e-mailben.':' – nem kell mást tenned.')+'</span>';
+  }).catch(err=>{
+    const e2=el();
+    if(e2)e2.innerHTML='<span class="err">A foglalást most nem sikerült elküldeni. '
+      +'Kérlek, nyomd meg lent az „E-mailben küldöm” gombot, hogy biztosan megkapjuk.</span>';
+  });
+}
+
+function submit(){
+  const gap=firstGap();
+  if(gap){flash=GAP_MSG[gap];flashWarn=true;go(gap);return;}
+  const F=['name','email','phone','zip','address'];
+  if(view!=='contact'){go('contact');return;}
+  F.forEach(k=>{touchedF[k]=true;const el=document.getElementById('f_'+k);if(el){customer[k]=el.value.trim();showErr(k);}});
+  const bad=F.find(k=>checkField(k));
+  if(bad){const el=document.getElementById('f_'+bad);el.focus();el.scrollIntoView({block:'center'});return;}
+  const o=computeOrder();
+  const booking={created:Date.now(),src:SRC,leadId:leadId,consent:consent,interest:interestText(),customer:clone(customer),dates:[...dates].sort(),
+    property:clone(property),photos:photos.slice(),noPhoto:noPhoto,photoVia:photoVia,
+    items:cart.map(it=>Object.assign({label:itemLabel(it),total:itemTotal(it)},itemBreakdown(it)||{})),
+    sub:o.sub,travelFee:o.travelFee,total:o.applied,deposit:o.deposit,onsite:o.onsite};
+  let arr=[];try{arr=JSON.parse(localStorage.getItem(BKEY)||'[]');}catch(e){}
+  arr.push(booking);
+  try{
+    localStorage.setItem(BKEY,JSON.stringify(arr));
+  }catch(err){
+    // quota exceeded – strip photos and retry, keep them only in memory for this view
+    const stripped=arr.map(b=>Object.assign({},b,{photos:[],photosDropped:(b.photos&&b.photos.length)||0}));
+    try{localStorage.setItem(BKEY,JSON.stringify(stripped));}catch(e2){}
+  }
+  window._lastBooking=booking;
+  // az érdeklődő-sor „foglalt” lesz; a választások a profilba kerülnek a következő ajánlásokhoz
+  profile.booked=(profile.booked||[]).concat(cart.map(it=>it.serviceId)).filter((x,i,a)=>a.indexOf(x)===i).slice(-8);
+  view='done';leadDirty=true;flushLead();
+  cart=[];draft=null;dates=new Set();photos=[];noPhoto=false;photoVia='';buildStep=1;
+  welcomeBack=false;store();
+  render();
+  document.getElementById('main').scrollIntoView({block:'start'});
+  cloudSendBooking(booking);
+}
+
+function renderDone(){
+  const b=window._lastBooking;
+  if(!b){view='build';return render();}
+  const lines=b.items.map(it=>'• '+it.label+' — '+fmt(it.total)).join('\n');
+  const body=
+'Új foglalási igény\n'+
+'====================\n'+
+'Név: '+b.customer.name+'\n'+
+'Telefon: '+b.customer.phone+'\n'+
+'E-mail: '+(b.customer.email||'-')+'\n'+
+'Cím: '+b.customer.zip+' '+b.customer.address+'\n'+
+'Ingatlan: '+propLabel(b.property)+'\n'+
+'Fotó: '+(b.noPhoto?'NINCS – telefonon kell egyeztetni!':((b.photos&&b.photos.length)||0)+' db csatolva')+'\n'+
+'Időpont preferencia: '+b.customer.timepref+'\n'+
+'Megjegyzés: '+(b.customer.note||'-')+'\n'+
+(b.interest?'Érdeklődés: '+b.interest+'\n':'')+'\n'+
+'Tételek:\n'+lines+'\n\n'+
+'Részösszeg: '+fmt(b.sub)+'\n'+
+((+b.travelFee>0)?('Kiszállási díj: '+fmt(b.travelFee)+'\n'):'')+
+'Végösszeg: '+fmt(b.total)+'\n'+
+'Fizetés: a munka után, a helyszínen (előleg nincs)\n\n'+
+'Elérhető napok: '+b.dates.join(', ');
+  const mail='mailto:'+(cfg.settings.notifyEmail||'')+'?subject='+encodeURIComponent('Új foglalás – '+b.customer.name)+'&body='+encodeURIComponent(body);
+  const upholstery=b.items.some(it=>['kanape','fotel','puff','auto','matrac'].indexOf(it.serviceId)>=0);
+  let h='<div class="done-h"><div class="ck">'+ic('check',30)+'</div><h2 class="q">Köszönjük, '+esc(b.customer.name)+'!</h2>'
+    +'<p>Megkaptuk az igényedet. <b>24 órán belül</b> jelentkezünk a megadott elérhetőségen, és egyeztetjük a pontos időpontot.</p></div>';
+  h+='<div class="state" id="cloudState"></div>';
+  h+='<div class="tot big"><span>Becsült végösszeg</span><span>'+fmt(b.total)+'</span></div>';
+  h+='<div class="facts">'
+    +'<div>'+ci('mail',3,16)+'<span>Az írásos ajánlatot a(z) <b>'+esc(b.customer.email)+'</b> címre küldjük.</span></div>'
+    +'<div>'+ci('shield',0,16)+'<span>A helyszínen szálpróbával kezdünk, és előre megmondjuk, mi fog kijönni.</span></div>'
+    +(upholstery?'<div>'+ci('clock',2,16)+'<span>A kárpitnak a munka után 4–6 óra a száradás.</span></div>':'')
+    +'<div>'+ci('check',1,16)+'<span>Javító garancia: ha visszajön a folt, ingyen visszamegyünk – lehetőleg 48 órán, legkésőbb 1 héten belül.</span></div>'
+    +'</div>';
+  if(b.photos&&b.photos.length)h+='<div class="photos">'+b.photos.map((s,i)=>'<div class="thumb"><img src="'+s+'" alt="Fotó '+(i+1)+'"></div>').join('')+'</div>';
+  const wa=waNumber();
+  if(wa&&(b.photoVia==='whatsapp'||b.noPhoto)){
+    h+='<div class="wa-box">'+ci('wa',1,20)+'<div class="tx"><b>'+(b.photoVia==='whatsapp'?'Küldd el a fotót WhatsAppon':'Ha mégis tudsz fotót csinálni')+'</b>'
+      +'<small>Egy gombnyomás, és a fotó a foglalásod mellé kerül – így pontosabb ajánlatot tudunk adni.</small></div>'
+      +'<a class="cta sm" href="'+esc(waLink('Szia! '+b.customer.name+' vagyok, most foglaltam a kalkulátorban ('+b.items.map(it=>it.name||it.label).join(', ')+'). Küldöm a fotót:'))+'" target="_blank" rel="noopener"><span>Fotó küldése</span><span class="cc">'+ic('wa',18)+'</span></a></div>';
+  }else if(b.noPhoto)h+='<div class="note">'+ic('phone',18)+'<span>Nincs fotó – telefonon keresünk a folt pontosításához.</span></div>';
+  h+='<details class="raw"><summary>A foglalás részletei</summary><pre class="sumtxt">'+esc(body)+'</pre></details>';
+  h+='<div class="nav"><button type="button" class="back" id="newBtn">Új foglalás indítása</button>'
+    +'<a class="cta lt" href="'+mail+'"><span>E-mailben is elküldöm</span><span class="cc">'+ic('mail',18)+'</span></a></div>'
+    +'<p style="text-align:center;margin-top:12px"><button type="button" class="btn2 sm" id="copyBtn">'+ic('copy',14)+'Részletek másolása</button></p>';
+  viewEl.innerHTML=h;
+  document.getElementById('copyBtn').onclick=()=>{navigator.clipboard.writeText(body).then(()=>alert('Vágólapra másolva!'),()=>alert('Nem sikerült a másolás.'));};
+  document.getElementById('newBtn').onclick=()=>{ // az elérhetőség megmarad, a választások törlődnek
+    leadId=newId();leadSig='';buildStep=1;customer.note='';go('build');};
+}
+
+/* ═══════════ INDULÁS ═══════════ */
+restore();
+(function(){
+  const c=readCk();
+  if(URLCK&&URLCK.ok===false){declineConsent();}
+  else if(URLCK&&URLCK.ok){if(!consent)acceptConsent(URLCK.at);else{ckDecided=true;writeCk(true,consent.at);}}
+  else if(c&&c.ok===false){consent=null;ckDecided=true;}
+  else if(consent||(c&&c.ok)){if(!consent)consent={at:c.at||Date.now(),v:CONSENT_V};if(!leadId)leadId=newId();ckDecided=true;if(!c)writeCk(true,consent.at);}
+  else showCookie();
+  if(consent){mergeInterest();store();}
+})();
+fillCkList();
+render();
+loadServerPricing();
+if(CLOUD.OWN){const al=document.querySelector('footer a[href="arkalkulator_admin.html"]');if(al)al.remove();}
+</script>
+</body>
+</html>

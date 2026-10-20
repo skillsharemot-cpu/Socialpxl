@@ -1,0 +1,130 @@
+DEEPLY – saját tárhely: telepítés lépésről lépésre (2026-10-19)
+================================================================
+
+Mi kerül a tárhelyre?
+  • a főoldal (index.html + kepek mappa) – a generátor kimenete
+  • a kalkulátor: kalkulator/index.html  (= arkalkulator_foglalas.html, átnevezve)
+  • a szerver: api/ mappa (PHP) – ide jön minden adat a weboldalról
+  • az Ügyek oldal és a régi admin: admin/ mappa
+  • az adatok (adatbázis, fotók, mentések): lehetőleg a public_html-en KÍVÜL
+
+Mappaszerkezet a tárhelyen (példa, a felhasználónév helyett a sajátotok):
+
+  /home/FELHASZNALO/
+  ├── deeply_adat/                 ← adatbázis, fotók, mentések (a szerver magától létrehozza)
+  └── public_html/
+      ├── index.html               ← főoldal
+      ├── kepek/ …
+      ├── kalkulator/index.html    ← kalkulátor
+      ├── api/                     ← a szerver/api mappa teljes tartalma (.htaccess fájlokkal együtt!)
+      │   ├── index.php, cron.php, foto.php, .htaccess
+      │   ├── config.php           ← EZT TI KÉSZÍTITEK (lásd 3. lépés)
+      │   └── lib/ …
+      └── admin/
+          ├── ugyek.html           ← Ügyek oldal (foglalások, érdeklődők, mentés)
+          ├── arkalkulator_admin.html   ← a régi admin (árak szerkesztése) – a Drive-ról
+          └── arajanlat_keszito.html    ← az árajánlat-készítő – a Drive-ról
+
+  Fontos: az admin, az árajánlat-készítő és az Ügyek oldal UGYANAZON a domainen legyen,
+  mert a böngésző tárolóján keresztül adják át egymásnak az adatot (árlista, foglalás → ajánlat).
+
+
+1. lépés – Tárhely és domain
+-----------------------------
+  Lásd: ../TARHELY_DOMAIN_JOG.txt (mit érdemes venni, mennyiért).
+  A tárhelyen ellenőrizd (a vezérlőpultban, általában cPanel):
+    • PHP 8.1 vagy újabb (a 8.0 is fut, de már nem kap biztonsági javítást) (a „Select PHP version” / „MultiPHP Manager” menüben)
+    • a PHP-bővítmények között be van kapcsolva: pdo_sqlite, openssl, mbstring (és ha van: zip)
+    • ingyenes SSL (Let's Encrypt / AutoSSL) – a domain https-sel menjen
+
+
+2. lépés – Postafiókok
+----------------------
+  A tárhely vezérlőpultjában („E-mail fiókok”) hozzatok létre például:
+    • ajanlat@deeply.hu  – ezzel küld a szerver (feladó), ide válaszolnak a vevők
+    • tomi@deeply.hu, norbi@deeply.hu – vagy maradhat a meglévő Gmail is értesítési címnek
+  Az „E-mail kliens beállítása” / „Connect devices” oldalon találjátok az SMTP adatokat:
+  kiszolgáló (pl. mail.deeply.hu), port (465 = SSL vagy 587 = STARTTLS), felhasználónév, jelszó.
+  Tipp: a tárhelyen állítsátok be a domainhez az SPF-, DKIM- és DMARC-rekordot (cPanel: „Email Deliverability”
+  → „Repair”), különben a levelek a spambe kerülhetnek.
+
+
+3. lépés – A config.php
+-----------------------
+  1. Másoljátok le az api/config.sample.php-t config.php néven (ugyanabba a mappába).
+  2. Írjátok át benne:
+     • admin_key   – hosszú, véletlen jelszó (legalább 24 karakter, pl. jelszókezelővel generálva).
+                     Ezzel léptek be az Ügyek oldalra. Ne adjátok ki senkinek.
+     • cron_secret – egy másik hosszú, véletlen szöveg (csak ha URL-ről futtatjátok a cront).
+     • data_dir    – pl. '/home/FELHASZNALO/deeply_adat' (a public_html-en kívül).
+                     Ha a tárhely nem engedi, maradhat az alapérték (api/adat – .htaccess védi).
+     • site_url    – 'https://deeply.hu'
+     • phone, whatsapp, public_email – a vevőknek mutatott elérhetőségek
+       (a whatsapp kitöltése után a kalkulátorban megjelenik a „WhatsAppon küldöm a fotót” lehetőség)
+     • notify_to   – ide jönnek az értesítések (több cím is lehet)
+     • mail_from, reply_to, smtp – a 2. lépés adatai
+  3. A config.php-t SOHA ne töltsétek fel GitHubra és ne küldjétek el e-mailben.
+
+
+4. lépés – Feltöltés és próba
+-----------------------------
+  1. Töltsétek fel a mappákat (FTP-vel vagy a vezérlőpult Fájlkezelőjével). A rejtett .htaccess fájlok is kellenek!
+  2. Nyissátok meg: https://deeply.hu/api/  → ezt kell látni: {"ok":true,"service":"deeply-backend",…}
+  3. Nyissátok meg: https://deeply.hu/api/config.php → „Forbidden” / 403 kell (ha a tartalma látszik: szóljatok!)
+  4. Nyissátok meg: https://deeply.hu/admin/ugyek.html → belépés az admin_key-jel.
+  5. Beállítások fül → „Próbalevél küldése”. Ha hibát ír, az üzenetből látszik, mi a gond
+     (pl. „AUTH (jelszó) – hibás felhasználónév vagy jelszó?”).
+  6. Kalkulátor: https://deeply.hu/kalkulator/ – küldjetek egy próbafoglalást a saját címetekre:
+     jönnie kell egy rangsorolt értesítőnek és egy visszaigazolásnak. Utána az Ügyek oldalon törölhető.
+
+
+5. lépés – Árlista
+------------------
+  A böngésző tárolója domainenként külön van, ezért az árakat az új helyen egyszer be kell tölteni:
+  1. Régi admin (a régi helyen): „Teljes mentés” → JSON fájl.
+  2. Új admin: https://deeply.hu/admin/arkalkulator_admin.html → a mentés visszatöltése (vagy az árak beírása).
+  3. Ügyek oldal → Beállítások → „Árlista közzététele”. Innentől minden látogató ezt az árlistát látja.
+  Árváltozáskor: admin → mentés → Ügyek → Közzététel.
+
+
+6. lépés – Főoldal és régi adatok
+---------------------------------
+  • content.js:  KALK: 'https://deeply.hu/kalkulator/'   és   WHATSAPP: '+36 …' (ha más, mint a PHONE)
+    Utána: node gen.js – és a kész főoldalt töltsétek fel a public_html-be.
+  • A régi foglalások átvétele: régi admin „Teljes mentés” JSON → Ügyek → Mentés → „Visszatöltés”.
+    (Nem küld levelet, és nem duplikál.)
+  • A régi Apps Script nyugodtan maradhat: a GitHub-os kalkulátor addig azt használja. Ha minden link az
+    új helyre mutat, a régi kalkulátorba betehető egy átirányítás az új címre.
+  • A kalkulátor magától felismeri, hol fut: a saját domainen a /api/-t használja, GitHubon az Apps Scriptet.
+
+
+7. lépés – Időzítő (ajánlott, nem kötelező)
+-------------------------------------------
+  A szerver minden látogatás után magától elvégzi a háttérmunkát (elakadt érdeklődők jelzése, levelek
+  újrapróbálása, napi mentés). Csendes időszakban viszont nincs látogatás – ezért jó egy időzítő:
+  cPanel → „Cron Jobs” → 10 percenként:
+      php /home/FELHASZNALO/public_html/api/cron.php
+  Ha csak URL-t lehet megadni:
+      https://deeply.hu/api/cron.php?secret=A_CONFIG_PHP_CRON_SECRET_ERTEKE
+
+
+Biztonsági mentés
+-----------------
+  • Automatikus: naponta egy adatbázis-mentés a data_dir/mentesek mappába (a legutóbbi 30 marad).
+  • Kézi: Ügyek → Mentés → „Teljes mentés letöltése (JSON)” és „Fotók letöltése (ZIP)”.
+    Javaslat: hetente egyszer, és tegyétek fel a Google Drive-ra.
+  • A tárhelyszolgáltató saját mentése is legyen bekapcsolva (sok csomagban alapból benne van).
+  • Visszaállítás adatbázis-mentésből: a data_dir mappában a deeply_….sqlite fájlt cseréljétek le a mentett
+    fájllal (a régit előtte nevezzétek át), és töröljétek mellőle a …-wal és …-shm fájlokat, ha vannak.
+    Ha csak egy deeply_*.sqlite fájl van a mappában, a szerver magától megtalálja.
+
+Ha megváltoztatjátok az admin_key-t
+-----------------------------------
+  Az adatok megmaradnak (a szerver átnevezi az adatbázist), de a régi levelekben lévő fotólinkek nem
+  nyílnak meg többé – az Ügyek oldalon a fotók továbbra is látszanak.
+
+Hibakeresés
+-----------
+  • Az Ügyek oldal tetején piros sáv jelzi, ha egy levél nem ment ki; Beállítások → Napló.
+  • „Szerverhiba” a kalkulátorban: a tárhely PHP-hibanaplójában (error_log) látszik a részlet.
+  • A levelek a spambe mennek: SPF/DKIM/DMARC (2. lépés), és a mail_from a saját domain címe legyen.

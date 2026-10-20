@@ -1,0 +1,67 @@
+DEEPLY – teendők és a még nyitott javaslatok (2026-10-19)
+==========================================================
+
+A) MOST – a ti részetekről
+---------------------------
+  1. Domain + tárhely megrendelése (TARHELY_DOMAIN_JOG.txt), postafiókok létrehozása.
+  2. Telepítés: szerver/TELEPITES.txt lépései (config.php, feltöltés, próbalevél, árlista közzététele).
+  3. Ügyvéd: a sablonok (ÁSZF v2, Adatkezelési tájékoztató, impresszum) + a TARHELY_DOMAIN_JOG.txt 4. pontja.
+  4. Képek feltöltése (munkafotók, előtte–utána, rólatok egy közös fotó) – ezekből kerülnek a főoldalra.
+  5. WhatsApp Business beállítása (lent a B pont).
+
+B) WHATSAPP – mi kell hozzá?
+-----------------------------
+  Költség: a WhatsApp Business alkalmazás INGYENES, előfizetés nem kell hozzá. Fizetős csak két dolog lenne:
+  a „Meta Verified” kék pipa (havidíjas, nem szükséges) és az automata üzenetküldő API (üzenetenként fizetős,
+  nagy cégeknek) – egyik sem kell nektek.
+  Hozzáférést NEM kell adnotok senkinek, és API / Meta fejlesztői fiók sem kell: a gombok egyszerű
+  „wa.me” linkek, amelyek a vevő telefonján megnyitják a beszélgetést a ti számotokkal.
+  Amit nektek kell megcsinálni:
+    1. Egy telefonszám a vállalkozásnak. Ha a szám már a személyes WhatsAppotokon van, az átállítható
+       WhatsApp Businessre (a beszélgetések megmaradnak) – de tisztább egy külön szám (második SIM / eSIM).
+    2. A „WhatsApp Business” alkalmazás (ingyenes) telefonra telepítve, a számmal regisztrálva.
+    3. Üzleti profil: név „Deeply – Kárpit és szőnyegtisztítás”, kategória, rövid leírás, szolgáltatási
+       terület (Budapest és környéke), nyitvatartás, weboldal, e-mail, profilkép (a logó).
+    4. Mindketten használhatjátok: Beállítások → Társított eszközök – ugyanaz a fiók több telefonon / gépen.
+    5. A számot írjátok be: a config.php „whatsapp” mezőjébe ÉS a content.js-be (WHATSAPP: '+36 …').
+  Javasolt automatikus üzenetek (a Business alkalmazás → Üzleti eszközök):
+    • Üdvözlő üzenet:
+      „Szia! Köszönjük, hogy írtál a Deeplynek. Küldj 1–2 fotót a foltról vagy a bútorról (közelről és egészben),
+       és írd meg a méretét (pl. 3 személyes kanapé, 2×3 m-es szőnyeg). Munkaidőben 1 órán belül válaszolunk.”
+    • Távollét-üzenet (munkaidőn kívül / munka közben):
+      „Szia! Most épp tisztítunk, ezért nem tudunk azonnal válaszolni. Küldd el nyugodtan a fotókat és a
+       települést / kerületet – hamarosan jelentkezünk, legkésőbb holnap délelőtt.”
+    • Gyors válaszok:
+      /ar       „Az irányárat itt rögtön látod: deeply.hu/kalkulator – a pontos ajánlatot a fotók alapján írásban küldjük.”
+      /idopont  „Melyik napok jók neked a következő két hétben? Délelőtt vagy délután?”
+      /szaradas „A kárpitnak a munka után 4–6 óra kell a teljes száradáshoz; ventilátorral gyorsabb.”
+      /garancia „Ha visszajön a folt, ingyen visszamegyünk – lehetőleg 48 órán, legkésőbb 1 héten belül.”
+    • Címkék: „Új érdeklődő”, „Ajánlat elküldve”, „Időpont egyeztetve”, „Kész” – ugyanaz, mint az Ügyek oldalon.
+
+C) MÉG NYITOTT JAVASLATOK (a korábbi listából – emlékeztető)
+------------------------------------------------------------
+  [ ] Valódi fotók a főoldalon (előtte–utána, munka közben, rólatok) – a minta-képek helyett
+  [ ] Jogi oldalak (ÁSZF, Adatkezelés, Impresszum, Süti-tájékoztató) – az ügyvédi átnézés után, a láblécbe linkelve
+  [ ] Élesítés előtt: a „Hivatkozások” (átnéző) gomb és a „(minta)” feliratok eltávolítása
+  [ ] Google Cégprofil (Google Business Profile) + Google Search Console – a helyi kereséshez ez a legfontosabb
+  [ ] Külön aloldal szolgáltatásonként (kárpit, szőnyeg, matrac, autókárpit) – keresőoptimalizálás
+  [ ] Árak „-tól” formában a főoldalon – FIGYELEM: a brandbook szabálya szerint ár nem kerül a weboldal szövegébe
+      (CLAUDE.md: „a kalkulátorra mutatunk”). Ha mégis kell, előbb ezt a szabályt kell módosítani.
+  [ ] Céges (B2B) aloldal: éttermek, irodák, szállások – rendszeres tisztítás
+  [ ] Mérés: látogatottság és foglalási arány (pl. Plausible vagy GA4 – a süti-ablak bővítésével)
+  [ ] Gyorsítás: az SVG-képek optimalizálása, a betűtípusok saját tárhelyről (ez a Google Fonts miatti
+      adatvédelmi kérdést is megoldja)
+  [ ] Vélemények: valódi Google-értékelések a minta-vélemények helyett (a Cégprofil után)
+
+E) KÉSZ (2026-10-19)
+-------------------
+  [x] „Budapest és agglomeráció” a 23 kerület helyett (content.js: areaTitle, areas, areaNav)
+  [x] Nincs előleg: kivéve a kalkulátorból, a levelekből és a GYIK-ből („Előleget nem kérünk.”)
+  [x] Arany CTA a brandbookban (docs.js → design-alapok.md: színtábla, kontraszt, szabály, változásnapló;
+      komponensek.md: „cta (arany)” gomb)
+
+D) KÉSŐBB, HA KELL
+-------------------
+  • SMS-értesítés a sürgős ügyekről (pl. szolgáltatón keresztül, havidíjas)
+  • Online időpontfoglalás valódi naptárral (Google Naptár-összekötés)
+  • Automatikus „hogy vagy megelégedve?” levél a munka után, Google-értékelés kéréssel
