@@ -69,6 +69,7 @@ class Line:
         self.open_l = [float(c) for c in it.get("open_l", [])]
         self.grams = [float(c) for c in it.get("grams", [])]
         self.note = it.get("note", "")
+        self.product = it.get("product")  # azonos termék összevonásához több forrásból
         self.separate = bool(it.get("separate", False))
         mode = it.get("mode")
         if not mode:
@@ -147,6 +148,20 @@ def build(data):
     return lines + extras
 
 
+def merge_by_product(lines):
+    """Azonos `product` + egység több forrásból -> (forrás, mennyiség) lista.
+    Csak az olyan termék kerül be, amelynek legalább 2 különböző forrása van."""
+    acc = {}
+    for ln in lines:
+        if ln.product and not ln.separate:
+            acc.setdefault((ln.product, ln.unit), []).append(ln)
+    res = {}
+    for key, lns in acc.items():
+        if len({l.source for l in lns}) > 1:
+            res[key] = [(l.source, l.total()) for l in lns]
+    return res
+
+
 def group(lines):
     groups = {}
     for ln in lines:
@@ -169,7 +184,7 @@ def report_markdown(data, lines):
         counted = [i for i in items if not i.separate]
         unit = items[0].unit
         sub = sum(i.total() for i in counted)
-        bott = sum(i.bottles() for i in counted) if items[0].mode == "bottle" else None
+        bott = sum(i.bottles() for i in counted if i.mode == "bottle") if items[0].mode == "bottle" else None
         opened = sum(sum(i.open_l) for i in counted) if items[0].mode == "bottle" else None
         summary.append((cat, unit, sub, bott, opened, items[0].mode))
 
@@ -195,6 +210,17 @@ def report_markdown(data, lines):
         if i.mode == "bottle" or i.unit.lower() == "liter":
             out.append(f"  - Ezzel együtt a palack-alapú összeg: {fmt(wine_total + i.total())} L")
     out.append("")
+
+    merged = merge_by_product(lines)
+    if merged:
+        out.append("## Azonos termék összevonva forrásonként\n")
+        out.append("| Termék | Forrásonként | Összesen |")
+        out.append("|---|---|---|")
+        for (prod, unit), parts in merged.items():
+            per = " + ".join(f"{src or '?'} {fmt(v, unit)}" for src, v in parts)
+            tot = sum(v for _, v in parts)
+            out.append(f"| {prod} | {per} | **{fmt(tot, unit)} {unit}** |")
+        out.append("")
 
     out.append("## Tételenként\n")
     for cat, items in groups.items():
@@ -240,6 +266,8 @@ def report_json(data, lines):
         })
     for cat, items in group(lines).items():
         res["groups"][cat] = sum(i.total() for i in items if not i.separate)
+    res["merged"] = {f"{p} [{u}]": sum(v for _, v in parts)
+                     for (p, u), parts in merge_by_product(lines).items()}
     return res
 
 

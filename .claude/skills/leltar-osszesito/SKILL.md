@@ -39,7 +39,7 @@ A cél: a kézzel kitöltött leltárívekből és a pult/sátor jegyzetekből *
 | **Csapolt** (sör, **Frizzante csapolt**) | Már liter, nem palack. A Frizzante csapolt a Pezsgők csoportban van, ezért `separate: true`: külön sorban szerepel, a jelentés "avval együtt / nélküle" összeget is ad. |
 | **Gramm** (kávé) | A `grams` lista g → kg. |
 | **Plusz N termék** | Az `adjustments` lista. Ha pontosan **egy** tétel nevében szerepel a kulcsszó, ahhoz adja hozzá. Ha több vagy nulla találat van (pl. "prosecco" több tételnél), **külön sor** lesz "nem azonosított" jelöléssel és a jelölt tételek listájával. Ilyenkor kérdezd meg a felhasználót, melyikhez tartozik. |
-| **Pult / sátor jegyzet** | A jegyzet saját egységét váltsd a nyomtatvány egységére: `p` (palack) × űrtartalom → liter; `db` → darab; `liter` → liter. Pl. "Hung Grand C: 17,25 liter" = 23 palack. Külön `source` mezővel add meg a pultot. A jelentésben mutasd a forrásonkénti és az összes mennyiséget. Ha nem világos, hogy a pult/sátor készlete a raktárkészlettől **független** vagy abban már benne van, **kérdezz rá** (alapértelmezett: független, ezt írd ki a feltételezések közé). |
+| **Pult / sátor jegyzet** | A jegyzet saját egységét váltsd a nyomtatvány egységére: `p` (palack) × űrtartalom → liter; `db` → darab; `liter` → liter. Pl. "Hung Grand C: 17,25 liter" = 23 palack. Külön `source` mezővel add meg a pultot, és add meg az azonos termékeknél a `product` mezőt is, így a jelentés összevonja a pultokat és a sátrat. Egy kategórián belül ne keverd a `bottle` és `direct` tételeket (a Sátor literben írt tételei külön kategóriába kerüljenek). A jelentésben mutasd a forrásonkénti és az összes mennyiséget. Ha nem világos, hogy a pult/sátor készlete a raktárkészlettől **független** vagy abban már benne van, **kérdezz rá** (alapértelmezett: független, ezt írd ki a feltételezések közé). |
 
 ## Kézírás-olvasási szabályok
 
@@ -72,7 +72,7 @@ A cél: a kézzel kitöltött leltárívekből és a pult/sátor jegyzetekből *
 }
 ```
 
-Mezők: `name`, `category`, `unit` (a nyomtatvány Mértékegység oszlopa), `counts` (a ⊕ tagok), `open_l`, `grams`, `size_l` (felülírja a névből olvasott űrtartalmat), `mode` (`bottle` vagy `direct`; a bor csoportoknál alapból `bottle`, máshol `direct`), `separate`, `source`, `note`.
+Mezők: `name`, `category`, `unit` (a nyomtatvány Mértékegység oszlopa), `counts` (a ⊕ tagok), `open_l`, `grams`, `size_l` (felülírja a névből olvasott űrtartalmat), `product` (azonos termék neve; ha több különböző `source`-ból érkezik, a jelentés "Azonos termék összevonva forrásonként" táblát ad), `mode` (`bottle` vagy `direct`; a bor csoportoknál alapból `bottle`, máshol `direct`), `separate`, `source`, `note`.
 
 ## Kimeneti szabályok
 
