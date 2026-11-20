@@ -1,0 +1,32 @@
+{
+  "date": "2026-01-01",
+  "location": "Kiosk Ital (kitalált példa-adatok)",
+  "items": [
+    {"name": "Példa Furmint 2024 0,75L", "category": "Fehér borok", "unit": "Liter",
+     "counts": [5, 3], "open_l": [0.4], "source": "Leltár 1. oldal"},
+    {"name": "Példa Olaszrizling 2025 0,75L", "category": "Fehér borok", "unit": "Liter",
+     "counts": [], "open_l": [0.65]},
+    {"name": "Példa Szamorodni 0,5L", "category": "Desszert borok", "unit": "Liter",
+     "counts": [3], "open_l": [0.35]},
+    {"name": "Példa Brut Magnum 1,5L", "category": "Pezsgők", "unit": "Liter",
+     "counts": [1, 1]},
+    {"name": "Példa Prosecco A 0,75L", "category": "Pezsgők", "unit": "Liter", "counts": [4]},
+    {"name": "Példa Prosecco B 0,75L", "category": "Pezsgők", "unit": "Liter", "counts": [2]},
+    {"name": "Frizzante csapolt", "category": "Pezsgők", "unit": "Liter",
+     "mode": "direct", "counts": [20, 18, 8], "separate": true,
+     "note": "Csapolt, a kézzel írt szám már liter."},
+    {"name": "Példa csapolt sör / 6KG", "category": "Sörök, cider", "unit": "Liter",
+     "mode": "direct", "counts": [20, 14]},
+    {"name": "Példa üveges sör 0,33L", "category": "Sörök, cider", "unit": "darab",
+     "mode": "direct", "counts": [23, 72]},
+    {"name": "Példa kávé", "category": "Kávé, tea", "unit": "Kg",
+     "mode": "direct", "grams": [753, 20, 9000]}
+  ],
+  "adjustments": [
+    {"match": "Példa Szamorodni", "plus": 2},
+    {"match": "prosecco", "plus": 5}
+  ],
+  "assumptions": [
+    "A ⊕ jel összeadás: a készletet több helyen tárolják."
+  ]
+}
