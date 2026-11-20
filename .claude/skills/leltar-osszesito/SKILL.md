@@ -15,6 +15,7 @@ A cél: a kézzel kitöltött leltárívekből és a pult/sátor jegyzetekből *
 2. **Pult / sátor / stand jegyzetek** (pl. Kis Boros Pult, Nagy Pult, Welcome Pult, Sátor): szabad szöveges, saját egységekkel (`p`, `db`, `liter`, `üveges`, `zsák`).
 3. **Telefonos listák** (képernyőkép, zárójelben a darabszám). A felhasználó megerősítette: a zárójeles szám a **bontatlan üvegek darabszáma**, és a lista a **Nagy Pult stand része** (a Nagy Pult kézzel írt jegyzetének kitakart/pixelezett alsó fele).
 4. **Szöveges kiegészítés**, pl. "Plusz 5 prosecco".
+5. **Fotó bontatlan dobozokról** (pl. "6 × 750 ml" felirat): doboz × palack/doboz = palack, `source` = `Bontatlan doboz`, `mode: bottle`. Ha a felhasználó külön megadta a palackszámot (pl. "+5 prosecco"), azzal számolj, és jelezd az eltérést a címke szerinti darabszámtól.
 
 ## Munkafolyamat
 
