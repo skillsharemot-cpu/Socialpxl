@@ -158,7 +158,10 @@ def merge_by_product(lines):
     res = {}
     for key, lns in acc.items():
         if len({l.source for l in lns}) > 1:
-            res[key] = [(l.source, l.total()) for l in lns]
+            per = {}
+            for l in lns:  # azonos forrás tételei összevonva (megőrzi a sorrendet)
+                per[l.source] = per.get(l.source, 0.0) + l.total()
+            res[key] = list(per.items())
     return res
 
 
