@@ -13,7 +13,7 @@ A cél: a kézzel kitöltött leltárívekből és a pult/sátor jegyzetekből *
    - **Aktuális készlet** (a fotókon gyakran átírva "Palackok száma (db)"-ra)
    - **Megjegyzés** (néha átírva "Bontott (literben)"-re)
 2. **Pult / sátor / stand jegyzetek** (pl. Kis Boros Pult, Nagy Pult, Welcome Pult, Sátor): szabad szöveges, saját egységekkel (`p`, `db`, `liter`, `üveges`, `zsák`).
-3. **Telefonos listák** (képernyőkép, zárójelben a darabszám).
+3. **Telefonos listák** (képernyőkép, zárójelben a darabszám). A felhasználó megerősítette: a zárójeles szám a **bontatlan üvegek darabszáma**.
 4. **Szöveges kiegészítés**, pl. "Plusz 5 prosecco".
 
 ## Munkafolyamat
@@ -39,6 +39,7 @@ A cél: a kézzel kitöltött leltárívekből és a pult/sátor jegyzetekből *
 | **Csapolt** (sör, **Frizzante csapolt**) | Már liter, nem palack. A Frizzante csapolt a Pezsgők csoportban van, ezért `separate: true`: külön sorban szerepel, a jelentés "avval együtt / nélküle" összeget is ad. |
 | **Gramm** (kávé) | A `grams` lista g → kg. |
 | **Plusz N termék** | Az `adjustments` lista. Ha pontosan **egy** tétel nevében szerepel a kulcsszó, ahhoz adja hozzá. Ha több vagy nulla találat van (pl. "prosecco" több tételnél), **külön sor** lesz "nem azonosított" jelöléssel és a jelölt tételek listájával. Ilyenkor kérdezd meg a felhasználót, melyikhez tartozik. |
+| **Telefonos lista** | Bontatlan üvegek darabszáma. Külön `source` (pl. `Telefonos lista (bontatlan)`), a `product` mező ugyanaz, mint a pult/sátor lapon, így összevonódik. Váltsd az egységre: ha a nyomtatvány egysége Liter, akkor darab × üvegméret (`mode: bottle`, `size_l`); ha darab, akkor marad darab. Az üvegméretet a képről / terméknévből vedd, és jelöld becsültként. **Átfedés-ellenőrzés:** ha a telefonos lista literértéke pontosan egyezik a sátor lap literértékével (pl. Aperol 5 ↔ 5 liter), valószínűleg ugyanazok az üvegek, ilyenkor írd ki a két lehetséges összeget. |
 | **Pult / sátor jegyzet** | A jegyzet saját egységét váltsd a nyomtatvány egységére: `p` (palack) × űrtartalom → liter; `db` → darab; `liter` → liter. Pl. "Hung Grand C: 17,25 liter" = 23 palack. Külön `source` mezővel add meg a pultot, és add meg az azonos termékeknél a `product` mezőt is, így a jelentés összevonja a pultokat és a sátrat. Egy kategórián belül ne keverd a `bottle` és `direct` tételeket (a Sátor literben írt tételei külön kategóriába kerüljenek). A jelentésben mutasd a forrásonkénti és az összes mennyiséget. Ha nem világos, hogy a pult/sátor készlete a raktárkészlettől **független** vagy abban már benne van, **kérdezz rá** (alapértelmezett: független, ezt írd ki a feltételezések közé). |
 
 ## Kézírás-olvasási szabályok
